@@ -578,12 +578,12 @@ export default function PartnerDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
 
-          {attachments.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Files & Links</CardTitle>
-              </CardHeader>
-              <CardContent>
+          <Card>
+            <CardHeader>
+              <CardTitle>Files & Links</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {attachments.length > 0 ? (
                 <div className="space-y-2">
                   {attachments.map((attachment) => (
                     <div
@@ -614,9 +614,13 @@ export default function PartnerDetailPage({ params }: PageProps) {
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  No files or links attached yet.
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
