@@ -10,6 +10,7 @@ export type LeadSource = "Website" | "Warm";
 export type OnboardingStep = "Step 1" | "Step 2" | "Step 3";
 export type SchoolType = "Public" | "Charter";
 export type Priority = "High" | "Medium" | "Low";
+export type PartnershipHealth = "Monitoring" | "Poor" | "Fair" | "Strong";
 
 export interface OnboardingTask {
   task: string;
@@ -28,6 +29,7 @@ export interface Partner {
   status: PartnerStatus;
   leadSource?: LeadSource;
   onboardingStep?: OnboardingStep;
+  partnershipHealth?: PartnershipHealth;
   priority: Priority;
   schoolType: SchoolType;
   studentCount: number;
@@ -112,6 +114,7 @@ export const partners: Partner[] = [
     id: "2",
     name: "Westview High School",
     status: "Active",
+    partnershipHealth: "Strong",
     priority: "Medium",
     schoolType: "Public",
     studentCount: 2100,
@@ -605,6 +608,13 @@ export const onboardingStepColors: Record<OnboardingStep, string> = {
   "Step 1": "bg-violet-100 text-violet-800",
   "Step 2": "bg-fuchsia-100 text-fuchsia-800",
   "Step 3": "bg-rose-100 text-rose-800",
+};
+
+export const partnershipHealthColors: Record<PartnershipHealth, string> = {
+  Monitoring: "bg-yellow-100 text-yellow-800",
+  Poor: "bg-red-100 text-red-800",
+  Fair: "bg-blue-100 text-blue-800",
+  Strong: "bg-green-100 text-green-800",
 };
 
 export const statusOrder: PartnerStatus[] = [

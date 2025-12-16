@@ -35,8 +35,10 @@ import {
   priorityColors,
   leadSourceColors,
   onboardingStepColors,
+  partnershipHealthColors,
   type OnboardingTask,
   type Note,
+  type PartnershipHealth,
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
 
@@ -65,6 +67,9 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
   const [showLinkForm, setShowLinkForm] = useState(false);
+  const [partnershipHealth, setPartnershipHealth] = useState<PartnershipHealth>(
+    partner?.partnershipHealth || "Fair",
+  );
 
   if (!partner) {
     notFound();
@@ -469,6 +474,28 @@ export default function PartnerDetailPage({ params }: PageProps) {
         </div>
 
         <div className="space-y-6">
+          {partner.status === "Active" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Partnership Health</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <select
+                  value={partnershipHealth}
+                  onChange={(e) =>
+                    setPartnershipHealth(e.target.value as PartnershipHealth)
+                  }
+                  className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${partnershipHealthColors[partnershipHealth]}`}
+                >
+                  <option value="Monitoring">Monitoring</option>
+                  <option value="Poor">Poor</option>
+                  <option value="Fair">Fair</option>
+                  <option value="Strong">Strong</option>
+                </select>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>School Info</CardTitle>
