@@ -577,6 +577,46 @@ export default function PartnerDetailPage({ params }: PageProps) {
               </div>
             </CardContent>
           </Card>
+
+          {attachments.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Files & Links</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {attachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className="flex items-center justify-between gap-2 p-2 bg-[var(--muted)] rounded-md"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        {attachment.type === "file" ? (
+                          <Paperclip className="h-4 w-4 text-[var(--muted-foreground)] shrink-0" />
+                        ) : (
+                          <LinkIcon className="h-4 w-4 text-[var(--muted-foreground)] shrink-0" />
+                        )}
+                        <a
+                          href={attachment.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-indigo-600 hover:underline truncate"
+                        >
+                          {attachment.name}
+                        </a>
+                      </div>
+                      <button
+                        onClick={() => removeAttachment(attachment.id)}
+                        className="text-[var(--muted-foreground)] hover:text-red-500 shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
