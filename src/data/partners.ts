@@ -77,12 +77,12 @@ export const partners: Partner[] = [
       phone: "(951) 555-0123",
     },
     summary:
-      "Lincoln High School is implementing Willow Staff to streamline substitute teacher management and reduce unfilled classroom positions. They've struggled with last-minute absences and want better visibility into staff availability across their large campus.",
+      "Lincoln High School is implementing Willow Staff to strengthen their college and career counseling program. With only 2 counselors for nearly 2,000 students, they need technology to scale personalized guidance for college applications, career exploration, and post-secondary planning.",
     painPoints: [
-      "High substitute no-show rate",
-      "Manual phone tree for absences",
-      "No visibility into sub qualifications",
-      "Complex period-by-period coverage",
+      "2 counselors for 1,850 students limits individual attention",
+      "No centralized tracking of student college application progress",
+      "Career exploration resources are outdated and fragmented",
+      "Difficulty connecting students with relevant internship opportunities",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: true },
@@ -96,12 +96,13 @@ export const partners: Partner[] = [
         date: "2024-12-10",
         author: "Sarah Mitchell",
         content:
-          "Data import complete. Moving to Step 2 - scheduling admin training for next week.",
+          "Data import complete. Moving to Step 2 - scheduling counselor training for next week. They're excited about the college application tracker.",
       },
       {
         date: "2024-12-05",
         author: "Sarah Mitchell",
-        content: "Contract signed! Starting onboarding process.",
+        content:
+          "Contract signed! Principal emphasized need for better FAFSA completion tracking.",
       },
     ],
   },
@@ -128,11 +129,11 @@ export const partners: Partner[] = [
       phone: "(858) 555-0456",
     },
     summary:
-      "Westview High has been using Willow Staff for 6 months to manage their teaching staff and athletic program coordinators. They've seen a 35% reduction in scheduling conflicts since implementation.",
+      "Westview High has been using Willow Staff for 6 months to manage their comprehensive college and career readiness program. They've seen a 28% increase in FAFSA completion rates and doubled the number of students participating in career pathway programs.",
     painPoints: [
-      "Athletics staff coordination",
-      "Complex bell schedule",
-      "Period substitutes vs. full-day subs",
+      "Needed better visibility into student post-secondary plans",
+      "Tracking dual enrollment and AP course planning was manual",
+      "Career technical education pathways lacked clear student tracking",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: true },
@@ -146,13 +147,13 @@ export const partners: Partner[] = [
         date: "2024-12-08",
         author: "Michael Torres",
         content:
-          "Quarterly check-in went well. They want to discuss expanding usage to their feeder middle schools.",
+          "Quarterly check-in went well. FAFSA completion up 28% vs last year. They want to expand career pathway tracking features.",
       },
       {
         date: "2024-10-15",
         author: "Michael Torres",
         content:
-          "Fully onboarded. Very satisfied with the mobile app adoption among staff.",
+          "Fully onboarded. Counselors love the college application dashboard.",
       },
     ],
   },
@@ -179,11 +180,12 @@ export const partners: Partner[] = [
       phone: "(408) 555-0789",
     },
     summary:
-      "Summit Prep is rapidly growing and needs a scalable solution for staff management. They're opening a second campus next fall and want systems in place before the expansion.",
+      "Summit Prep is seeking Willow Staff to support their 100% college acceptance mission. They need a platform to track student progress from freshman year college prep through senior year applications, with emphasis on first-generation college student support.",
     painPoints: [
-      "Rapid growth outpacing manual processes",
-      "Need multi-campus visibility",
-      "Teacher certification tracking",
+      "65% first-gen college students need extra support tracking",
+      "No system to monitor 4-year college readiness progression",
+      "Scholarship search and application tracking is disorganized",
+      "Alumni mentorship program has no central coordination",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
@@ -197,13 +199,13 @@ export const partners: Partner[] = [
         date: "2024-12-12",
         author: "Sarah Mitchell",
         content:
-          "Sent proposal with multi-campus pricing. Decision expected by Dec 20 board meeting.",
+          "Sent proposal emphasizing first-gen student tracking features. Board decision expected Dec 20.",
       },
       {
         date: "2024-12-05",
         author: "Sarah Mitchell",
         content:
-          "Demo went very well. ED loves the credential tracking feature.",
+          "Demo went very well. ED loves the scholarship tracker and parent communication portal.",
       },
     ],
   },
@@ -230,11 +232,12 @@ export const partners: Partner[] = [
       phone: "(626) 555-0234",
     },
     summary:
-      "Gateway High is interested in Willow Staff primarily for managing their project-based learning facilitators and flexible scheduling requirements. Their innovative teaching model requires dynamic staff allocation.",
+      "Gateway High is interested in Willow Staff to enhance their career-focused curriculum model. Students complete industry certifications alongside academics, and they need better tools to track certification progress, internship placements, and employer partnerships.",
     painPoints: [
-      "Flexible schedule complexity",
-      "Part-time facilitator coordination",
-      "Cross-departmental teaching assignments",
+      "Industry certification tracking spread across multiple systems",
+      "Internship placement coordination is entirely manual",
+      "No dashboard for employer partnership management",
+      "Career pathway completion rates hard to measure",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
@@ -248,7 +251,7 @@ export const partners: Partner[] = [
         date: "2024-12-05",
         author: "David Kim",
         content:
-          "Initial call went well. They have unique needs around flexible scheduling. Demo scheduled for next week.",
+          "Initial call went well. Strong interest in internship tracking and employer portal features. Demo scheduled for next week.",
       },
     ],
   },
@@ -275,12 +278,12 @@ export const partners: Partner[] = [
       phone: "(510) 555-0567",
     },
     summary:
-      "Oakland Tech is the pilot school for OUSD's district-wide evaluation of Willow Staff. Success here could lead to a 15-school rollout. They need strong support during the pilot period.",
+      "Oakland Tech is piloting Willow Staff for OUSD's district-wide college and career readiness initiative. As a large comprehensive high school, they need to coordinate multiple pathway programs, track A-G completion rates, and increase college enrollment for underrepresented students.",
     painPoints: [
-      "District compliance requirements",
-      "Union reporting needs",
-      "Period-by-period coverage tracking",
-      "Large campus coordination",
+      "A-G requirement tracking is fragmented across systems",
+      "Low FAFSA completion rates among eligible students",
+      "Career pathway programs lack unified reporting",
+      "Need better early warning system for off-track students",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
@@ -294,13 +297,13 @@ export const partners: Partner[] = [
         date: "2024-12-11",
         author: "Michael Torres",
         content:
-          "Contract in legal review. District counsel had minor redlines - should be resolved by Friday.",
+          "Contract in legal review. District wants emphasis on equity metrics for college access.",
       },
       {
         date: "2024-12-08",
         author: "Michael Torres",
         content:
-          "Met with OUSD procurement. This is a strategic account - potential for district-wide expansion.",
+          "Met with OUSD leadership. Success here means potential 15-school district expansion.",
       },
     ],
   },
@@ -328,11 +331,12 @@ export const partners: Partner[] = [
       phone: "(415) 555-0890",
     },
     summary:
-      "KIPP SF College Prep is implementing Willow Staff to better manage their extended day program staff and Saturday school coordinators. They're particularly interested in skills-based matching for substitute coverage.",
+      "KIPP SF College Prep is implementing Willow Staff to support their 'To and Through College' mission. They need comprehensive tracking from high school through college persistence, with particular focus on supporting students during their first year of college.",
     painPoints: [
-      "Extended day program staffing",
-      "Saturday school coordination",
-      "Network-wide reporting requirements",
+      "Alumni tracking post-graduation is inconsistent",
+      "KIPP Through College advisors need better student data access",
+      "College persistence intervention triggers are manual",
+      "Scholarship renewal tracking falls through cracks",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: true },
@@ -346,13 +350,13 @@ export const partners: Partner[] = [
         date: "2024-12-09",
         author: "Sarah Mitchell",
         content:
-          "Admin training complete. Moving to Step 3 - teacher app rollout scheduled for Friday before winter break.",
+          "Admin training complete. Moving to Step 3 - counselor app rollout. They're excited about the alumni tracking features.",
       },
       {
         date: "2024-12-02",
         author: "Sarah Mitchell",
         content:
-          "Kickoff call done. Very organized team - should be smooth onboarding.",
+          "Kickoff call done. Strong alignment with KIPP's college persistence goals.",
       },
     ],
   },
@@ -375,16 +379,17 @@ export const partners: Partner[] = [
     willowStaffLead: "David Kim",
     leadContact: {
       name: "Assistant Principal Robert Chen",
-      title: "Assistant Principal, Operations",
+      title: "Assistant Principal, Student Services",
       email: "r.chen@fremont.k12.ca.us",
       phone: "(510) 555-0345",
     },
     summary:
-      "Fremont High submitted an inquiry through our website after seeing the Oakland Tech case study. They're interested in exploring options but are early in their evaluation process.",
+      "Fremont High submitted an inquiry through our website seeking solutions for their college and career center. They're looking to modernize their approach to post-secondary planning and better serve their diverse student population with varied post-graduation goals.",
     painPoints: [
-      "Manual substitute calling",
-      "No centralized absence tracking",
-      "Difficulty finding qualified subs",
+      "College and career center resources are underutilized",
+      "No way to track student career interest assessments",
+      "Military and trade school pathways often overlooked",
+      "Parent engagement in college planning is low",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
@@ -398,7 +403,7 @@ export const partners: Partner[] = [
         date: "2024-12-13",
         author: "David Kim",
         content:
-          "Website inquiry received. Scheduled intro call for next week.",
+          "Website inquiry received. Interested in comprehensive post-secondary planning tools. Intro call scheduled for next week.",
       },
     ],
   },
@@ -425,11 +430,12 @@ export const partners: Partner[] = [
       phone: "(916) 555-0678",
     },
     summary:
-      "Elk Grove Charter High is part of a 3-school pilot evaluation for their charter network. They're the lead school and success here influences the broader network decision.",
+      "Elk Grove Charter High wants Willow Staff to strengthen their dual enrollment and early college program. With 40% of students taking community college courses, they need better coordination between high school counselors and college advisors.",
     painPoints: [
-      "Network-wide consistency",
-      "Credential compliance tracking",
-      "Board reporting requirements",
+      "Dual enrollment course tracking is manual and error-prone",
+      "Students unclear on how college credits transfer",
+      "No visibility into community college advisor interactions",
+      "Early college pathway completion rates need improvement",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
@@ -443,13 +449,13 @@ export const partners: Partner[] = [
         date: "2024-12-07",
         author: "Michael Torres",
         content:
-          "Proposal sent. Pricing includes option for 2 additional network schools. Decision expected before holiday break.",
+          "Proposal sent highlighting dual enrollment tracking features. Decision expected before holiday break.",
       },
       {
         date: "2024-11-28",
         author: "Michael Torres",
         content:
-          "Good demo with ED and board chair. They liked the reporting features.",
+          "Great demo with ED. They want seamless integration with community college systems.",
       },
     ],
   },
@@ -477,11 +483,12 @@ export const partners: Partner[] = [
       phone: "(916) 555-0912",
     },
     summary:
-      "Referred by Dr. Patel at KIPP SF. Sacramento Charter High is rapidly expanding and struggling with their current manual processes. High priority warm lead with strong referral.",
+      "Referred by KIPP SF, Sacramento Charter High serves predominantly first-generation college students and needs robust support systems. They're seeking Willow Staff to build a comprehensive college-going culture with family engagement and alumni mentorship components.",
     painPoints: [
-      "Rapid enrollment growth",
-      "Manual spreadsheet tracking",
-      "Compliance documentation",
+      "85% first-gen students need intensive college guidance",
+      "Family workshops on college process poorly attended",
+      "No system to match students with college student mentors",
+      "Scholarship tracking for low-income students is critical",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
@@ -495,7 +502,7 @@ export const partners: Partner[] = [
         date: "2024-12-12",
         author: "Sarah Mitchell",
         content:
-          "Warm referral from KIPP SF. Dr. Brooks very interested - scheduled call for this Friday.",
+          "Warm referral from KIPP SF. Dr. Brooks very interested in first-gen student support features. Call scheduled Friday.",
       },
     ],
   },
@@ -523,11 +530,12 @@ export const partners: Partner[] = [
       phone: "(650) 555-0234",
     },
     summary:
-      "Menlo-Atherton is the first school in Sequoia UHSD to adopt Willow Staff. Just signed contract and beginning Step 1 of onboarding. Success here opens door to 5 other district high schools.",
+      "Menlo-Atherton serves a socioeconomically diverse student body and wants Willow Staff to ensure equitable access to college and career resources. They're focused on closing opportunity gaps between students from different backgrounds while managing high expectations from all families.",
     painPoints: [
-      "District-wide standardization needs",
-      "Athletics and activities coordination",
-      "Large staff management",
+      "Significant equity gaps in college enrollment outcomes",
+      "Affluent families dominate counselor time for college prep",
+      "Under-resourced students miss scholarship deadlines",
+      "Career technical education stigmatized vs college prep",
     ],
     onboardingChecklist: [
       { task: "Sign Contract", completed: true },
@@ -541,13 +549,13 @@ export const partners: Partner[] = [
         date: "2024-12-11",
         author: "Michael Torres",
         content:
-          "Contract signed yesterday! Scheduling kickoff call for early next week. Step 1 begins.",
+          "Contract signed yesterday! Scheduling kickoff call. Principal emphasized equity in college access as top priority.",
       },
       {
         date: "2024-12-06",
         author: "Michael Torres",
         content:
-          "Final contract negotiations complete. Very excited to get started.",
+          "Final negotiations complete. Excited to support their equity-focused approach.",
       },
     ],
   },
