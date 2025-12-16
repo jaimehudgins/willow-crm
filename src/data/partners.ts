@@ -87,9 +87,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: true },
       { task: "Kickoff Call", completed: true },
+      { task: "Scope and Sequence", completed: true },
       { task: "Staff Roster Import", completed: true },
-      { task: "Admin Training Session", completed: false },
-      { task: "Teacher App Rollout", completed: false },
+      { task: "Student Roster Import", completed: true },
+      { task: "Curriculum Upload", completed: false },
+      { task: "Initial Training", completed: false },
     ],
     notes: [
       {
@@ -138,9 +140,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: true },
       { task: "Kickoff Call", completed: true },
+      { task: "Scope and Sequence", completed: true },
       { task: "Staff Roster Import", completed: true },
-      { task: "Admin Training Session", completed: true },
-      { task: "Teacher App Rollout", completed: true },
+      { task: "Student Roster Import", completed: true },
+      { task: "Curriculum Upload", completed: true },
+      { task: "Initial Training", completed: true },
     ],
     notes: [
       {
@@ -190,9 +194,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
       { task: "Kickoff Call", completed: false },
+      { task: "Scope and Sequence", completed: false },
       { task: "Staff Roster Import", completed: false },
-      { task: "Admin Training Session", completed: false },
-      { task: "Teacher App Rollout", completed: false },
+      { task: "Student Roster Import", completed: false },
+      { task: "Curriculum Upload", completed: false },
+      { task: "Initial Training", completed: false },
     ],
     notes: [
       {
@@ -242,9 +248,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
       { task: "Kickoff Call", completed: false },
+      { task: "Scope and Sequence", completed: false },
       { task: "Staff Roster Import", completed: false },
-      { task: "Admin Training Session", completed: false },
-      { task: "Teacher App Rollout", completed: false },
+      { task: "Student Roster Import", completed: false },
+      { task: "Curriculum Upload", completed: false },
+      { task: "Initial Training", completed: false },
     ],
     notes: [
       {
@@ -288,9 +296,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
       { task: "Kickoff Call", completed: false },
+      { task: "Scope and Sequence", completed: false },
       { task: "Staff Roster Import", completed: false },
-      { task: "Admin Training Session", completed: false },
-      { task: "Teacher App Rollout", completed: false },
+      { task: "Student Roster Import", completed: false },
+      { task: "Curriculum Upload", completed: false },
+      { task: "Initial Training", completed: false },
     ],
     notes: [
       {
@@ -341,9 +351,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: true },
       { task: "Kickoff Call", completed: true },
+      { task: "Scope and Sequence", completed: true },
       { task: "Staff Roster Import", completed: true },
-      { task: "Admin Training Session", completed: true },
-      { task: "Teacher App Rollout", completed: false },
+      { task: "Student Roster Import", completed: true },
+      { task: "Curriculum Upload", completed: true },
+      { task: "Initial Training", completed: false },
     ],
     notes: [
       {
@@ -394,9 +406,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
       { task: "Kickoff Call", completed: false },
+      { task: "Scope and Sequence", completed: false },
       { task: "Staff Roster Import", completed: false },
-      { task: "Admin Training Session", completed: false },
-      { task: "Teacher App Rollout", completed: false },
+      { task: "Student Roster Import", completed: false },
+      { task: "Curriculum Upload", completed: false },
+      { task: "Initial Training", completed: false },
     ],
     notes: [
       {
@@ -440,9 +454,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
       { task: "Kickoff Call", completed: false },
+      { task: "Scope and Sequence", completed: false },
       { task: "Staff Roster Import", completed: false },
-      { task: "Admin Training Session", completed: false },
-      { task: "Teacher App Rollout", completed: false },
+      { task: "Student Roster Import", completed: false },
+      { task: "Curriculum Upload", completed: false },
+      { task: "Initial Training", completed: false },
     ],
     notes: [
       {
@@ -493,9 +509,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: false },
       { task: "Kickoff Call", completed: false },
+      { task: "Scope and Sequence", completed: false },
       { task: "Staff Roster Import", completed: false },
-      { task: "Admin Training Session", completed: false },
-      { task: "Teacher App Rollout", completed: false },
+      { task: "Student Roster Import", completed: false },
+      { task: "Curriculum Upload", completed: false },
+      { task: "Initial Training", completed: false },
     ],
     notes: [
       {
@@ -540,9 +558,11 @@ export const partners: Partner[] = [
     onboardingChecklist: [
       { task: "Sign Contract", completed: true },
       { task: "Kickoff Call", completed: false },
+      { task: "Scope and Sequence", completed: false },
       { task: "Staff Roster Import", completed: false },
-      { task: "Admin Training Session", completed: false },
-      { task: "Teacher App Rollout", completed: false },
+      { task: "Student Roster Import", completed: false },
+      { task: "Curriculum Upload", completed: false },
+      { task: "Initial Training", completed: false },
     ],
     notes: [
       {
