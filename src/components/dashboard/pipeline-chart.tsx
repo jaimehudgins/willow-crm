@@ -98,7 +98,7 @@ export function PipelineChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>School Pipeline</CardTitle>
+        <CardTitle>Partnership Status</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
