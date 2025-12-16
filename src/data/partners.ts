@@ -1,0 +1,589 @@
+export type PartnerStatus =
+  | "New Lead"
+  | "Contacted"
+  | "Proposal Sent"
+  | "Contract Preparation"
+  | "Onboarding"
+  | "Active";
+
+export type LeadSource = "Website" | "Warm";
+export type OnboardingStep = "Step 1" | "Step 2" | "Step 3";
+export type SchoolType = "Public" | "Charter";
+export type Priority = "High" | "Medium" | "Low";
+
+export interface OnboardingTask {
+  task: string;
+  completed: boolean;
+}
+
+export interface Note {
+  date: string;
+  author: string;
+  content: string;
+}
+
+export interface Partner {
+  id: string;
+  name: string;
+  status: PartnerStatus;
+  leadSource?: LeadSource;
+  onboardingStep?: OnboardingStep;
+  priority: Priority;
+  schoolType: SchoolType;
+  studentCount: number;
+  staffCount: number;
+  district: string;
+  address: string;
+  lastContactDate: string;
+  nextFollowUp: string | null;
+  proposalDeadline: string | null;
+  contractValue: number | null;
+  contractLink: string;
+  willowStaffLead: string;
+  leadContact: {
+    name: string;
+    title: string;
+    email: string;
+    phone: string;
+  };
+  summary: string;
+  painPoints: string[];
+  onboardingChecklist: OnboardingTask[];
+  notes: Note[];
+}
+
+export const partners: Partner[] = [
+  {
+    id: "1",
+    name: "Lincoln High School",
+    status: "Onboarding",
+    onboardingStep: "Step 2",
+    priority: "High",
+    schoolType: "Public",
+    studentCount: 1850,
+    staffCount: 142,
+    district: "Riverside Unified School District",
+    address: "1250 Oak Street, Riverside, CA 92501",
+    lastContactDate: "2024-12-10",
+    nextFollowUp: "2024-12-17",
+    proposalDeadline: null,
+    contractValue: 48000,
+    contractLink: "https://contracts.willow.com/lincoln-high",
+    willowStaffLead: "Sarah Mitchell",
+    leadContact: {
+      name: "Dr. Maria Santos",
+      title: "Principal",
+      email: "m.santos@riversideusd.edu",
+      phone: "(951) 555-0123",
+    },
+    summary:
+      "Lincoln High School is implementing Willow Staff to streamline substitute teacher management and reduce unfilled classroom positions. They've struggled with last-minute absences and want better visibility into staff availability across their large campus.",
+    painPoints: [
+      "High substitute no-show rate",
+      "Manual phone tree for absences",
+      "No visibility into sub qualifications",
+      "Complex period-by-period coverage",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: true },
+      { task: "Kickoff Call", completed: true },
+      { task: "Staff Roster Import", completed: true },
+      { task: "Admin Training Session", completed: false },
+      { task: "Teacher App Rollout", completed: false },
+    ],
+    notes: [
+      {
+        date: "2024-12-10",
+        author: "Sarah Mitchell",
+        content:
+          "Data import complete. Moving to Step 2 - scheduling admin training for next week.",
+      },
+      {
+        date: "2024-12-05",
+        author: "Sarah Mitchell",
+        content: "Contract signed! Starting onboarding process.",
+      },
+    ],
+  },
+  {
+    id: "2",
+    name: "Westview High School",
+    status: "Active",
+    priority: "Medium",
+    schoolType: "Public",
+    studentCount: 2100,
+    staffCount: 165,
+    district: "San Diego Unified School District",
+    address: "4500 Westview Parkway, San Diego, CA 92130",
+    lastContactDate: "2024-12-08",
+    nextFollowUp: "2025-01-08",
+    proposalDeadline: null,
+    contractValue: 58000,
+    contractLink: "https://contracts.willow.com/westview-high",
+    willowStaffLead: "Michael Torres",
+    leadContact: {
+      name: "Principal James Richardson",
+      title: "Principal",
+      email: "j.richardson@sdusd.edu",
+      phone: "(858) 555-0456",
+    },
+    summary:
+      "Westview High has been using Willow Staff for 6 months to manage their teaching staff and athletic program coordinators. They've seen a 35% reduction in scheduling conflicts since implementation.",
+    painPoints: [
+      "Athletics staff coordination",
+      "Complex bell schedule",
+      "Period substitutes vs. full-day subs",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: true },
+      { task: "Kickoff Call", completed: true },
+      { task: "Staff Roster Import", completed: true },
+      { task: "Admin Training Session", completed: true },
+      { task: "Teacher App Rollout", completed: true },
+    ],
+    notes: [
+      {
+        date: "2024-12-08",
+        author: "Michael Torres",
+        content:
+          "Quarterly check-in went well. They want to discuss expanding usage to their feeder middle schools.",
+      },
+      {
+        date: "2024-10-15",
+        author: "Michael Torres",
+        content:
+          "Fully onboarded. Very satisfied with the mobile app adoption among staff.",
+      },
+    ],
+  },
+  {
+    id: "3",
+    name: "Summit Preparatory Charter High",
+    status: "Proposal Sent",
+    priority: "High",
+    schoolType: "Charter",
+    studentCount: 980,
+    staffCount: 78,
+    district: "Independent Charter",
+    address: "789 Innovation Blvd, San Jose, CA 95110",
+    lastContactDate: "2024-12-12",
+    nextFollowUp: "2024-12-18",
+    proposalDeadline: "2024-12-20",
+    contractValue: 38000,
+    contractLink: "https://contracts.willow.com/summit-prep",
+    willowStaffLead: "Sarah Mitchell",
+    leadContact: {
+      name: "James Nakamura",
+      title: "Executive Director",
+      email: "j.nakamura@summitprep.org",
+      phone: "(408) 555-0789",
+    },
+    summary:
+      "Summit Prep is rapidly growing and needs a scalable solution for staff management. They're opening a second campus next fall and want systems in place before the expansion.",
+    painPoints: [
+      "Rapid growth outpacing manual processes",
+      "Need multi-campus visibility",
+      "Teacher certification tracking",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: false },
+      { task: "Kickoff Call", completed: false },
+      { task: "Staff Roster Import", completed: false },
+      { task: "Admin Training Session", completed: false },
+      { task: "Teacher App Rollout", completed: false },
+    ],
+    notes: [
+      {
+        date: "2024-12-12",
+        author: "Sarah Mitchell",
+        content:
+          "Sent proposal with multi-campus pricing. Decision expected by Dec 20 board meeting.",
+      },
+      {
+        date: "2024-12-05",
+        author: "Sarah Mitchell",
+        content:
+          "Demo went very well. ED loves the credential tracking feature.",
+      },
+    ],
+  },
+  {
+    id: "4",
+    name: "Gateway High School",
+    status: "Contacted",
+    priority: "Medium",
+    schoolType: "Charter",
+    studentCount: 720,
+    staffCount: 58,
+    district: "Independent Charter",
+    address: "2100 Gateway Boulevard, Pasadena, CA 91101",
+    lastContactDate: "2024-12-05",
+    nextFollowUp: "2024-12-16",
+    proposalDeadline: "2024-12-22",
+    contractValue: null,
+    contractLink: "https://contracts.willow.com/gateway-high",
+    willowStaffLead: "David Kim",
+    leadContact: {
+      name: "Dr. Elena Rodriguez",
+      title: "Head of School",
+      email: "e.rodriguez@gatewayhigh.org",
+      phone: "(626) 555-0234",
+    },
+    summary:
+      "Gateway High is interested in Willow Staff primarily for managing their project-based learning facilitators and flexible scheduling requirements. Their innovative teaching model requires dynamic staff allocation.",
+    painPoints: [
+      "Flexible schedule complexity",
+      "Part-time facilitator coordination",
+      "Cross-departmental teaching assignments",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: false },
+      { task: "Kickoff Call", completed: false },
+      { task: "Staff Roster Import", completed: false },
+      { task: "Admin Training Session", completed: false },
+      { task: "Teacher App Rollout", completed: false },
+    ],
+    notes: [
+      {
+        date: "2024-12-05",
+        author: "David Kim",
+        content:
+          "Initial call went well. They have unique needs around flexible scheduling. Demo scheduled for next week.",
+      },
+    ],
+  },
+  {
+    id: "5",
+    name: "Oakland Technical High School",
+    status: "Contract Preparation",
+    priority: "High",
+    schoolType: "Public",
+    studentCount: 2400,
+    staffCount: 185,
+    district: "Oakland Unified School District",
+    address: "4351 Broadway, Oakland, CA 94611",
+    lastContactDate: "2024-12-11",
+    nextFollowUp: "2024-12-14",
+    proposalDeadline: "2024-12-15",
+    contractValue: 68000,
+    contractLink: "https://contracts.willow.com/oakland-tech",
+    willowStaffLead: "Michael Torres",
+    leadContact: {
+      name: "Principal Denise Washington",
+      title: "Principal",
+      email: "d.washington@ousd.org",
+      phone: "(510) 555-0567",
+    },
+    summary:
+      "Oakland Tech is the pilot school for OUSD's district-wide evaluation of Willow Staff. Success here could lead to a 15-school rollout. They need strong support during the pilot period.",
+    painPoints: [
+      "District compliance requirements",
+      "Union reporting needs",
+      "Period-by-period coverage tracking",
+      "Large campus coordination",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: false },
+      { task: "Kickoff Call", completed: false },
+      { task: "Staff Roster Import", completed: false },
+      { task: "Admin Training Session", completed: false },
+      { task: "Teacher App Rollout", completed: false },
+    ],
+    notes: [
+      {
+        date: "2024-12-11",
+        author: "Michael Torres",
+        content:
+          "Contract in legal review. District counsel had minor redlines - should be resolved by Friday.",
+      },
+      {
+        date: "2024-12-08",
+        author: "Michael Torres",
+        content:
+          "Met with OUSD procurement. This is a strategic account - potential for district-wide expansion.",
+      },
+    ],
+  },
+  {
+    id: "6",
+    name: "KIPP San Francisco College Prep",
+    status: "Onboarding",
+    onboardingStep: "Step 3",
+    priority: "Medium",
+    schoolType: "Charter",
+    studentCount: 650,
+    staffCount: 52,
+    district: "KIPP Bay Area Schools",
+    address: "1195 Hudson Avenue, San Francisco, CA 94124",
+    lastContactDate: "2024-12-09",
+    nextFollowUp: "2024-12-13",
+    proposalDeadline: null,
+    contractValue: 32000,
+    contractLink: "https://contracts.willow.com/kipp-sf",
+    willowStaffLead: "Sarah Mitchell",
+    leadContact: {
+      name: "Dr. Kevin Patel",
+      title: "School Leader",
+      email: "k.patel@kippbayarea.org",
+      phone: "(415) 555-0890",
+    },
+    summary:
+      "KIPP SF College Prep is implementing Willow Staff to better manage their extended day program staff and Saturday school coordinators. They're particularly interested in skills-based matching for substitute coverage.",
+    painPoints: [
+      "Extended day program staffing",
+      "Saturday school coordination",
+      "Network-wide reporting requirements",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: true },
+      { task: "Kickoff Call", completed: true },
+      { task: "Staff Roster Import", completed: true },
+      { task: "Admin Training Session", completed: true },
+      { task: "Teacher App Rollout", completed: false },
+    ],
+    notes: [
+      {
+        date: "2024-12-09",
+        author: "Sarah Mitchell",
+        content:
+          "Admin training complete. Moving to Step 3 - teacher app rollout scheduled for Friday before winter break.",
+      },
+      {
+        date: "2024-12-02",
+        author: "Sarah Mitchell",
+        content:
+          "Kickoff call done. Very organized team - should be smooth onboarding.",
+      },
+    ],
+  },
+  {
+    id: "7",
+    name: "Fremont High School",
+    status: "New Lead",
+    leadSource: "Website",
+    priority: "Low",
+    schoolType: "Public",
+    studentCount: 1950,
+    staffCount: 148,
+    district: "Fremont Unified School District",
+    address: "1800 Noble Avenue, Fremont, CA 94538",
+    lastContactDate: "2024-12-13",
+    nextFollowUp: "2024-12-20",
+    proposalDeadline: null,
+    contractValue: null,
+    contractLink: "https://contracts.willow.com/fremont-high",
+    willowStaffLead: "David Kim",
+    leadContact: {
+      name: "Assistant Principal Robert Chen",
+      title: "Assistant Principal, Operations",
+      email: "r.chen@fremont.k12.ca.us",
+      phone: "(510) 555-0345",
+    },
+    summary:
+      "Fremont High submitted an inquiry through our website after seeing the Oakland Tech case study. They're interested in exploring options but are early in their evaluation process.",
+    painPoints: [
+      "Manual substitute calling",
+      "No centralized absence tracking",
+      "Difficulty finding qualified subs",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: false },
+      { task: "Kickoff Call", completed: false },
+      { task: "Staff Roster Import", completed: false },
+      { task: "Admin Training Session", completed: false },
+      { task: "Teacher App Rollout", completed: false },
+    ],
+    notes: [
+      {
+        date: "2024-12-13",
+        author: "David Kim",
+        content:
+          "Website inquiry received. Scheduled intro call for next week.",
+      },
+    ],
+  },
+  {
+    id: "8",
+    name: "Elk Grove Charter High",
+    status: "Proposal Sent",
+    priority: "Medium",
+    schoolType: "Charter",
+    studentCount: 880,
+    staffCount: 72,
+    district: "Elk Grove Unified School District",
+    address: "9400 Elk Grove Blvd, Elk Grove, CA 95624",
+    lastContactDate: "2024-12-07",
+    nextFollowUp: "2024-12-16",
+    proposalDeadline: "2024-12-22",
+    contractValue: 36000,
+    contractLink: "https://contracts.willow.com/elk-grove-charter",
+    willowStaffLead: "Michael Torres",
+    leadContact: {
+      name: "Jennifer Martinez",
+      title: "Executive Director",
+      email: "j.martinez@egcharter.org",
+      phone: "(916) 555-0678",
+    },
+    summary:
+      "Elk Grove Charter High is part of a 3-school pilot evaluation for their charter network. They're the lead school and success here influences the broader network decision.",
+    painPoints: [
+      "Network-wide consistency",
+      "Credential compliance tracking",
+      "Board reporting requirements",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: false },
+      { task: "Kickoff Call", completed: false },
+      { task: "Staff Roster Import", completed: false },
+      { task: "Admin Training Session", completed: false },
+      { task: "Teacher App Rollout", completed: false },
+    ],
+    notes: [
+      {
+        date: "2024-12-07",
+        author: "Michael Torres",
+        content:
+          "Proposal sent. Pricing includes option for 2 additional network schools. Decision expected before holiday break.",
+      },
+      {
+        date: "2024-11-28",
+        author: "Michael Torres",
+        content:
+          "Good demo with ED and board chair. They liked the reporting features.",
+      },
+    ],
+  },
+  {
+    id: "9",
+    name: "Sacramento Charter High",
+    status: "New Lead",
+    leadSource: "Warm",
+    priority: "High",
+    schoolType: "Charter",
+    studentCount: 1100,
+    staffCount: 88,
+    district: "Independent Charter",
+    address: "2315 34th Street, Sacramento, CA 95817",
+    lastContactDate: "2024-12-12",
+    nextFollowUp: "2024-12-15",
+    proposalDeadline: null,
+    contractValue: null,
+    contractLink: "https://contracts.willow.com/sac-charter-high",
+    willowStaffLead: "Sarah Mitchell",
+    leadContact: {
+      name: "Dr. Angela Brooks",
+      title: "Founder & CEO",
+      email: "a.brooks@saccharterhigh.org",
+      phone: "(916) 555-0912",
+    },
+    summary:
+      "Referred by Dr. Patel at KIPP SF. Sacramento Charter High is rapidly expanding and struggling with their current manual processes. High priority warm lead with strong referral.",
+    painPoints: [
+      "Rapid enrollment growth",
+      "Manual spreadsheet tracking",
+      "Compliance documentation",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: false },
+      { task: "Kickoff Call", completed: false },
+      { task: "Staff Roster Import", completed: false },
+      { task: "Admin Training Session", completed: false },
+      { task: "Teacher App Rollout", completed: false },
+    ],
+    notes: [
+      {
+        date: "2024-12-12",
+        author: "Sarah Mitchell",
+        content:
+          "Warm referral from KIPP SF. Dr. Brooks very interested - scheduled call for this Friday.",
+      },
+    ],
+  },
+  {
+    id: "10",
+    name: "Menlo-Atherton High School",
+    status: "Onboarding",
+    onboardingStep: "Step 1",
+    priority: "High",
+    schoolType: "Public",
+    studentCount: 2300,
+    staffCount: 175,
+    district: "Sequoia Union High School District",
+    address: "555 Middlefield Road, Atherton, CA 94027",
+    lastContactDate: "2024-12-11",
+    nextFollowUp: "2024-12-14",
+    proposalDeadline: null,
+    contractValue: 62000,
+    contractLink: "https://contracts.willow.com/menlo-atherton",
+    willowStaffLead: "Michael Torres",
+    leadContact: {
+      name: "Principal Simone Kennel",
+      title: "Principal",
+      email: "s.kennel@seq.org",
+      phone: "(650) 555-0234",
+    },
+    summary:
+      "Menlo-Atherton is the first school in Sequoia UHSD to adopt Willow Staff. Just signed contract and beginning Step 1 of onboarding. Success here opens door to 5 other district high schools.",
+    painPoints: [
+      "District-wide standardization needs",
+      "Athletics and activities coordination",
+      "Large staff management",
+    ],
+    onboardingChecklist: [
+      { task: "Sign Contract", completed: true },
+      { task: "Kickoff Call", completed: false },
+      { task: "Staff Roster Import", completed: false },
+      { task: "Admin Training Session", completed: false },
+      { task: "Teacher App Rollout", completed: false },
+    ],
+    notes: [
+      {
+        date: "2024-12-11",
+        author: "Michael Torres",
+        content:
+          "Contract signed yesterday! Scheduling kickoff call for early next week. Step 1 begins.",
+      },
+      {
+        date: "2024-12-06",
+        author: "Michael Torres",
+        content:
+          "Final contract negotiations complete. Very excited to get started.",
+      },
+    ],
+  },
+];
+
+export const statusColors: Record<PartnerStatus, string> = {
+  "New Lead": "bg-blue-100 text-blue-800",
+  Contacted: "bg-yellow-100 text-yellow-800",
+  "Proposal Sent": "bg-purple-100 text-purple-800",
+  "Contract Preparation": "bg-orange-100 text-orange-800",
+  Onboarding: "bg-indigo-100 text-indigo-800",
+  Active: "bg-green-100 text-green-800",
+};
+
+export const priorityColors: Record<Priority, string> = {
+  High: "bg-red-100 text-red-800",
+  Medium: "bg-amber-100 text-amber-800",
+  Low: "bg-gray-100 text-gray-800",
+};
+
+export const leadSourceColors: Record<LeadSource, string> = {
+  Website: "bg-sky-100 text-sky-800",
+  Warm: "bg-pink-100 text-pink-800",
+};
+
+export const onboardingStepColors: Record<OnboardingStep, string> = {
+  "Step 1": "bg-violet-100 text-violet-800",
+  "Step 2": "bg-fuchsia-100 text-fuchsia-800",
+  "Step 3": "bg-rose-100 text-rose-800",
+};
+
+export const statusOrder: PartnerStatus[] = [
+  "New Lead",
+  "Contacted",
+  "Proposal Sent",
+  "Contract Preparation",
+  "Onboarding",
+  "Active",
+];
