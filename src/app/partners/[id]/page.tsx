@@ -17,7 +17,6 @@ import {
   MapPin,
   GraduationCap,
   Users,
-  DollarSign,
   AlertCircle,
   Clock,
   Building,
@@ -265,21 +264,6 @@ export default function PartnerDetailPage({ params }: PageProps) {
                       </p>
                       <p className="text-sm text-[var(--muted-foreground)]">
                         {formatDate(partner.proposalDeadline)}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {partner.contractValue && (
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
-                      <DollarSign className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-[var(--foreground)]">
-                        Contract Value
-                      </p>
-                      <p className="text-sm text-[var(--muted-foreground)]">
-                        ${partner.contractValue.toLocaleString()}/year
                       </p>
                     </div>
                   </div>
