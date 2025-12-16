@@ -1,10 +1,4 @@
-import {
-  School,
-  UserPlus,
-  FileText,
-  CheckCircle,
-  DollarSign,
-} from "lucide-react";
+import { School, UserPlus, FileText, CheckCircle } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { PipelineChart } from "@/components/dashboard/pipeline-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
@@ -19,9 +13,6 @@ export default function DashboardPage() {
     (p) => p.status === "Proposal Sent" || p.status === "Contract Preparation",
   ).length;
   const activeSchools = partners.filter((p) => p.status === "Active").length;
-  const pipelineValue = partners
-    .filter((p) => p.contractValue && p.status !== "Active")
-    .reduce((sum, p) => sum + (p.contractValue || 0), 0);
 
   return (
     <div className="space-y-8">
@@ -34,7 +25,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Total Schools"
           value={totalSchools}
@@ -58,12 +49,6 @@ export default function DashboardPage() {
           value={proposalsPending}
           icon={FileText}
           description="Proposals & contracts"
-        />
-        <MetricCard
-          title="Pipeline Value"
-          value={`$${(pipelineValue / 1000).toFixed(0)}k`}
-          icon={DollarSign}
-          description="Annual contract value"
         />
       </div>
 
