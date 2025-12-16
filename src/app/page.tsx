@@ -1,3 +1,5 @@
+"use client";
+
 import { School, UserPlus, FileText, CheckCircle } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { PipelineChart } from "@/components/dashboard/pipeline-chart";
