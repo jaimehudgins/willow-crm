@@ -16,7 +16,7 @@ export default function DashboardPage() {
     (p) => p.status === "Onboarding",
   ).length;
   const proposalsPending = partners.filter(
-    (p) => p.status === "Proposal Sent" || p.status === "Contract Review",
+    (p) => p.status === "Proposal Sent" || p.status === "Contract Preparation",
   ).length;
   const activeSchools = partners.filter((p) => p.status === "Active").length;
   const pipelineValue = partners
