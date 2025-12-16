@@ -323,8 +323,8 @@ export const partners: Partner[] = [
   {
     id: "6",
     name: "KIPP San Francisco College Prep",
-    status: "Onboarding",
-    onboardingStep: "Step 3",
+    status: "Active",
+    partnershipHealth: "Fair",
     priority: "Medium",
     schoolType: "Charter",
     studentCount: 650,
@@ -427,7 +427,8 @@ export const partners: Partner[] = [
   {
     id: "8",
     name: "Elk Grove Charter High",
-    status: "Proposal Sent",
+    status: "Active",
+    partnershipHealth: "Monitoring",
     priority: "Medium",
     schoolType: "Charter",
     studentCount: 880,

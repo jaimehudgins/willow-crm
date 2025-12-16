@@ -1,27 +1,56 @@
 "use client";
 
-import { School, UserPlus, FileText, CheckCircle } from "lucide-react";
+import {
+  School,
+  UserPlus,
+  FileText,
+  CheckCircle,
+  Activity,
+  AlertTriangle,
+  ThumbsUp,
+  Eye,
+} from "lucide-react";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { PipelineChart } from "@/components/dashboard/pipeline-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { partners } from "@/data/partners";
 
 export default function DashboardPage() {
-  const allSchools = partners.map((p) => ({ id: p.id, name: p.name }));
+  // Pipeline schools (non-active)
+  const pipelineSchools = partners.filter((p) => p.status !== "Active");
 
-  const activeSchoolsList = partners
-    .filter((p) => p.status === "Active")
-    .map((p) => ({ id: p.id, name: p.name }));
-
-  const onboardingSchoolsList = partners
+  const onboardingSchoolsList = pipelineSchools
     .filter((p) => p.status === "Onboarding")
     .map((p) => ({ id: p.id, name: p.name }));
 
-  const pendingDealsList = partners
+  const pendingDealsList = pipelineSchools
     .filter(
       (p) =>
         p.status === "Proposal Sent" || p.status === "Contract Preparation",
     )
+    .map((p) => ({ id: p.id, name: p.name }));
+
+  const newLeadsList = pipelineSchools
+    .filter((p) => p.status === "New Lead" || p.status === "Contacted")
+    .map((p) => ({ id: p.id, name: p.name }));
+
+  // Active partners by health status
+  const activePartners = partners.filter((p) => p.status === "Active");
+
+  const strongPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Strong")
+    .map((p) => ({ id: p.id, name: p.name }));
+
+  const fairPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Fair")
+    .map((p) => ({ id: p.id, name: p.name }));
+
+  const monitoringPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Monitoring")
+    .map((p) => ({ id: p.id, name: p.name }));
+
+  const poorPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Poor")
     .map((p) => ({ id: p.id, name: p.name }));
 
   return (
@@ -35,35 +64,78 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Schools"
-          value={allSchools.length}
-          icon={School}
-          description="All schools in pipeline"
-          schools={allSchools}
-        />
-        <MetricCard
-          title="Active Schools"
-          value={activeSchoolsList.length}
-          icon={CheckCircle}
-          description="Fully onboarded"
-          schools={activeSchoolsList}
-        />
-        <MetricCard
-          title="Onboarding"
-          value={onboardingSchoolsList.length}
-          icon={UserPlus}
-          description="In progress"
-          schools={onboardingSchoolsList}
-        />
-        <MetricCard
-          title="Pending Deals"
-          value={pendingDealsList.length}
-          icon={FileText}
-          description="Proposals & contracts"
-          schools={pendingDealsList}
-        />
+      {/* Active Partners Section */}
+      <div>
+        <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+          Active Partners ({activePartners.length})
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            title="Strong"
+            value={strongPartners.length}
+            icon={ThumbsUp}
+            description="Healthy partnerships"
+            schools={strongPartners}
+          />
+          <MetricCard
+            title="Fair"
+            value={fairPartners.length}
+            icon={Activity}
+            description="Stable partnerships"
+            schools={fairPartners}
+          />
+          <MetricCard
+            title="Monitoring"
+            value={monitoringPartners.length}
+            icon={Eye}
+            description="Needs attention"
+            schools={monitoringPartners}
+          />
+          <MetricCard
+            title="Poor"
+            value={poorPartners.length}
+            icon={AlertTriangle}
+            description="At risk"
+            schools={poorPartners}
+          />
+        </div>
+      </div>
+
+      {/* Pipeline Section */}
+      <div>
+        <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+          Pipeline ({pipelineSchools.length})
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            title="Total in Pipeline"
+            value={pipelineSchools.length}
+            icon={School}
+            description="Schools in pipeline"
+            schools={pipelineSchools.map((p) => ({ id: p.id, name: p.name }))}
+          />
+          <MetricCard
+            title="New Leads"
+            value={newLeadsList.length}
+            icon={UserPlus}
+            description="New & contacted"
+            schools={newLeadsList}
+          />
+          <MetricCard
+            title="Pending Deals"
+            value={pendingDealsList.length}
+            icon={FileText}
+            description="Proposals & contracts"
+            schools={pendingDealsList}
+          />
+          <MetricCard
+            title="Onboarding"
+            value={onboardingSchoolsList.length}
+            icon={CheckCircle}
+            description="In progress"
+            schools={onboardingSchoolsList}
+          />
+        </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
