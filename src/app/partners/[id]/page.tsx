@@ -21,10 +21,15 @@ import {
   AlertCircle,
   Clock,
   Building,
+  Plus,
+  Paperclip,
+  Link as LinkIcon,
+  X,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   partners,
   statusColors,
@@ -32,8 +37,16 @@ import {
   leadSourceColors,
   onboardingStepColors,
   type OnboardingTask,
+  type Note,
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
+
+interface Attachment {
+  id: string;
+  name: string;
+  url: string;
+  type: "file" | "link";
+}
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -47,6 +60,13 @@ export default function PartnerDetailPage({ params }: PageProps) {
     partner?.onboardingChecklist || [],
   );
 
+  const [notes, setNotes] = useState<Note[]>(partner?.notes || []);
+  const [newNote, setNewNote] = useState("");
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkName, setLinkName] = useState("");
+  const [showLinkForm, setShowLinkForm] = useState(false);
+
   if (!partner) {
     notFound();
   }
@@ -57,6 +77,56 @@ export default function PartnerDetailPage({ params }: PageProps) {
         i === index ? { ...task, completed: !task.completed } : task,
       ),
     );
+  };
+
+  const addNote = () => {
+    if (!newNote.trim()) return;
+
+    const note: Note = {
+      date: new Date().toISOString().split("T")[0],
+      author: "You",
+      content: newNote.trim(),
+    };
+
+    setNotes((prev) => [note, ...prev]);
+    setNewNote("");
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      const attachment: Attachment = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        name: file.name,
+        url: URL.createObjectURL(file),
+        type: "file",
+      };
+      setAttachments((prev) => [...prev, attachment]);
+    });
+
+    e.target.value = "";
+  };
+
+  const addLink = () => {
+    if (!linkUrl.trim()) return;
+
+    const attachment: Attachment = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      name: linkName.trim() || linkUrl,
+      url: linkUrl.startsWith("http") ? linkUrl : `https://${linkUrl}`,
+      type: "link",
+    };
+
+    setAttachments((prev) => [...prev, attachment]);
+    setLinkUrl("");
+    setLinkName("");
+    setShowLinkForm(false);
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
   };
 
   const completedTasks = checklist.filter((t) => t.completed).length;
@@ -287,25 +357,128 @@ export default function PartnerDetailPage({ params }: PageProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {partner.notes.map((note, index) => (
-                  <div
-                    key={index}
-                    className="border-l-2 border-indigo-200 pl-4"
-                  >
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="font-medium text-[var(--foreground)]">
-                        {note.author}
-                      </span>
-                      <span className="text-[var(--muted-foreground)]">•</span>
-                      <span className="text-[var(--muted-foreground)]">
-                        {formatDate(note.date)}
-                      </span>
+                <div className="space-y-3">
+                  <textarea
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    placeholder="Add a note about this school..."
+                    className="w-full min-h-[100px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm placeholder:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] resize-none"
+                  />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          multiple
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                        <div className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+                          <Paperclip className="h-4 w-4" />
+                          <span>Attach file</span>
+                        </div>
+                      </label>
+                      <button
+                        onClick={() => setShowLinkForm(!showLinkForm)}
+                        className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                      >
+                        <LinkIcon className="h-4 w-4" />
+                        <span>Add link</span>
+                      </button>
                     </div>
-                    <p className="mt-1 text-[var(--muted-foreground)]">
-                      {note.content}
-                    </p>
+                    <Button onClick={addNote} size="sm">
+                      <Plus className="mr-1 h-4 w-4" />
+                      Add Note
+                    </Button>
                   </div>
-                ))}
+
+                  {showLinkForm && (
+                    <div className="flex items-center gap-2 p-3 bg-[var(--muted)] rounded-lg">
+                      <Input
+                        value={linkName}
+                        onChange={(e) => setLinkName(e.target.value)}
+                        placeholder="Link name (optional)"
+                        className="flex-1"
+                      />
+                      <Input
+                        value={linkUrl}
+                        onChange={(e) => setLinkUrl(e.target.value)}
+                        placeholder="https://..."
+                        className="flex-1"
+                      />
+                      <Button onClick={addLink} size="sm">
+                        Add
+                      </Button>
+                      <Button
+                        onClick={() => setShowLinkForm(false)}
+                        variant="ghost"
+                        size="sm"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {attachments.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-[var(--foreground)]">
+                        Attachments
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {attachments.map((attachment) => (
+                          <div
+                            key={attachment.id}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-[var(--muted)] rounded-md text-sm"
+                          >
+                            {attachment.type === "file" ? (
+                              <Paperclip className="h-3 w-3 text-[var(--muted-foreground)]" />
+                            ) : (
+                              <LinkIcon className="h-3 w-3 text-[var(--muted-foreground)]" />
+                            )}
+                            <a
+                              href={attachment.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-indigo-600 hover:underline"
+                            >
+                              {attachment.name}
+                            </a>
+                            <button
+                              onClick={() => removeAttachment(attachment.id)}
+                              className="text-[var(--muted-foreground)] hover:text-red-500"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-[var(--border)] pt-4 space-y-4">
+                  {notes.map((note, index) => (
+                    <div
+                      key={index}
+                      className="border-l-2 border-indigo-200 pl-4"
+                    >
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="font-medium text-[var(--foreground)]">
+                          {note.author}
+                        </span>
+                        <span className="text-[var(--muted-foreground)]">
+                          •
+                        </span>
+                        <span className="text-[var(--muted-foreground)]">
+                          {formatDate(note.date)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[var(--muted-foreground)]">
+                        {note.content}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
