@@ -9,13 +9,14 @@ import {
   Users,
   GraduationCap,
   Mail,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  partners,
   statusColors,
   priorityColors,
   leadSourceColors,
@@ -24,8 +25,10 @@ import {
   type PartnerStatus,
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
+import { usePartners } from "@/hooks/usePartners";
 
 export default function PartnersPage() {
+  const { partners, loading, error } = usePartners();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<PartnerStatus | "all">(
     "all",
@@ -51,7 +54,7 @@ export default function PartnersPage() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [searchQuery, statusFilter]);
+  }, [partners, searchQuery, statusFilter]);
 
   const getNextAction = (partner: (typeof partners)[0]) => {
     if (partner.nextFollowUp) {
@@ -62,6 +65,25 @@ export default function PartnersPage() {
     }
     return "—";
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+          <p className="text-red-600">Error loading data: {error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

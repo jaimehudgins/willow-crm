@@ -24,23 +24,23 @@ import {
   Paperclip,
   Link as LinkIcon,
   X,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  partners,
   statusColors,
   priorityColors,
   leadSourceColors,
   onboardingStepColors,
   partnershipHealthColors,
-  type OnboardingTask,
-  type Note,
   type PartnershipHealth,
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
+import { usePartner } from "@/hooks/usePartners";
 
 interface Attachment {
   id: string;
@@ -55,45 +55,68 @@ interface PageProps {
 
 export default function PartnerDetailPage({ params }: PageProps) {
   const { id } = use(params);
-  const partner = partners.find((p) => p.id === id);
+  const {
+    partner,
+    loading,
+    error,
+    updateOnboardingTask,
+    addNote,
+    updatePartnershipHealth,
+  } = usePartner(id);
 
-  const [checklist, setChecklist] = useState<OnboardingTask[]>(
-    partner?.onboardingChecklist || [],
-  );
-
-  const [notes, setNotes] = useState<Note[]>(partner?.notes || []);
   const [newNote, setNewNote] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
   const [showLinkForm, setShowLinkForm] = useState(false);
-  const [partnershipHealth, setPartnershipHealth] = useState<PartnershipHealth>(
-    partner?.partnershipHealth || "Fair",
-  );
+  const [isAddingNote, setIsAddingNote] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+          <p className="text-red-600">Error loading partner: {error}</p>
+          <Link href="/partners" className="mt-4 inline-block">
+            <Button variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Schools
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!partner) {
     notFound();
   }
 
-  const toggleTask = (index: number) => {
-    setChecklist((prev) =>
-      prev.map((task, i) =>
-        i === index ? { ...task, completed: !task.completed } : task,
-      ),
-    );
+  const toggleTask = async (index: number) => {
+    const currentTask = partner.onboardingChecklist[index];
+    await updateOnboardingTask(index, !currentTask.completed);
   };
 
-  const addNote = () => {
-    if (!newNote.trim()) return;
+  const handleAddNote = async () => {
+    if (!newNote.trim() || isAddingNote) return;
 
-    const note: Note = {
-      date: new Date().toISOString().split("T")[0],
-      author: "You",
-      content: newNote.trim(),
-    };
-
-    setNotes((prev) => [note, ...prev]);
-    setNewNote("");
+    setIsAddingNote(true);
+    try {
+      await addNote(newNote.trim());
+      setNewNote("");
+    } catch (err) {
+      console.error("Failed to add note:", err);
+    } finally {
+      setIsAddingNote(false);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,7 +136,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
     e.target.value = "";
   };
 
-  const addLink = () => {
+  const handleAddLink = () => {
     if (!linkUrl.trim()) return;
 
     const attachment: Attachment = {
@@ -129,12 +152,22 @@ export default function PartnerDetailPage({ params }: PageProps) {
     setShowLinkForm(false);
   };
 
-  const removeAttachment = (id: string) => {
-    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  const removeAttachment = (attachmentId: string) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
   };
 
-  const completedTasks = checklist.filter((t) => t.completed).length;
-  const totalTasks = checklist.length;
+  const handleHealthChange = async (health: PartnershipHealth) => {
+    try {
+      await updatePartnershipHealth(health);
+    } catch (err) {
+      console.error("Failed to update partnership health:", err);
+    }
+  };
+
+  const completedTasks = partner.onboardingChecklist.filter(
+    (t) => t.completed,
+  ).length;
+  const totalTasks = partner.onboardingChecklist.length;
   const progressPercent =
     totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
@@ -314,7 +347,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                 </div>
               </div>
               <div className="space-y-2">
-                {checklist.map((task, index) => (
+                {partner.onboardingChecklist.map((task, index) => (
                   <button
                     key={index}
                     onClick={() => toggleTask(index)}
@@ -375,8 +408,16 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         <span>Add link</span>
                       </button>
                     </div>
-                    <Button onClick={addNote} size="sm">
-                      <Plus className="mr-1 h-4 w-4" />
+                    <Button
+                      onClick={handleAddNote}
+                      size="sm"
+                      disabled={isAddingNote}
+                    >
+                      {isAddingNote ? (
+                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="mr-1 h-4 w-4" />
+                      )}
                       Add Note
                     </Button>
                   </div>
@@ -395,7 +436,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         placeholder="https://..."
                         className="flex-1"
                       />
-                      <Button onClick={addLink} size="sm">
+                      <Button onClick={handleAddLink} size="sm">
                         Add
                       </Button>
                       <Button
@@ -446,27 +487,33 @@ export default function PartnerDetailPage({ params }: PageProps) {
                 </div>
 
                 <div className="border-t border-[var(--border)] pt-4 space-y-4">
-                  {notes.map((note, index) => (
-                    <div
-                      key={index}
-                      className="border-l-2 border-indigo-200 pl-4"
-                    >
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="font-medium text-[var(--foreground)]">
-                          {note.author}
-                        </span>
-                        <span className="text-[var(--muted-foreground)]">
-                          •
-                        </span>
-                        <span className="text-[var(--muted-foreground)]">
-                          {formatDate(note.date)}
-                        </span>
+                  {partner.notes.length === 0 ? (
+                    <p className="text-center text-[var(--muted-foreground)] py-4">
+                      No notes yet
+                    </p>
+                  ) : (
+                    partner.notes.map((note, index) => (
+                      <div
+                        key={index}
+                        className="border-l-2 border-indigo-200 pl-4"
+                      >
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-medium text-[var(--foreground)]">
+                            {note.author}
+                          </span>
+                          <span className="text-[var(--muted-foreground)]">
+                            •
+                          </span>
+                          <span className="text-[var(--muted-foreground)]">
+                            {formatDate(note.date)}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[var(--muted-foreground)]">
+                          {note.content}
+                        </p>
                       </div>
-                      <p className="mt-1 text-[var(--muted-foreground)]">
-                        {note.content}
-                      </p>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -481,11 +528,11 @@ export default function PartnerDetailPage({ params }: PageProps) {
               </CardHeader>
               <CardContent>
                 <select
-                  value={partnershipHealth}
+                  value={partner.partnershipHealth || "Fair"}
                   onChange={(e) =>
-                    setPartnershipHealth(e.target.value as PartnershipHealth)
+                    handleHealthChange(e.target.value as PartnershipHealth)
                   }
-                  className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${partnershipHealthColors[partnershipHealth]}`}
+                  className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${partnershipHealthColors[partner.partnershipHealth || "Fair"]}`}
                 >
                   <option value="Monitoring">Monitoring</option>
                   <option value="Poor">Poor</option>

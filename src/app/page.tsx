@@ -9,13 +9,35 @@ import {
   AlertTriangle,
   ThumbsUp,
   Eye,
+  Loader2,
 } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { PipelineChart } from "@/components/dashboard/pipeline-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { partners } from "@/data/partners";
+import { usePartners } from "@/hooks/usePartners";
 
 export default function DashboardPage() {
+  const { partners, loading, error } = usePartners();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+          <p className="text-red-600">Error loading data: {error}</p>
+        </div>
+      </div>
+    );
+  }
+
   // Pipeline schools (non-active)
   const pipelineSchools = partners.filter((p) => p.status !== "Active");
 
@@ -139,8 +161,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <PipelineChart />
-        <RecentActivity />
+        <PipelineChart partners={partners} />
+        <RecentActivity partners={partners} />
       </div>
     </div>
   );

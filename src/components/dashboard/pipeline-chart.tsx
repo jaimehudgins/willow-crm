@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { partners, statusOrder, type PartnerStatus } from "@/data/partners";
+import { statusOrder, type PartnerStatus, type Partner } from "@/data/partners";
 
 const statusBarColors: Record<PartnerStatus, string> = {
   "New Lead": "bg-blue-500",
@@ -23,7 +23,11 @@ const onboardingStepColors = {
   "Step 3": "bg-rose-400",
 };
 
-export function PipelineChart() {
+interface PipelineChartProps {
+  partners: Partner[];
+}
+
+export function PipelineChart({ partners }: PipelineChartProps) {
   const statusCounts = statusOrder.map((status) => {
     const schoolsInStatus = partners.filter((p) => p.status === status);
     const totalValue = schoolsInStatus.reduce(
