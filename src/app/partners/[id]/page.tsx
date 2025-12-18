@@ -265,9 +265,17 @@ export default function PartnerDetailPage({ params }: PageProps) {
                 {partner.onboardingStep}
               </Badge>
             )}
-            <Badge className={priorityColors[partner.priority]}>
-              {partner.priority} Priority
-            </Badge>
+            {partner.status === "Active" && partner.partnershipHealth ? (
+              <Badge
+                className={partnershipHealthColors[partner.partnershipHealth]}
+              >
+                {partner.partnershipHealth}
+              </Badge>
+            ) : (
+              <Badge className={priorityColors[partner.priority]}>
+                {partner.priority} Priority
+              </Badge>
+            )}
           </div>
           <div className="mt-2 flex items-center gap-4 text-sm text-[var(--muted-foreground)]">
             <span className="flex items-center gap-1">

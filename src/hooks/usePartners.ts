@@ -35,7 +35,7 @@ function transformPartner(
     status: (dbPartner.status as PartnerStatus) || "New Lead",
     leadSource: dbPartner.lead_source as LeadSource | undefined,
     onboardingStep: dbPartner.onboarding_step as OnboardingStep | undefined,
-    partnershipHealth: dbPartner.partnership_health as
+    partnershipHealth: dbPartner.relationship_health as
       | PartnershipHealth
       | undefined,
     priority: (dbPartner.priority as Priority) || "Medium",
@@ -303,7 +303,7 @@ export function usePartner(id: string) {
     try {
       const { error: updateError } = await supabase
         .from("partners")
-        .update({ partnership_health: health })
+        .update({ relationship_health: health })
         .eq("id", id);
 
       if (updateError) throw updateError;
@@ -376,6 +376,14 @@ export function usePartner(id: string) {
       schoolType: "school_type",
       willowStaffLead: "willow_staff_lead",
       painPoints: "pain_points",
+      partnershipHealth: "relationship_health",
+      lastContactDate: "last_contact_date",
+      nextFollowUp: "next_follow_up",
+      proposalDeadline: "proposal_deadline",
+      contractValue: "contract_value",
+      contractLink: "contract_link",
+      leadSource: "lead_source",
+      onboardingStep: "onboarding_step",
     };
 
     const dbField = fieldMapping[field] || field;
