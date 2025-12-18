@@ -1014,48 +1014,36 @@ export default function PartnerDetailPage({ params }: PageProps) {
               <CardTitle>Willow Staff Lead</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-3 group">
+              <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
                   <User className="h-6 w-6 text-indigo-600" />
                 </div>
                 <div className="flex-1">
-                  {editingField === "willowStaffLead" ? (
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") saveField("willowStaffLead");
-                          if (e.key === "Escape") cancelEditing();
-                        }}
-                        className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => saveField("willowStaffLead")}
-                        className="text-green-600 hover:text-green-700"
-                      >
-                        <Check className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={cancelEditing}
-                        className="text-red-500 hover:text-red-600"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <p
-                      onClick={() =>
-                        startEditing("willowStaffLead", partner.willowStaffLead)
+                  <select
+                    value={partner.willowStaffLead || ""}
+                    onChange={async (e) => {
+                      try {
+                        await updatePartnerField(
+                          "willowStaffLead",
+                          e.target.value,
+                        );
+                      } catch (err) {
+                        console.error(
+                          "Failed to update Willow Staff Lead:",
+                          err,
+                        );
+                        alert(
+                          "Failed to update Willow Staff Lead. Check console for details.",
+                        );
                       }
-                      className="font-medium text-[var(--foreground)] cursor-pointer hover:text-indigo-600 flex items-center gap-1"
-                    >
-                      {partner.willowStaffLead || "Click to add"}
-                      <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
-                    </p>
-                  )}
+                    }}
+                    className="font-medium text-[var(--foreground)] bg-transparent border-none p-0 cursor-pointer hover:text-indigo-600 focus:outline-none"
+                  >
+                    <option value="">Select lead...</option>
+                    <option value="James Cryan">James Cryan</option>
+                    <option value="Jaime Hudgins">Jaime Hudgins</option>
+                    <option value="Ryan York">Ryan York</option>
+                  </select>
                   <p className="text-sm text-[var(--muted-foreground)]">
                     Account Manager
                   </p>
