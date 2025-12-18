@@ -25,37 +25,37 @@ function transformPartner(
   dbPartner: DbPartner,
   contacts: DbContact[],
   touchpoints: DbTouchpoint[],
-  onboardingTasks: DbOnboardingTask[]
+  onboardingTasks: DbOnboardingTask[],
 ): Partner {
   const primaryContact = contacts.find((c) => c.is_primary) || contacts[0];
 
   return {
-    id: dbPartner.id,
-    name: dbPartner.name,
-    status: dbPartner.status as PartnerStatus,
+    id: dbPartner.id || "",
+    name: dbPartner.name || "",
+    status: (dbPartner.status as PartnerStatus) || "New Lead",
     leadSource: dbPartner.lead_source as LeadSource | undefined,
     onboardingStep: dbPartner.onboarding_step as OnboardingStep | undefined,
     partnershipHealth: dbPartner.partnership_health as
       | PartnershipHealth
       | undefined,
-    priority: dbPartner.priority as Priority,
-    schoolType: dbPartner.school_type as SchoolType,
-    studentCount: dbPartner.student_count,
-    staffCount: dbPartner.staff_count,
-    district: dbPartner.district,
-    address: dbPartner.address,
-    lastContactDate: dbPartner.last_contact_date,
+    priority: (dbPartner.priority as Priority) || "Medium",
+    schoolType: (dbPartner.school_type as SchoolType) || "Public",
+    studentCount: dbPartner.student_count ?? 0,
+    staffCount: dbPartner.staff_count ?? 0,
+    district: dbPartner.district || "",
+    address: dbPartner.address || "",
+    lastContactDate: dbPartner.last_contact_date || "",
     nextFollowUp: dbPartner.next_follow_up || null,
     proposalDeadline: dbPartner.proposal_deadline || null,
-    contractValue: dbPartner.contract_value || null,
-    contractLink: dbPartner.contract_link,
-    willowStaffLead: dbPartner.willow_staff_lead,
+    contractValue: dbPartner.contract_value ?? null,
+    contractLink: dbPartner.contract_link || "",
+    willowStaffLead: dbPartner.willow_staff_lead || "",
     leadContact: primaryContact
       ? {
-          name: primaryContact.name,
-          title: primaryContact.title,
-          email: primaryContact.email,
-          phone: primaryContact.phone,
+          name: primaryContact.name || "",
+          title: primaryContact.title || "",
+          email: primaryContact.email || "",
+          phone: primaryContact.phone || "",
         }
       : {
           name: "",
@@ -63,18 +63,18 @@ function transformPartner(
           email: "",
           phone: "",
         },
-    summary: dbPartner.summary,
+    summary: dbPartner.summary || "",
     painPoints: dbPartner.pain_points || [],
-    onboardingChecklist: onboardingTasks
-      .sort((a, b) => a.order_index - b.order_index)
+    onboardingChecklist: (onboardingTasks || [])
+      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
       .map((t) => ({
-        task: t.task,
-        completed: t.completed,
+        task: t.task || "",
+        completed: t.completed ?? false,
       })),
-    notes: touchpoints.map((t) => ({
-      date: t.date,
-      author: t.author,
-      content: t.content,
+    notes: (touchpoints || []).map((t) => ({
+      date: t.date || "",
+      author: t.author || "",
+      content: t.content || "",
     })),
   };
 }
@@ -134,8 +134,8 @@ export function usePartners() {
           dbPartner,
           contacts.filter((c) => c.partner_id === dbPartner.id),
           touchpoints.filter((t) => t.partner_id === dbPartner.id),
-          tasks.filter((t) => t.partner_id === dbPartner.id)
-        )
+          tasks.filter((t) => t.partner_id === dbPartner.id),
+        ),
       );
 
       setPartners(transformedPartners);
@@ -203,7 +203,7 @@ export function usePartner(id: string) {
         partnerData,
         contactsResult.data || [],
         touchpointsResult.data || [],
-        tasksResult.data || []
+        tasksResult.data || [],
       );
 
       setPartner(transformedPartner);
@@ -222,7 +222,7 @@ export function usePartner(id: string) {
   // Update onboarding task
   const updateOnboardingTask = async (
     taskIndex: number,
-    completed: boolean
+    completed: boolean,
   ) => {
     if (!partner) return;
 

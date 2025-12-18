@@ -212,11 +212,11 @@ export default function PartnerDetailPage({ params }: PageProps) {
             </span>
             <span className="flex items-center gap-1">
               <GraduationCap className="h-4 w-4" />
-              {partner.studentCount.toLocaleString()} students
+              {(partner.studentCount ?? 0).toLocaleString()} students
             </span>
             <span className="flex items-center gap-1">
               <Users className="h-4 w-4" />
-              {partner.staffCount} staff
+              {partner.staffCount ?? 0} staff
             </span>
           </div>
         </div>

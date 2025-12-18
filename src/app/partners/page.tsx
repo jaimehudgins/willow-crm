@@ -169,11 +169,11 @@ export default function PartnersPage() {
                         <div className="mt-1 flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
                           <span className="flex items-center gap-1">
                             <GraduationCap className="h-3 w-3" />
-                            {partner.studentCount.toLocaleString()}
+                            {(partner.studentCount ?? 0).toLocaleString()}
                           </span>
                           <span className="flex items-center gap-1">
                             <Users className="h-3 w-3" />
-                            {partner.staffCount}
+                            {partner.staffCount ?? 0}
                           </span>
                           <span>{partner.schoolType}</span>
                         </div>
