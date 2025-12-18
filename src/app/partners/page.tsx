@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Filter,
@@ -11,6 +12,8 @@ import {
   Mail,
   Loader2,
   AlertTriangle,
+  Plus,
+  X,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,13 +29,23 @@ import {
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
 import { usePartners } from "@/hooks/usePartners";
+import { supabase } from "@/lib/supabase";
 
 export default function PartnersPage() {
-  const { partners, loading, error } = usePartners();
+  const router = useRouter();
+  const { partners, loading, error, refetch } = usePartners();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<PartnerStatus | "all">(
     "all",
   );
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newPartner, setNewPartner] = useState({
+    name: "",
+    schoolType: "Public",
+    district: "",
+    city_state: "",
+  });
 
   const filteredPartners = useMemo(() => {
     return partners.filter((partner) => {
@@ -66,6 +79,46 @@ export default function PartnersPage() {
     return "—";
   };
 
+  const handleCreatePartner = async () => {
+    if (!newPartner.name.trim()) return;
+
+    setIsCreating(true);
+    try {
+      const { data, error: createError } = await supabase
+        .from("partners")
+        .insert({
+          name: newPartner.name,
+          school_type: newPartner.schoolType,
+          district: newPartner.district,
+          city_state: newPartner.city_state,
+          status: "New Lead",
+          priority: "Medium",
+        })
+        .select()
+        .single();
+
+      if (createError) throw createError;
+
+      setShowAddModal(false);
+      setNewPartner({
+        name: "",
+        schoolType: "Public",
+        district: "",
+        city_state: "",
+      });
+      await refetch();
+
+      if (data) {
+        router.push(`/partners/${data.id}`);
+      }
+    } catch (err) {
+      console.error("Failed to create partner:", err);
+      alert("Failed to create partner. Check console for details.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -87,14 +140,116 @@ export default function PartnersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
-          School Directory
-        </h1>
-        <p className="mt-1 text-[var(--muted-foreground)]">
-          Manage and track all your school partnerships
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+            School Directory
+          </h1>
+          <p className="mt-1 text-[var(--muted-foreground)]">
+            Manage and track all your school partnerships
+          </p>
+        </div>
+        <Button onClick={() => setShowAddModal(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Partner
+        </Button>
       </div>
+
+      {/* Add Partner Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-[var(--background)] rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Add New Partner</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  School Name *
+                </label>
+                <Input
+                  value={newPartner.name}
+                  onChange={(e) =>
+                    setNewPartner((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  placeholder="Enter school name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  School Type
+                </label>
+                <select
+                  value={newPartner.schoolType}
+                  onChange={(e) =>
+                    setNewPartner((prev) => ({
+                      ...prev,
+                      schoolType: e.target.value,
+                    }))
+                  }
+                  className="w-full h-10 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm"
+                >
+                  <option value="Public">Public</option>
+                  <option value="Charter">Charter</option>
+                  <option value="Non-Profit">Non-Profit</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  District
+                </label>
+                <Input
+                  value={newPartner.district}
+                  onChange={(e) =>
+                    setNewPartner((prev) => ({
+                      ...prev,
+                      district: e.target.value,
+                    }))
+                  }
+                  placeholder="Enter district name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  City, State
+                </label>
+                <Input
+                  value={newPartner.city_state}
+                  onChange={(e) =>
+                    setNewPartner((prev) => ({
+                      ...prev,
+                      city_state: e.target.value,
+                    }))
+                  }
+                  placeholder="e.g., San Francisco, CA"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setShowAddModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreatePartner}
+                disabled={isCreating || !newPartner.name.trim()}
+              >
+                {isCreating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="mr-2 h-4 w-4" />
+                )}
+                Create Partner
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Card>
         <CardHeader>

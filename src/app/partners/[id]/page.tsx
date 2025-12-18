@@ -28,6 +28,9 @@ import {
   AlertTriangle,
   Pencil,
   Check,
+  ChevronDown,
+  ChevronRight,
+  MessageSquare,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +79,11 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [newNote, setNewNote] = useState("");
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
+  const [checklistExpanded, setChecklistExpanded] = useState(
+    partner?.status !== "Active",
+  );
+  const [taskNoteOpen, setTaskNoteOpen] = useState<number | null>(null);
+  const [taskNotes, setTaskNotes] = useState<Record<number, string>>({});
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
@@ -485,14 +493,22 @@ export default function PartnerDetailPage({ params }: PageProps) {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Onboarding Checklist</CardTitle>
+                <button
+                  onClick={() => setChecklistExpanded(!checklistExpanded)}
+                  className="flex items-center gap-2 hover:text-indigo-600 transition-colors"
+                >
+                  {checklistExpanded ? (
+                    <ChevronDown className="h-5 w-5" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5" />
+                  )}
+                  <CardTitle>Onboarding Checklist</CardTitle>
+                </button>
                 <span className="text-sm text-[var(--muted-foreground)]">
                   {completedTasks} of {totalTasks} completed
                 </span>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4">
+              <div className="mt-2">
                 <div className="h-2 w-full rounded-full bg-[var(--muted)]">
                   <div
                     className="h-2 rounded-full bg-indigo-600 transition-all duration-300"
@@ -500,31 +516,77 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                {partner.onboardingChecklist.map((task, index) => (
-                  <button
-                    key={index}
-                    onClick={() => toggleTask(index)}
-                    className="flex w-full items-center gap-3 rounded-lg border border-[var(--border)] p-4 text-left transition-colors hover:bg-[var(--muted)]"
-                  >
-                    {task.completed ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-[var(--muted-foreground)]" />
-                    )}
-                    <span
-                      className={
-                        task.completed
-                          ? "text-[var(--muted-foreground)] line-through"
-                          : "text-[var(--foreground)]"
-                      }
-                    >
-                      {task.task}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </CardContent>
+            </CardHeader>
+            {checklistExpanded && (
+              <CardContent>
+                <div className="space-y-2">
+                  {partner.onboardingChecklist.map((task, index) => (
+                    <div key={index} className="relative">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleTask(index)}
+                          className="flex flex-1 items-center gap-3 rounded-lg border border-[var(--border)] p-4 text-left transition-colors hover:bg-[var(--muted)]"
+                        >
+                          {task.completed ? (
+                            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-[var(--muted-foreground)] shrink-0" />
+                          )}
+                          <span
+                            className={
+                              task.completed
+                                ? "text-[var(--muted-foreground)] line-through"
+                                : "text-[var(--foreground)]"
+                            }
+                          >
+                            {task.task}
+                          </span>
+                        </button>
+                        <button
+                          onClick={() =>
+                            setTaskNoteOpen(
+                              taskNoteOpen === index ? null : index,
+                            )
+                          }
+                          className={`p-2 rounded-lg border border-[var(--border)] transition-colors hover:bg-[var(--muted)] ${
+                            taskNotes[index]
+                              ? "text-indigo-600"
+                              : "text-[var(--muted-foreground)]"
+                          }`}
+                          title="Add note"
+                        >
+                          <MessageSquare className="h-5 w-5" />
+                        </button>
+                      </div>
+                      {taskNoteOpen === index && (
+                        <div className="mt-2 p-3 bg-[var(--muted)] rounded-lg border border-[var(--border)]">
+                          <textarea
+                            value={taskNotes[index] || ""}
+                            onChange={(e) =>
+                              setTaskNotes((prev) => ({
+                                ...prev,
+                                [index]: e.target.value,
+                              }))
+                            }
+                            placeholder="Add a note for this task..."
+                            className="w-full min-h-[80px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm placeholder:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] resize-none"
+                          />
+                          <div className="flex justify-end mt-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setTaskNoteOpen(null)}
+                            >
+                              Close
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            )}
           </Card>
 
           <Card>
