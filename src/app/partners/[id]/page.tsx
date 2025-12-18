@@ -175,19 +175,21 @@ export default function PartnerDetailPage({ params }: PageProps) {
     }
   };
 
-  const handleStatusChange = async (status: PartnerStatus) => {
+  const handleStatusChange = async (newStatus: PartnerStatus) => {
     try {
-      await updateStatus(status);
+      await updatePartnerField("status", newStatus);
     } catch (err) {
       console.error("Failed to update status:", err);
+      alert("Failed to update status. Check console for details.");
     }
   };
 
-  const handlePriorityChange = async (priority: Priority) => {
+  const handlePriorityChange = async (newPriority: Priority) => {
     try {
-      await updatePriority(priority);
+      await updatePartnerField("priority", newPriority);
     } catch (err) {
       console.error("Failed to update priority:", err);
+      alert("Failed to update priority. Check console for details.");
     }
   };
 
@@ -279,6 +281,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
               >
                 <option value="Public">Public</option>
                 <option value="Charter">Charter</option>
+                <option value="Non-Profit">Non-Profit</option>
               </select>
             </span>
             <span className="flex items-center gap-1 group">
