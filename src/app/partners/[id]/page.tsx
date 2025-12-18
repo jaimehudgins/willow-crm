@@ -1192,7 +1192,19 @@ export default function PartnerDetailPage({ params }: PageProps) {
                           </div>
                           <div className="flex items-center gap-1">
                             <button
-                              onClick={() => setPrimaryContact(contact.id)}
+                              onClick={async () => {
+                                try {
+                                  await setPrimaryContact(contact.id);
+                                } catch (err) {
+                                  console.error(
+                                    "Failed to set primary contact:",
+                                    err,
+                                  );
+                                  alert(
+                                    "Failed to set primary contact. Check console for details.",
+                                  );
+                                }
+                              }}
                               className="p-1 text-[var(--muted-foreground)] hover:text-amber-500"
                               title="Set as primary"
                             >
