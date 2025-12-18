@@ -22,6 +22,7 @@ import type {
   Contact,
   School,
 } from "@/data/partners";
+import { CORE_ONBOARDING_TASKS, CUSTOM_TASK_SLOTS } from "@/data/partners";
 
 // Transform database partner to frontend Partner type
 function transformPartner(
@@ -86,6 +87,7 @@ function transformPartner(
       .map((t) => ({
         task: t.task || "",
         completed: t.completed ?? false,
+        isCustom: t.is_custom ?? false,
       })),
     notes: (touchpoints || []).map((t) => ({
       date: t.date || "",
@@ -295,6 +297,91 @@ export function usePartner(id: string) {
       });
     } catch (err) {
       console.error("Error updating task:", err);
+    }
+  };
+
+  // Initialize default onboarding tasks for a partner
+  const initializeOnboardingTasks = async () => {
+    if (!partner) return;
+
+    try {
+      // Check if tasks already exist
+      const { data: existingTasks } = await supabase
+        .from("onboarding_tasks")
+        .select("id")
+        .eq("partner_id", id);
+
+      if (existingTasks && existingTasks.length > 0) {
+        console.log("Tasks already exist for this partner");
+        return;
+      }
+
+      // Create core tasks + custom task slots
+      const allTasks = [
+        ...CORE_ONBOARDING_TASKS.map((task, index) => ({
+          partner_id: id,
+          task,
+          completed: false,
+          order_index: index,
+          is_custom: false,
+        })),
+        ...Array.from({ length: CUSTOM_TASK_SLOTS }, (_, i) => ({
+          partner_id: id,
+          task: "",
+          completed: false,
+          order_index: CORE_ONBOARDING_TASKS.length + i,
+          is_custom: true,
+        })),
+      ];
+
+      const { error: insertError } = await supabase
+        .from("onboarding_tasks")
+        .insert(allTasks);
+
+      if (insertError) throw insertError;
+
+      // Refetch to get the updated data
+      await fetchPartner();
+    } catch (err) {
+      console.error("Error initializing onboarding tasks:", err);
+      throw err;
+    }
+  };
+
+  // Update a custom task's text
+  const updateCustomTaskText = async (taskIndex: number, newText: string) => {
+    if (!partner) return;
+
+    try {
+      // Get the task from the database
+      const { data: tasks, error: fetchError } = await supabase
+        .from("onboarding_tasks")
+        .select("*")
+        .eq("partner_id", id)
+        .order("order_index");
+
+      if (fetchError) throw fetchError;
+
+      const task = tasks?.[taskIndex];
+      if (!task) return;
+
+      const { error: updateError } = await supabase
+        .from("onboarding_tasks")
+        .update({ task: newText })
+        .eq("id", task.id);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const newChecklist = [...prev.onboardingChecklist];
+        newChecklist[taskIndex] = { ...newChecklist[taskIndex], task: newText };
+        return { ...prev, onboardingChecklist: newChecklist };
+      });
+    } catch (err) {
+      console.error("Error updating custom task:", err);
+      throw err;
     }
   };
 
@@ -693,6 +780,8 @@ export function usePartner(id: string) {
     error,
     refetch: fetchPartner,
     updateOnboardingTask,
+    initializeOnboardingTasks,
+    updateCustomTaskText,
     addNote,
     updatePartnershipHealth,
     updateStatus,

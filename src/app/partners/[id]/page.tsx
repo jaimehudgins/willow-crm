@@ -72,6 +72,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
     loading,
     error,
     updateOnboardingTask,
+    initializeOnboardingTasks,
+    updateCustomTaskText,
     addNote,
     updatePartnershipHealth,
     updateStatus,
@@ -97,6 +99,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
   }, [partner?.status]);
   const [taskNoteOpen, setTaskNoteOpen] = useState<number | null>(null);
   const [taskNotes, setTaskNotes] = useState<Record<number, string>>({});
+  const [editingTaskIndex, setEditingTaskIndex] = useState<number | null>(null);
+  const [editingTaskText, setEditingTaskText] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
@@ -659,72 +663,184 @@ export default function PartnerDetailPage({ params }: PageProps) {
             </CardHeader>
             {checklistExpanded && (
               <CardContent>
-                <div className="space-y-2">
-                  {partner.onboardingChecklist.map((task, index) => (
-                    <div key={index} className="relative">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleTask(index)}
-                          className="flex flex-1 items-center gap-3 rounded-lg border border-[var(--border)] p-4 text-left transition-colors hover:bg-[var(--muted)]"
-                        >
-                          {task.completed ? (
-                            <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                {partner.onboardingChecklist.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-[var(--muted-foreground)] mb-3">
+                      No onboarding tasks yet.
+                    </p>
+                    <Button
+                      onClick={async () => {
+                        try {
+                          await initializeOnboardingTasks();
+                        } catch (err) {
+                          console.error("Failed to initialize tasks:", err);
+                          alert(
+                            "Failed to initialize tasks. Check console for details.",
+                          );
+                        }
+                      }}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Initialize Onboarding Tasks
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {partner.onboardingChecklist.map((task, index) => (
+                      <div key={index} className="relative">
+                        <div className="flex items-center gap-2">
+                          {/* Custom task being edited */}
+                          {task.isCustom && editingTaskIndex === index ? (
+                            <div className="flex flex-1 items-center gap-2 rounded-lg border border-indigo-300 p-4 bg-indigo-50">
+                              <Circle className="h-5 w-5 text-[var(--muted-foreground)] shrink-0" />
+                              <input
+                                type="text"
+                                value={editingTaskText}
+                                onChange={(e) =>
+                                  setEditingTaskText(e.target.value)
+                                }
+                                onKeyDown={async (e) => {
+                                  if (e.key === "Enter") {
+                                    await updateCustomTaskText(
+                                      index,
+                                      editingTaskText,
+                                    );
+                                    setEditingTaskIndex(null);
+                                    setEditingTaskText("");
+                                  }
+                                  if (e.key === "Escape") {
+                                    setEditingTaskIndex(null);
+                                    setEditingTaskText("");
+                                  }
+                                }}
+                                placeholder="Enter custom task..."
+                                className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                                autoFocus
+                              />
+                              <button
+                                onClick={async () => {
+                                  await updateCustomTaskText(
+                                    index,
+                                    editingTaskText,
+                                  );
+                                  setEditingTaskIndex(null);
+                                  setEditingTaskText("");
+                                }}
+                                className="text-green-600 hover:text-green-700"
+                              >
+                                <Check className="h-5 w-5" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingTaskIndex(null);
+                                  setEditingTaskText("");
+                                }}
+                                className="text-red-500 hover:text-red-600"
+                              >
+                                <X className="h-5 w-5" />
+                              </button>
+                            </div>
                           ) : (
-                            <Circle className="h-5 w-5 text-[var(--muted-foreground)] shrink-0" />
-                          )}
-                          <span
-                            className={
-                              task.completed
-                                ? "text-[var(--muted-foreground)] line-through"
-                                : "text-[var(--foreground)]"
-                            }
-                          >
-                            {task.task}
-                          </span>
-                        </button>
-                        <button
-                          onClick={() =>
-                            setTaskNoteOpen(
-                              taskNoteOpen === index ? null : index,
-                            )
-                          }
-                          className={`p-2 rounded-lg border border-[var(--border)] transition-colors hover:bg-[var(--muted)] ${
-                            taskNotes[index]
-                              ? "text-indigo-600"
-                              : "text-[var(--muted-foreground)]"
-                          }`}
-                          title="Add note"
-                        >
-                          <MessageSquare className="h-5 w-5" />
-                        </button>
-                      </div>
-                      {taskNoteOpen === index && (
-                        <div className="mt-2 p-3 bg-[var(--muted)] rounded-lg border border-[var(--border)]">
-                          <textarea
-                            value={taskNotes[index] || ""}
-                            onChange={(e) =>
-                              setTaskNotes((prev) => ({
-                                ...prev,
-                                [index]: e.target.value,
-                              }))
-                            }
-                            placeholder="Add a note for this task..."
-                            className="w-full min-h-[80px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm placeholder:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] resize-none"
-                          />
-                          <div className="flex justify-end mt-2">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => setTaskNoteOpen(null)}
+                            <button
+                              onClick={() => {
+                                if (task.isCustom && !task.task) {
+                                  // Empty custom task - start editing
+                                  setEditingTaskIndex(index);
+                                  setEditingTaskText(task.task);
+                                } else {
+                                  // Toggle completion
+                                  toggleTask(index);
+                                }
+                              }}
+                              className={`flex flex-1 items-center gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-[var(--muted)] ${
+                                task.isCustom
+                                  ? "border-dashed border-[var(--border)]"
+                                  : "border-[var(--border)]"
+                              }`}
                             >
-                              Close
-                            </Button>
-                          </div>
+                              {task.completed ? (
+                                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                              ) : (
+                                <Circle className="h-5 w-5 text-[var(--muted-foreground)] shrink-0" />
+                              )}
+                              <span
+                                className={
+                                  task.completed
+                                    ? "text-[var(--muted-foreground)] line-through"
+                                    : task.isCustom && !task.task
+                                      ? "text-[var(--muted-foreground)] italic"
+                                      : "text-[var(--foreground)]"
+                                }
+                              >
+                                {task.task ||
+                                  (task.isCustom
+                                    ? "Click to add custom task..."
+                                    : "")}
+                              </span>
+                            </button>
+                          )}
+                          {/* Edit button for custom tasks with content */}
+                          {task.isCustom &&
+                            task.task &&
+                            editingTaskIndex !== index && (
+                              <button
+                                onClick={() => {
+                                  setEditingTaskIndex(index);
+                                  setEditingTaskText(task.task);
+                                }}
+                                className="p-2 rounded-lg border border-[var(--border)] transition-colors hover:bg-[var(--muted)] text-[var(--muted-foreground)]"
+                                title="Edit task"
+                              >
+                                <Pencil className="h-5 w-5" />
+                              </button>
+                            )}
+                          {/* Note button */}
+                          {editingTaskIndex !== index && (
+                            <button
+                              onClick={() =>
+                                setTaskNoteOpen(
+                                  taskNoteOpen === index ? null : index,
+                                )
+                              }
+                              className={`p-2 rounded-lg border border-[var(--border)] transition-colors hover:bg-[var(--muted)] ${
+                                taskNotes[index]
+                                  ? "text-indigo-600"
+                                  : "text-[var(--muted-foreground)]"
+                              }`}
+                              title="Add note"
+                            >
+                              <MessageSquare className="h-5 w-5" />
+                            </button>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                        {taskNoteOpen === index && (
+                          <div className="mt-2 p-3 bg-[var(--muted)] rounded-lg border border-[var(--border)]">
+                            <textarea
+                              value={taskNotes[index] || ""}
+                              onChange={(e) =>
+                                setTaskNotes((prev) => ({
+                                  ...prev,
+                                  [index]: e.target.value,
+                                }))
+                              }
+                              placeholder="Add a note for this task..."
+                              className="w-full min-h-[80px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm placeholder:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] resize-none"
+                            />
+                            <div className="flex justify-end mt-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setTaskNoteOpen(null)}
+                              >
+                                Close
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             )}
           </Card>

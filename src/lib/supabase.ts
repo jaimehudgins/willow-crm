@@ -77,6 +77,7 @@ export interface DbOnboardingTask {
   task: string;
   completed: boolean;
   order_index: number;
+  is_custom?: boolean;
   created_at?: string;
   updated_at?: string;
 }

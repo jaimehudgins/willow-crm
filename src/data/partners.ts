@@ -15,7 +15,23 @@ export type PartnershipHealth = "Monitoring" | "Poor" | "Fair" | "Strong";
 export interface OnboardingTask {
   task: string;
   completed: boolean;
+  isCustom?: boolean;
 }
+
+// Core onboarding tasks that are auto-populated for every partner
+export const CORE_ONBOARDING_TASKS = [
+  "Sign Contract",
+  "Kickoff Call",
+  "Scope and Sequence",
+  "Add to Platform",
+  "Staff Roster Import",
+  "Student Roster Import",
+  "Curriculum Upload",
+  "Initial Training",
+];
+
+// Number of custom task slots available
+export const CUSTOM_TASK_SLOTS = 3;
 
 export interface Note {
   date: string;
