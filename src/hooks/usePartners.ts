@@ -318,6 +318,50 @@ export function usePartner(id: string) {
     }
   };
 
+  // Update partner status
+  const updateStatus = async (status: PartnerStatus) => {
+    if (!partner) return;
+
+    try {
+      const { error: updateError } = await supabase
+        .from("partners")
+        .update({ status })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      setPartner((prev) => {
+        if (!prev) return prev;
+        return { ...prev, status };
+      });
+    } catch (err) {
+      console.error("Error updating status:", err);
+      throw err;
+    }
+  };
+
+  // Update partner priority
+  const updatePriority = async (priority: Priority) => {
+    if (!partner) return;
+
+    try {
+      const { error: updateError } = await supabase
+        .from("partners")
+        .update({ priority })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      setPartner((prev) => {
+        if (!prev) return prev;
+        return { ...prev, priority };
+      });
+    } catch (err) {
+      console.error("Error updating priority:", err);
+      throw err;
+    }
+  };
+
   return {
     partner,
     loading,
@@ -326,5 +370,7 @@ export function usePartner(id: string) {
     updateOnboardingTask,
     addNote,
     updatePartnershipHealth,
+    updateStatus,
+    updatePriority,
   };
 }

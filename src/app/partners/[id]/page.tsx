@@ -37,7 +37,10 @@ import {
   leadSourceColors,
   onboardingStepColors,
   partnershipHealthColors,
+  statusOrder,
   type PartnershipHealth,
+  type PartnerStatus,
+  type Priority,
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
 import { usePartner } from "@/hooks/usePartners";
@@ -62,6 +65,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
     updateOnboardingTask,
     addNote,
     updatePartnershipHealth,
+    updateStatus,
+    updatePriority,
   } = usePartner(id);
 
   const [newNote, setNewNote] = useState("");
@@ -161,6 +166,22 @@ export default function PartnerDetailPage({ params }: PageProps) {
       await updatePartnershipHealth(health);
     } catch (err) {
       console.error("Failed to update partnership health:", err);
+    }
+  };
+
+  const handleStatusChange = async (status: PartnerStatus) => {
+    try {
+      await updateStatus(status);
+    } catch (err) {
+      console.error("Failed to update status:", err);
+    }
+  };
+
+  const handlePriorityChange = async (priority: Priority) => {
+    try {
+      await updatePriority(priority);
+    } catch (err) {
+      console.error("Failed to update priority:", err);
     }
   };
 
@@ -521,6 +542,46 @@ export default function PartnerDetailPage({ params }: PageProps) {
         </div>
 
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <select
+                value={partner.status}
+                onChange={(e) =>
+                  handleStatusChange(e.target.value as PartnerStatus)
+                }
+                className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${statusColors[partner.status]}`}
+              >
+                {statusOrder.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Priority</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <select
+                value={partner.priority}
+                onChange={(e) =>
+                  handlePriorityChange(e.target.value as Priority)
+                }
+                className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${priorityColors[partner.priority]}`}
+              >
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </CardContent>
+          </Card>
+
           {partner.status === "Active" && (
             <Card>
               <CardHeader>
