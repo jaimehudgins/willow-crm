@@ -1010,6 +1010,11 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         )}
                       </p>
                     </div>
+                    {contact.role && (
+                      <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
+                        {contact.role}
+                      </p>
+                    )}
                     <div className="flex items-center gap-2 mt-1 text-sm text-[var(--muted-foreground)]">
                       <Mail className="h-3 w-3" />
                       <span
@@ -1186,6 +1191,11 @@ export default function PartnerDetailPage({ params }: PageProps) {
                             <p className="text-sm font-medium text-[var(--foreground)] truncate">
                               {contact.name}
                             </p>
+                            {contact.role && (
+                              <p className="text-xs text-[var(--muted-foreground)] truncate">
+                                {contact.role}
+                              </p>
+                            )}
                             <p className="text-xs text-[var(--muted-foreground)] truncate">
                               {contact.email}
                             </p>

@@ -27,6 +27,7 @@ export interface Contact {
   id: string;
   name: string;
   title: string;
+  role: string;
   email: string;
   phone: string;
   isPrimary: boolean;

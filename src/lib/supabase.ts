@@ -52,6 +52,7 @@ export interface DbContact {
   partner_id: string;
   name: string;
   title: string;
+  role?: string;
   email: string;
   phone: string;
   is_primary_contact: boolean;
