@@ -7,6 +7,7 @@ import {
   DbContact,
   DbTouchpoint,
   DbOnboardingTask,
+  DbSchool,
 } from "@/lib/supabase";
 import type {
   Partner,
@@ -19,6 +20,7 @@ import type {
   Note,
   OnboardingTask,
   Contact,
+  School,
 } from "@/data/partners";
 
 // Transform database partner to frontend Partner type
@@ -170,6 +172,7 @@ export function usePartners() {
 
 export function usePartner(id: string) {
   const [partner, setPartner] = useState<Partner | null>(null);
+  const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -194,7 +197,7 @@ export function usePartner(id: string) {
       }
 
       // Fetch related data in parallel
-      const [contactsResult, touchpointsResult, tasksResult] =
+      const [contactsResult, touchpointsResult, tasksResult, schoolsResult] =
         await Promise.all([
           supabase.from("contacts").select("*").eq("partner_id", id),
           supabase
@@ -207,11 +210,20 @@ export function usePartner(id: string) {
             .select("*")
             .eq("partner_id", id)
             .order("order_index"),
+          supabase
+            .from("schools")
+            .select("*")
+            .eq("partner_id", id)
+            .order("name"),
         ]);
 
       if (contactsResult.error) throw contactsResult.error;
       if (touchpointsResult.error) throw touchpointsResult.error;
       if (tasksResult.error) throw tasksResult.error;
+      // Schools table may not exist yet, so we don't throw on error
+      if (schoolsResult.error) {
+        console.warn("Schools table not available:", schoolsResult.error);
+      }
 
       const transformedPartner = transformPartner(
         partnerData,
@@ -221,6 +233,20 @@ export function usePartner(id: string) {
       );
 
       setPartner(transformedPartner);
+
+      // Transform schools
+      const transformedSchools: School[] = (schoolsResult.data || []).map(
+        (s: DbSchool) => ({
+          id: s.id,
+          name: s.name || "",
+          schoolType: s.school_type || "Public",
+          studentCount: s.student_count ?? 0,
+          staffCount: s.staff_count ?? 0,
+          district: s.district || "",
+          address: s.address || "",
+        }),
+      );
+      setSchools(transformedSchools);
     } catch (err) {
       console.error("Error fetching partner:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch partner");
@@ -662,6 +688,7 @@ export function usePartner(id: string) {
 
   return {
     partner,
+    schools,
     loading,
     error,
     refetch: fetchPartner,

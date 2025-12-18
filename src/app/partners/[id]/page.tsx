@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -68,6 +68,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const {
     partner,
+    schools,
     loading,
     error,
     updateOnboardingTask,
@@ -86,9 +87,14 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [newNote, setNewNote] = useState("");
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
-  const [checklistExpanded, setChecklistExpanded] = useState(
-    partner?.status !== "Active",
-  );
+  const [checklistExpanded, setChecklistExpanded] = useState(true);
+
+  // Default checklist to closed for Active partners
+  useEffect(() => {
+    if (partner) {
+      setChecklistExpanded(partner.status !== "Active");
+    }
+  }, [partner?.status]);
   const [taskNoteOpen, setTaskNoteOpen] = useState<number | null>(null);
   const [taskNotes, setTaskNotes] = useState<Record<number, string>>({});
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -1325,6 +1331,55 @@ export default function PartnerDetailPage({ params }: PageProps) {
               )}
             </CardContent>
           </Card>
+
+          {/* Schools Section - show when partner has multiple schools */}
+          {((partner.schoolCount ?? 1) > 1 || schools.length > 0) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Schools ({schools.length || partner.schoolCount || 0})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {schools.length > 0 ? (
+                  <div className="space-y-3">
+                    {schools.map((school) => (
+                      <div
+                        key={school.id}
+                        className="p-3 bg-[var(--muted)] rounded-lg border border-[var(--border)]"
+                      >
+                        <p className="font-medium text-[var(--foreground)]">
+                          {school.name}
+                        </p>
+                        <div className="mt-1 flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
+                          <span className="flex items-center gap-1">
+                            <GraduationCap className="h-3 w-3" />
+                            {school.studentCount.toLocaleString()}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {school.staffCount}
+                          </span>
+                          <span>{school.schoolType}</span>
+                        </div>
+                        {school.address && (
+                          <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                            {school.address}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    No schools added yet. Add schools to the schools database
+                    with this partner&apos;s ID.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

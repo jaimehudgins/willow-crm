@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Plus,
   X,
+  Building,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -322,6 +323,10 @@ export default function PartnersPage() {
                           {partner.name}
                         </span>
                         <div className="mt-1 flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
+                          <span className="flex items-center gap-1">
+                            <Building className="h-3 w-3" />
+                            {partner.schoolCount ?? 1}
+                          </span>
                           <span className="flex items-center gap-1">
                             <GraduationCap className="h-3 w-3" />
                             {(partner.studentCount ?? 0).toLocaleString()}

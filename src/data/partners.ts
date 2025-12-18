@@ -33,6 +33,16 @@ export interface Contact {
   isPrimary: boolean;
 }
 
+export interface School {
+  id: string;
+  name: string;
+  schoolType: string;
+  studentCount: number;
+  staffCount: number;
+  district: string;
+  address: string;
+}
+
 export interface Partner {
   id: string;
   name: string;
