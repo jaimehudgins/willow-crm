@@ -31,6 +31,9 @@ import {
   ChevronDown,
   ChevronRight,
   MessageSquare,
+  Star,
+  Trash2,
+  Globe,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +77,10 @@ export default function PartnerDetailPage({ params }: PageProps) {
     updatePriority,
     updatePartnerField,
     updateLeadContact,
+    addContact,
+    updateContact,
+    deleteContact,
+    setPrimaryContact,
   } = usePartner(id);
 
   const [newNote, setNewNote] = useState("");
@@ -89,6 +96,13 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [linkName, setLinkName] = useState("");
   const [showLinkForm, setShowLinkForm] = useState(false);
   const [isAddingNote, setIsAddingNote] = useState(false);
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [newContact, setNewContact] = useState({
+    name: "",
+    title: "",
+    email: "",
+    phone: "",
+  });
 
   if (loading) {
     return (
@@ -926,25 +940,161 @@ export default function PartnerDetailPage({ params }: PageProps) {
               <CardTitle>Partner Info</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Primary Contact */}
+              {(partner.contacts || [])
+                .filter((c) => c.isPrimary)
+                .map((contact) => (
+                  <div
+                    key={contact.id}
+                    className="p-3 bg-indigo-50 rounded-lg border border-indigo-100"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium text-indigo-600 flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-indigo-600" />
+                        Primary Contact
+                      </span>
+                    </div>
+                    <div className="group">
+                      <p
+                        onClick={() =>
+                          startEditing(
+                            `contact-${contact.id}-name`,
+                            contact.name,
+                          )
+                        }
+                        className="font-medium text-[var(--foreground)] cursor-pointer hover:text-indigo-600 flex items-center gap-1"
+                      >
+                        {editingField === `contact-${contact.id}-name` ? (
+                          <span className="flex items-center gap-1 flex-1">
+                            <input
+                              type="text"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={async (e) => {
+                                if (e.key === "Enter") {
+                                  await updateContact(contact.id, {
+                                    ...contact,
+                                    name: editValue,
+                                  });
+                                  cancelEditing();
+                                }
+                                if (e.key === "Escape") cancelEditing();
+                              }}
+                              className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                              autoFocus
+                            />
+                            <button
+                              onClick={async () => {
+                                await updateContact(contact.id, {
+                                  ...contact,
+                                  name: editValue,
+                                });
+                                cancelEditing();
+                              }}
+                              className="text-green-600 hover:text-green-700"
+                            >
+                              <Check className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="text-red-500 hover:text-red-600"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </span>
+                        ) : (
+                          <>
+                            {contact.name || "Click to add name"}
+                            <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
+                          </>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-sm text-[var(--muted-foreground)]">
+                      <Mail className="h-3 w-3" />
+                      <span
+                        onClick={() =>
+                          startEditing(
+                            `contact-${contact.id}-email`,
+                            contact.email,
+                          )
+                        }
+                        className="cursor-pointer hover:text-indigo-600"
+                      >
+                        {editingField === `contact-${contact.id}-email` ? (
+                          <span className="flex items-center gap-1">
+                            <input
+                              type="email"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={async (e) => {
+                                if (e.key === "Enter") {
+                                  await updateContact(contact.id, {
+                                    ...contact,
+                                    email: editValue,
+                                  });
+                                  cancelEditing();
+                                }
+                                if (e.key === "Escape") cancelEditing();
+                              }}
+                              className="px-2 py-0.5 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                              autoFocus
+                            />
+                            <button
+                              onClick={async () => {
+                                await updateContact(contact.id, {
+                                  ...contact,
+                                  email: editValue,
+                                });
+                                cancelEditing();
+                              }}
+                              className="text-green-600 hover:text-green-700"
+                            >
+                              <Check className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ) : (
+                          contact.email || "Add email"
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+
+              {/* No primary contact message */}
+              {(partner.contacts || []).filter((c) => c.isPrimary).length ===
+                0 && (
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    No primary contact set
+                  </p>
+                </div>
+              )}
+
+              {/* City & State */}
               <div className="group">
-                <p className="text-sm font-medium text-[var(--foreground)]">
-                  District
-                </p>
-                {editingField === "district" ? (
-                  <div className="flex items-center gap-1 mt-1">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-[var(--muted-foreground)]" />
+                  <p className="text-sm font-medium text-[var(--foreground)]">
+                    City & State
+                  </p>
+                </div>
+                {editingField === "cityState" ? (
+                  <div className="flex items-center gap-1 mt-1 ml-6">
                     <input
                       type="text"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") saveField("district");
+                        if (e.key === "Enter") saveField("cityState");
                         if (e.key === "Escape") cancelEditing();
                       }}
                       className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                      placeholder="e.g., San Francisco, CA"
                       autoFocus
                     />
                     <button
-                      onClick={() => saveField("district")}
+                      onClick={() => saveField("cityState")}
                       className="text-green-600 hover:text-green-700"
                     >
                       <Check className="h-4 w-4" />
@@ -958,54 +1108,199 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   </div>
                 ) : (
                   <p
-                    onClick={() => startEditing("district", partner.district)}
-                    className="text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-[var(--foreground)] flex items-center gap-1"
+                    onClick={() =>
+                      startEditing("cityState", partner.cityState || "")
+                    }
+                    className="text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-[var(--foreground)] ml-6 mt-1 flex items-center gap-1"
                   >
-                    {partner.district || "Click to add"}
+                    {partner.cityState || "Click to add"}
                     <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
                   </p>
                 )}
               </div>
+
+              {/* Time Zone */}
               <div className="group">
-                <div className="flex items-start gap-2">
-                  <MapPin className="mt-0.5 h-4 w-4 text-[var(--muted-foreground)]" />
-                  {editingField === "address" ? (
-                    <div className="flex-1 flex items-center gap-1">
-                      <input
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") saveField("address");
-                          if (e.key === "Escape") cancelEditing();
-                        }}
-                        className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => saveField("address")}
-                        className="text-green-600 hover:text-green-700"
-                      >
-                        <Check className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={cancelEditing}
-                        className="text-red-500 hover:text-red-600"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <p
-                      onClick={() => startEditing("address", partner.address)}
-                      className="text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-[var(--foreground)] flex items-center gap-1"
-                    >
-                      {partner.address || "Click to add"}
-                      <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
-                    </p>
-                  )}
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-[var(--muted-foreground)]" />
+                  <p className="text-sm font-medium text-[var(--foreground)]">
+                    Time Zone
+                  </p>
                 </div>
+                {editingField === "timeZone" ? (
+                  <div className="flex items-center gap-1 mt-1 ml-6">
+                    <select
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                      autoFocus
+                    >
+                      <option value="">Select time zone...</option>
+                      <option value="Pacific">Pacific (PT)</option>
+                      <option value="Mountain">Mountain (MT)</option>
+                      <option value="Central">Central (CT)</option>
+                      <option value="Eastern">Eastern (ET)</option>
+                    </select>
+                    <button
+                      onClick={() => saveField("timeZone")}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      <Check className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={cancelEditing}
+                      className="text-red-500 hover:text-red-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <p
+                    onClick={() =>
+                      startEditing("timeZone", partner.timeZone || "")
+                    }
+                    className="text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-[var(--foreground)] ml-6 mt-1 flex items-center gap-1"
+                  >
+                    {partner.timeZone || "Click to add"}
+                    <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
+                  </p>
+                )}
               </div>
+
+              {/* Additional Contacts */}
+              {(partner.contacts || []).filter((c) => !c.isPrimary).length >
+                0 && (
+                <div className="border-t border-[var(--border)] pt-4 mt-4">
+                  <p className="text-sm font-medium text-[var(--foreground)] mb-2">
+                    Other Contacts
+                  </p>
+                  <div className="space-y-2">
+                    {(partner.contacts || [])
+                      .filter((c) => !c.isPrimary)
+                      .map((contact) => (
+                        <div
+                          key={contact.id}
+                          className="flex items-center justify-between p-2 bg-[var(--muted)] rounded-md"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-[var(--foreground)] truncate">
+                              {contact.name}
+                            </p>
+                            <p className="text-xs text-[var(--muted-foreground)] truncate">
+                              {contact.email}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setPrimaryContact(contact.id)}
+                              className="p-1 text-[var(--muted-foreground)] hover:text-amber-500"
+                              title="Set as primary"
+                            >
+                              <Star className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => deleteContact(contact.id)}
+                              className="p-1 text-[var(--muted-foreground)] hover:text-red-500"
+                              title="Delete contact"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Add Contact */}
+              {showAddContact ? (
+                <div className="border-t border-[var(--border)] pt-4 mt-4 space-y-2">
+                  <p className="text-sm font-medium text-[var(--foreground)]">
+                    Add Contact
+                  </p>
+                  <Input
+                    value={newContact.name}
+                    onChange={(e) =>
+                      setNewContact((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    placeholder="Name"
+                    className="text-sm"
+                  />
+                  <Input
+                    value={newContact.email}
+                    onChange={(e) =>
+                      setNewContact((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
+                    placeholder="Email"
+                    type="email"
+                    className="text-sm"
+                  />
+                  <Input
+                    value={newContact.title}
+                    onChange={(e) =>
+                      setNewContact((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
+                    placeholder="Title (optional)"
+                    className="text-sm"
+                  />
+                  <Input
+                    value={newContact.phone}
+                    onChange={(e) =>
+                      setNewContact((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
+                    }
+                    placeholder="Phone (optional)"
+                    className="text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        if (newContact.name && newContact.email) {
+                          await addContact(newContact);
+                          setNewContact({
+                            name: "",
+                            title: "",
+                            email: "",
+                            phone: "",
+                          });
+                          setShowAddContact(false);
+                        }
+                      }}
+                      disabled={!newContact.name || !newContact.email}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setShowAddContact(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowAddContact(true)}
+                  className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 mt-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add contact
+                </button>
+              )}
             </CardContent>
           </Card>
 
@@ -1044,219 +1339,6 @@ export default function PartnerDetailPage({ params }: PageProps) {
                     <option value="Jaime Hudgins">Jaime Hudgins</option>
                     <option value="Ryan York">Ryan York</option>
                   </select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Partner Contact</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-                    <User className="h-6 w-6 text-gray-600" />
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="group">
-                      {editingField === "contactName" ? (
-                        <div className="flex items-center gap-1">
-                          <input
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                handleContactFieldChange("name", editValue);
-                                cancelEditing();
-                              }
-                              if (e.key === "Escape") cancelEditing();
-                            }}
-                            className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
-                            autoFocus
-                          />
-                          <button
-                            onClick={() => {
-                              handleContactFieldChange("name", editValue);
-                              cancelEditing();
-                            }}
-                            className="text-green-600 hover:text-green-700"
-                          >
-                            <Check className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={cancelEditing}
-                            className="text-red-500 hover:text-red-600"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <p
-                          onClick={() =>
-                            startEditing(
-                              "contactName",
-                              partner.leadContact.name,
-                            )
-                          }
-                          className="font-medium text-[var(--foreground)] cursor-pointer hover:text-indigo-600 flex items-center gap-1"
-                        >
-                          {partner.leadContact.name || "Click to add name"}
-                          <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
-                        </p>
-                      )}
-                    </div>
-                    <div className="group">
-                      {editingField === "contactTitle" ? (
-                        <div className="flex items-center gap-1">
-                          <input
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                handleContactFieldChange("title", editValue);
-                                cancelEditing();
-                              }
-                              if (e.key === "Escape") cancelEditing();
-                            }}
-                            className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
-                            autoFocus
-                          />
-                          <button
-                            onClick={() => {
-                              handleContactFieldChange("title", editValue);
-                              cancelEditing();
-                            }}
-                            className="text-green-600 hover:text-green-700"
-                          >
-                            <Check className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={cancelEditing}
-                            className="text-red-500 hover:text-red-600"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ) : (
-                        <p
-                          onClick={() =>
-                            startEditing(
-                              "contactTitle",
-                              partner.leadContact.title,
-                            )
-                          }
-                          className="text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-[var(--foreground)] flex items-center gap-1"
-                        >
-                          {partner.leadContact.title || "Click to add title"}
-                          <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="group flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-[var(--muted-foreground)]" />
-                    {editingField === "contactEmail" ? (
-                      <div className="flex-1 flex items-center gap-1">
-                        <input
-                          type="email"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleContactFieldChange("email", editValue);
-                              cancelEditing();
-                            }
-                            if (e.key === "Escape") cancelEditing();
-                          }}
-                          className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => {
-                            handleContactFieldChange("email", editValue);
-                            cancelEditing();
-                          }}
-                          className="text-green-600 hover:text-green-700"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={cancelEditing}
-                          className="text-red-500 hover:text-red-600"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <span
-                        onClick={() =>
-                          startEditing(
-                            "contactEmail",
-                            partner.leadContact.email,
-                          )
-                        }
-                        className="text-sm text-indigo-600 cursor-pointer hover:underline flex items-center gap-1"
-                      >
-                        {partner.leadContact.email || "Click to add email"}
-                        <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
-                      </span>
-                    )}
-                  </div>
-                  <div className="group flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-[var(--muted-foreground)]" />
-                    {editingField === "contactPhone" ? (
-                      <div className="flex-1 flex items-center gap-1">
-                        <input
-                          type="tel"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleContactFieldChange("phone", editValue);
-                              cancelEditing();
-                            }
-                            if (e.key === "Escape") cancelEditing();
-                          }}
-                          className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => {
-                            handleContactFieldChange("phone", editValue);
-                            cancelEditing();
-                          }}
-                          className="text-green-600 hover:text-green-700"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={cancelEditing}
-                          className="text-red-500 hover:text-red-600"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ) : (
-                      <span
-                        onClick={() =>
-                          startEditing(
-                            "contactPhone",
-                            partner.leadContact.phone,
-                          )
-                        }
-                        className="text-sm text-indigo-600 cursor-pointer hover:underline flex items-center gap-1"
-                      >
-                        {partner.leadContact.phone || "Click to add phone"}
-                        <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
-                      </span>
-                    )}
-                  </div>
                 </div>
               </div>
             </CardContent>

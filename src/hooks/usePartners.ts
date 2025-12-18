@@ -18,6 +18,7 @@ import type {
   SchoolType,
   Note,
   OnboardingTask,
+  Contact,
 } from "@/data/partners";
 
 // Transform database partner to frontend Partner type
@@ -45,6 +46,8 @@ function transformPartner(
     schoolCount: dbPartner.school_count ?? 1,
     district: dbPartner.district || "",
     address: dbPartner.address || "",
+    cityState: dbPartner.city_state || "",
+    timeZone: dbPartner.time_zone || "",
     lastContactDate: dbPartner.last_contact_date || "",
     nextFollowUp: dbPartner.next_follow_up || null,
     proposalDeadline: dbPartner.proposal_deadline || null,
@@ -64,6 +67,14 @@ function transformPartner(
           email: "",
           phone: "",
         },
+    contacts: contacts.map((c) => ({
+      id: c.id,
+      name: c.name || "",
+      title: c.title || "",
+      email: c.email || "",
+      phone: c.phone || "",
+      isPrimary: c.is_primary ?? false,
+    })),
     summary: dbPartner.summary || "",
     painPoints: dbPartner.pain_points || [],
     onboardingChecklist: (onboardingTasks || [])
@@ -376,6 +387,8 @@ export function usePartner(id: string) {
       staffCount: "staff_count",
       schoolCount: "school_count",
       schoolType: "school_type",
+      cityState: "city_state",
+      timeZone: "time_zone",
       willowStaffLead: "willow_staff_lead",
       painPoints: "pain_points",
       partnershipHealth: "relationship_health",
@@ -465,6 +478,185 @@ export function usePartner(id: string) {
     }
   };
 
+  // Add a new contact
+  const addContact = async (contact: {
+    name: string;
+    title: string;
+    email: string;
+    phone: string;
+  }) => {
+    if (!partner) return;
+
+    try {
+      const { data, error: insertError } = await supabase
+        .from("contacts")
+        .insert({
+          partner_id: id,
+          name: contact.name,
+          title: contact.title,
+          email: contact.email,
+          phone: contact.phone,
+          is_primary: (partner.contacts || []).length === 0, // First contact is primary
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      const newContact: Contact = {
+        id: data.id,
+        name: data.name || "",
+        title: data.title || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        isPrimary: data.is_primary ?? false,
+      };
+
+      setPartner((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          contacts: [...(prev.contacts || []), newContact],
+          leadContact: newContact.isPrimary ? contact : prev.leadContact,
+        };
+      });
+
+      return data;
+    } catch (err) {
+      console.error("Error adding contact:", err);
+      throw err;
+    }
+  };
+
+  // Update a contact
+  const updateContact = async (
+    contactId: string,
+    contact: { name: string; title: string; email: string; phone: string },
+  ) => {
+    if (!partner) return;
+
+    try {
+      const { error: updateError } = await supabase
+        .from("contacts")
+        .update({
+          name: contact.name,
+          title: contact.title,
+          email: contact.email,
+          phone: contact.phone,
+        })
+        .eq("id", contactId);
+
+      if (updateError) throw updateError;
+
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const updatedContacts = (prev.contacts || []).map((c) =>
+          c.id === contactId ? { ...c, ...contact } : c,
+        );
+        const primaryContact = updatedContacts.find((c) => c.isPrimary);
+        return {
+          ...prev,
+          contacts: updatedContacts,
+          leadContact: primaryContact
+            ? {
+                name: primaryContact.name,
+                title: primaryContact.title,
+                email: primaryContact.email,
+                phone: primaryContact.phone,
+              }
+            : prev.leadContact,
+        };
+      });
+    } catch (err) {
+      console.error("Error updating contact:", err);
+      throw err;
+    }
+  };
+
+  // Delete a contact
+  const deleteContact = async (contactId: string) => {
+    if (!partner) return;
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("contacts")
+        .delete()
+        .eq("id", contactId);
+
+      if (deleteError) throw deleteError;
+
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const updatedContacts = (prev.contacts || []).filter(
+          (c) => c.id !== contactId,
+        );
+        const primaryContact = updatedContacts.find((c) => c.isPrimary);
+        return {
+          ...prev,
+          contacts: updatedContacts,
+          leadContact: primaryContact
+            ? {
+                name: primaryContact.name,
+                title: primaryContact.title,
+                email: primaryContact.email,
+                phone: primaryContact.phone,
+              }
+            : { name: "", title: "", email: "", phone: "" },
+        };
+      });
+    } catch (err) {
+      console.error("Error deleting contact:", err);
+      throw err;
+    }
+  };
+
+  // Set a contact as primary
+  const setPrimaryContact = async (contactId: string) => {
+    if (!partner) return;
+
+    try {
+      // First, unset all contacts as primary
+      const { error: unsetError } = await supabase
+        .from("contacts")
+        .update({ is_primary: false })
+        .eq("partner_id", id);
+
+      if (unsetError) throw unsetError;
+
+      // Then set the selected contact as primary
+      const { error: setError } = await supabase
+        .from("contacts")
+        .update({ is_primary: true })
+        .eq("id", contactId);
+
+      if (setError) throw setError;
+
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const updatedContacts = (prev.contacts || []).map((c) => ({
+          ...c,
+          isPrimary: c.id === contactId,
+        }));
+        const primaryContact = updatedContacts.find((c) => c.isPrimary);
+        return {
+          ...prev,
+          contacts: updatedContacts,
+          leadContact: primaryContact
+            ? {
+                name: primaryContact.name,
+                title: primaryContact.title,
+                email: primaryContact.email,
+                phone: primaryContact.phone,
+              }
+            : prev.leadContact,
+        };
+      });
+    } catch (err) {
+      console.error("Error setting primary contact:", err);
+      throw err;
+    }
+  };
+
   return {
     partner,
     loading,
@@ -477,5 +669,9 @@ export function usePartner(id: string) {
     updatePriority,
     updatePartnerField,
     updateLeadContact,
+    addContact,
+    updateContact,
+    deleteContact,
+    setPrimaryContact,
   };
 }

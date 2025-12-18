@@ -23,6 +23,15 @@ export interface Note {
   content: string;
 }
 
+export interface Contact {
+  id: string;
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+  isPrimary: boolean;
+}
+
 export interface Partner {
   id: string;
   name: string;
@@ -37,6 +46,8 @@ export interface Partner {
   schoolCount?: number;
   district: string;
   address: string;
+  cityState?: string;
+  timeZone?: string;
   lastContactDate: string;
   nextFollowUp: string | null;
   proposalDeadline: string | null;
@@ -49,6 +60,7 @@ export interface Partner {
     email: string;
     phone: string;
   };
+  contacts?: Contact[];
   summary: string;
   painPoints: string[];
   onboardingChecklist: OnboardingTask[];

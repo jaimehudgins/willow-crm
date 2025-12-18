@@ -20,6 +20,8 @@ export interface DbPartner {
   school_count?: number;
   district: string;
   address: string;
+  city_state?: string;
+  time_zone?: string;
   last_contact_date: string;
   next_follow_up?: string;
   proposal_deadline?: string;
