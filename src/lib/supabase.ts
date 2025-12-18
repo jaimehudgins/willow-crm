@@ -54,7 +54,7 @@ export interface DbContact {
   title: string;
   email: string;
   phone: string;
-  is_primary: boolean;
+  is_primary_contact: boolean;
   created_at?: string;
   updated_at?: string;
 }

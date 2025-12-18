@@ -28,7 +28,8 @@ function transformPartner(
   touchpoints: DbTouchpoint[],
   onboardingTasks: DbOnboardingTask[],
 ): Partner {
-  const primaryContact = contacts.find((c) => c.is_primary) || contacts[0];
+  const primaryContact =
+    contacts.find((c) => c.is_primary_contact) || contacts[0];
 
   return {
     id: dbPartner.id || "",
@@ -73,7 +74,7 @@ function transformPartner(
       title: c.title || "",
       email: c.email || "",
       phone: c.phone || "",
-      isPrimary: c.is_primary ?? false,
+      isPrimary: c.is_primary_contact ?? false,
     })),
     summary: dbPartner.summary || "",
     painPoints: dbPartner.pain_points || [],
@@ -436,7 +437,7 @@ export function usePartner(id: string) {
         .from("contacts")
         .select("*")
         .eq("partner_id", id)
-        .order("is_primary", { ascending: false })
+        .order("is_primary_contact", { ascending: false })
         .limit(1);
 
       if (fetchError) throw fetchError;
@@ -462,7 +463,7 @@ export function usePartner(id: string) {
           title: contact.title,
           email: contact.email,
           phone: contact.phone,
-          is_primary: true,
+          is_primary_contact: true,
         });
 
         if (insertError) throw insertError;
@@ -496,7 +497,7 @@ export function usePartner(id: string) {
           title: contact.title,
           email: contact.email,
           phone: contact.phone,
-          is_primary: (partner.contacts || []).length === 0, // First contact is primary
+          is_primary_contact: (partner.contacts || []).length === 0, // First contact is primary
         })
         .select()
         .single();
@@ -509,7 +510,7 @@ export function usePartner(id: string) {
         title: data.title || "",
         email: data.email || "",
         phone: data.phone || "",
-        isPrimary: data.is_primary ?? false,
+        isPrimary: data.is_primary_contact ?? false,
       };
 
       setPartner((prev) => {
@@ -618,7 +619,7 @@ export function usePartner(id: string) {
       // First, unset all contacts as primary
       const { error: unsetError } = await supabase
         .from("contacts")
-        .update({ is_primary: false })
+        .update({ is_primary_contact: false })
         .eq("partner_id", id);
 
       if (unsetError) throw unsetError;
@@ -626,7 +627,7 @@ export function usePartner(id: string) {
       // Then set the selected contact as primary
       const { error: setError } = await supabase
         .from("contacts")
-        .update({ is_primary: true })
+        .update({ is_primary_contact: true })
         .eq("id", contactId);
 
       if (setError) throw setError;
