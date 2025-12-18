@@ -362,6 +362,99 @@ export function usePartner(id: string) {
     }
   };
 
+  // Update partner field (generic)
+  const updatePartnerField = async (
+    field: string,
+    value: string | number | string[],
+  ) => {
+    if (!partner) return;
+
+    // Map frontend field names to database column names
+    const fieldMapping: Record<string, string> = {
+      studentCount: "student_count",
+      staffCount: "staff_count",
+      schoolType: "school_type",
+      willowStaffLead: "willow_staff_lead",
+      painPoints: "pain_points",
+    };
+
+    const dbField = fieldMapping[field] || field;
+
+    try {
+      const { error: updateError } = await supabase
+        .from("partners")
+        .update({ [dbField]: value })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      setPartner((prev) => {
+        if (!prev) return prev;
+        return { ...prev, [field]: value };
+      });
+    } catch (err) {
+      console.error(`Error updating ${field}:`, err);
+      throw err;
+    }
+  };
+
+  // Update lead contact
+  const updateLeadContact = async (contact: {
+    name: string;
+    title: string;
+    email: string;
+    phone: string;
+  }) => {
+    if (!partner) return;
+
+    try {
+      // First, find the primary contact
+      const { data: contacts, error: fetchError } = await supabase
+        .from("contacts")
+        .select("*")
+        .eq("partner_id", id)
+        .order("is_primary", { ascending: false })
+        .limit(1);
+
+      if (fetchError) throw fetchError;
+
+      if (contacts && contacts.length > 0) {
+        // Update existing contact
+        const { error: updateError } = await supabase
+          .from("contacts")
+          .update({
+            name: contact.name,
+            title: contact.title,
+            email: contact.email,
+            phone: contact.phone,
+          })
+          .eq("id", contacts[0].id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Create new contact
+        const { error: insertError } = await supabase.from("contacts").insert({
+          partner_id: id,
+          name: contact.name,
+          title: contact.title,
+          email: contact.email,
+          phone: contact.phone,
+          is_primary: true,
+        });
+
+        if (insertError) throw insertError;
+      }
+
+      setPartner((prev) => {
+        if (!prev) return prev;
+        return { ...prev, leadContact: contact };
+      });
+    } catch (err) {
+      console.error("Error updating lead contact:", err);
+      throw err;
+    }
+  };
+
   return {
     partner,
     loading,
@@ -372,5 +465,7 @@ export function usePartner(id: string) {
     updatePartnershipHealth,
     updateStatus,
     updatePriority,
+    updatePartnerField,
+    updateLeadContact,
   };
 }
