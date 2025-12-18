@@ -1044,9 +1044,6 @@ export default function PartnerDetailPage({ params }: PageProps) {
                     <option value="Jaime Hudgins">Jaime Hudgins</option>
                     <option value="Ryan York">Ryan York</option>
                   </select>
-                  <p className="text-sm text-[var(--muted-foreground)]">
-                    Account Manager
-                  </p>
                 </div>
               </div>
             </CardContent>
