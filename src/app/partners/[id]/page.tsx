@@ -696,24 +696,26 @@ export default function PartnerDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Priority</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <select
-                value={partner.priority}
-                onChange={(e) =>
-                  handlePriorityChange(e.target.value as Priority)
-                }
-                className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${priorityColors[partner.priority]}`}
-              >
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </select>
-            </CardContent>
-          </Card>
+          {partner.status !== "Active" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Priority</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <select
+                  value={partner.priority}
+                  onChange={(e) =>
+                    handlePriorityChange(e.target.value as Priority)
+                  }
+                  className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${priorityColors[partner.priority]}`}
+                >
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </CardContent>
+            </Card>
+          )}
 
           {partner.status === "Active" && (
             <Card>
