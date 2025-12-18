@@ -143,10 +143,10 @@ export default function PartnersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--foreground)]">
-            School Directory
+            Partner Directory
           </h1>
           <p className="mt-1 text-[var(--muted-foreground)]">
-            Manage and track all your school partnerships
+            Manage and track all your partnerships
           </p>
         </div>
         <Button onClick={() => setShowAddModal(true)}>
@@ -171,19 +171,19 @@ export default function PartnersPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  School Name *
+                  Partner Name *
                 </label>
                 <Input
                   value={newPartner.name}
                   onChange={(e) =>
                     setNewPartner((prev) => ({ ...prev, name: e.target.value }))
                   }
-                  placeholder="Enter school name"
+                  placeholder="Enter partner name"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  School Type
+                  Partner Type
                 </label>
                 <select
                   value={newPartner.schoolType}
@@ -254,12 +254,12 @@ export default function PartnersPage() {
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle>All Schools ({partners.length})</CardTitle>
+            <CardTitle>All Partners ({partners.length})</CardTitle>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
                 <Input
-                  placeholder="Search schools, contacts..."
+                  placeholder="Search partners, contacts..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 w-full sm:w-64"
@@ -291,7 +291,7 @@ export default function PartnersPage() {
               <thead>
                 <tr className="border-b border-[var(--border)]">
                   <th className="pb-3 text-left text-sm font-medium text-[var(--muted-foreground)]">
-                    School
+                    Partner
                   </th>
                   <th className="pb-3 text-left text-sm font-medium text-[var(--muted-foreground)]">
                     Status
@@ -406,7 +406,7 @@ export default function PartnersPage() {
                       colSpan={6}
                       className="py-8 text-center text-[var(--muted-foreground)]"
                     >
-                      No schools found matching your criteria
+                      No partners found matching your criteria
                     </td>
                   </tr>
                 )}

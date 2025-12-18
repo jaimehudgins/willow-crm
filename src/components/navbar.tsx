@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/partners", label: "Schools", icon: School },
+  { href: "/partners", label: "Partners", icon: School },
 ];
 
 export function Navbar() {
@@ -23,7 +23,7 @@ export function Navbar() {
                 <Leaf className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold text-[var(--foreground)]">
-                Willow Staff
+                Willow Partner Success
               </span>
             </Link>
           </div>

@@ -82,7 +82,7 @@ export default function DashboardPage() {
           Dashboard
         </h1>
         <p className="mt-1 text-[var(--muted-foreground)]">
-          Overview of your school partnerships and pipeline
+          Overview of your partnerships and pipeline
         </p>
       </div>
 
@@ -133,7 +133,7 @@ export default function DashboardPage() {
             title="Total in Pipeline"
             value={pipelineSchools.length}
             icon={School}
-            description="Schools in pipeline"
+            description="Partners in pipeline"
             schools={pipelineSchools.map((p) => ({ id: p.id, name: p.name }))}
           />
           <MetricCard

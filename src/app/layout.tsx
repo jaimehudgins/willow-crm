@@ -3,7 +3,7 @@ import { Navbar } from "@/components/navbar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Willow Staff - Partner CRM",
+  title: "Willow Partner Success - Partner CRM",
   description: "CRM and onboarding tool for managing potential and new clients",
 };
 

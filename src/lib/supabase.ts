@@ -17,6 +17,7 @@ export interface DbPartner {
   school_type: string;
   student_count: number;
   staff_count: number;
+  school_count?: number;
   district: string;
   address: string;
   last_contact_date: string;

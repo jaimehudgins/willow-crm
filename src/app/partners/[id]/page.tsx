@@ -107,7 +107,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
           <Link href="/partners" className="mt-4 inline-block">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Schools
+              Back to Partners
             </Button>
           </Link>
         </div>
@@ -249,7 +249,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
         <Link href="/partners">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Schools
+            Back to Partners
           </Button>
         </Link>
       </div>
@@ -290,9 +290,16 @@ export default function PartnerDetailPage({ params }: PageProps) {
               <Building className="h-4 w-4" />
               <select
                 value={partner.schoolType}
-                onChange={(e) =>
-                  updatePartnerField("schoolType", e.target.value)
-                }
+                onChange={async (e) => {
+                  try {
+                    await updatePartnerField("schoolType", e.target.value);
+                  } catch (err) {
+                    console.error("Failed to update partner type:", err);
+                    alert(
+                      "Failed to update partner type. Check console for details.",
+                    );
+                  }
+                }}
                 className="bg-transparent border-none p-0 text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-[var(--foreground)] focus:outline-none"
               >
                 <option value="Public">Public</option>
@@ -380,11 +387,52 @@ export default function PartnerDetailPage({ params }: PageProps) {
                 </span>
               )}
             </span>
+            <span className="flex items-center gap-1 group">
+              <Building className="h-4 w-4" />
+              {editingField === "schoolCount" ? (
+                <span className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveField("schoolCount", true);
+                      if (e.key === "Escape") cancelEditing();
+                    }}
+                    className="w-16 px-1 py-0.5 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => saveField("schoolCount", true)}
+                    className="text-green-600 hover:text-green-700"
+                  >
+                    <Check className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={cancelEditing}
+                    className="text-red-500 hover:text-red-600"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ) : (
+                <span
+                  onClick={() =>
+                    startEditing("schoolCount", partner.schoolCount ?? 1)
+                  }
+                  className="cursor-pointer hover:text-[var(--foreground)] flex items-center gap-1"
+                >
+                  {partner.schoolCount ?? 1}{" "}
+                  {(partner.schoolCount ?? 1) === 1 ? "school" : "schools"}
+                  <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
+                </span>
+              )}
+            </span>
           </div>
         </div>
         <Button variant="outline">
           <Edit className="mr-2 h-4 w-4" />
-          Edit School
+          Edit Partner
         </Button>
       </div>
 
@@ -395,9 +443,33 @@ export default function PartnerDetailPage({ params }: PageProps) {
               <CardTitle>Engagement Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-[var(--muted-foreground)] leading-relaxed">
-                {partner.summary}
-              </p>
+              {editingField === "summary" ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="w-full min-h-[120px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm leading-relaxed text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] resize-none"
+                    autoFocus
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button size="sm" variant="ghost" onClick={cancelEditing}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={() => saveField("summary")}>
+                      <Check className="mr-1 h-4 w-4" />
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p
+                  onClick={() => startEditing("summary", partner.summary)}
+                  className="text-[var(--muted-foreground)] leading-relaxed cursor-pointer hover:bg-[var(--muted)] rounded-md p-2 -m-2 transition-colors group"
+                >
+                  {partner.summary || "Click to add engagement summary..."}
+                  <Pencil className="inline-block ml-2 h-3 w-3 opacity-0 group-hover:opacity-50" />
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -406,16 +478,64 @@ export default function PartnerDetailPage({ params }: PageProps) {
               <CardTitle>Pain Points & Needs</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
-                {partner.painPoints.map((point, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <AlertCircle className="mt-0.5 h-4 w-4 text-amber-500 shrink-0" />
-                    <span className="text-[var(--muted-foreground)]">
-                      {point}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              {editingField === "painPoints" ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    placeholder="Enter each pain point on a new line..."
+                    className="w-full min-h-[150px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm leading-relaxed text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] resize-none"
+                    autoFocus
+                  />
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    Enter each pain point on a separate line
+                  </p>
+                  <div className="flex justify-end gap-2">
+                    <Button size="sm" variant="ghost" onClick={cancelEditing}>
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        const painPointsArray = editValue
+                          .split("\n")
+                          .map((p) => p.trim())
+                          .filter((p) => p.length > 0);
+                        await updatePartnerField("painPoints", painPointsArray);
+                        cancelEditing();
+                      }}
+                    >
+                      <Check className="mr-1 h-4 w-4" />
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() =>
+                    startEditing("painPoints", partner.painPoints.join("\n"))
+                  }
+                  className="cursor-pointer hover:bg-[var(--muted)] rounded-md p-2 -m-2 transition-colors group"
+                >
+                  {partner.painPoints.length > 0 ? (
+                    <ul className="space-y-2">
+                      {partner.painPoints.map((point, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <AlertCircle className="mt-0.5 h-4 w-4 text-amber-500 shrink-0" />
+                          <span className="text-[var(--muted-foreground)]">
+                            {point}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-[var(--muted-foreground)]">
+                      Click to add pain points...
+                    </p>
+                  )}
+                  <Pencil className="inline-block ml-2 h-3 w-3 opacity-0 group-hover:opacity-50 mt-2" />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -599,7 +719,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   <textarea
                     value={newNote}
                     onChange={(e) => setNewNote(e.target.value)}
-                    placeholder="Add a note about this school..."
+                    placeholder="Add a note about this partner..."
                     className="w-full min-h-[100px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm placeholder:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] resize-none"
                   />
                   <div className="flex items-center justify-between">
@@ -803,7 +923,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
           <Card>
             <CardHeader>
-              <CardTitle>School Info</CardTitle>
+              <CardTitle>Partner Info</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="group">
@@ -946,7 +1066,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
           <Card>
             <CardHeader>
-              <CardTitle>School Contact</CardTitle>
+              <CardTitle>Partner Contact</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">

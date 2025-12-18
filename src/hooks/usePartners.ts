@@ -42,6 +42,7 @@ function transformPartner(
     schoolType: (dbPartner.school_type as SchoolType) || "Public",
     studentCount: dbPartner.student_count ?? 0,
     staffCount: dbPartner.staff_count ?? 0,
+    schoolCount: dbPartner.school_count ?? 1,
     district: dbPartner.district || "",
     address: dbPartner.address || "",
     lastContactDate: dbPartner.last_contact_date || "",
@@ -373,6 +374,7 @@ export function usePartner(id: string) {
     const fieldMapping: Record<string, string> = {
       studentCount: "student_count",
       staffCount: "staff_count",
+      schoolCount: "school_count",
       schoolType: "school_type",
       willowStaffLead: "willow_staff_lead",
       painPoints: "pain_points",

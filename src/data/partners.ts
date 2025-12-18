@@ -8,7 +8,7 @@ export type PartnerStatus =
 
 export type LeadSource = "Website" | "Warm";
 export type OnboardingStep = "Step 1" | "Step 2" | "Step 3";
-export type SchoolType = "Public" | "Charter";
+export type SchoolType = "Public" | "Charter" | "Non-Profit";
 export type Priority = "High" | "Medium" | "Low";
 export type PartnershipHealth = "Monitoring" | "Poor" | "Fair" | "Strong";
 
@@ -34,6 +34,7 @@ export interface Partner {
   schoolType: SchoolType;
   studentCount: number;
   staffCount: number;
+  schoolCount?: number;
   district: string;
   address: string;
   lastContactDate: string;
