@@ -1129,16 +1129,17 @@ export default function PartnerDetailPage({ params }: PageProps) {
               </CardHeader>
               <CardContent>
                 <select
-                  value={partner.partnershipHealth || "Fair"}
+                  value={partner.partnershipHealth || "Monitoring (New)"}
                   onChange={(e) =>
                     handleHealthChange(e.target.value as PartnershipHealth)
                   }
-                  className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${partnershipHealthColors[partner.partnershipHealth || "Fair"]}`}
+                  className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${partnershipHealthColors[partner.partnershipHealth || "Monitoring (New)"]}`}
                 >
-                  <option value="Monitoring">Monitoring</option>
-                  <option value="Poor">Poor</option>
-                  <option value="Fair">Fair</option>
                   <option value="Strong">Strong</option>
+                  <option value="Good">Good</option>
+                  <option value="Fair">Fair</option>
+                  <option value="At Risk">At Risk</option>
+                  <option value="Monitoring (New)">Monitoring (New)</option>
                 </select>
               </CardContent>
             </Card>

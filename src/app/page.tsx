@@ -63,16 +63,20 @@ export default function DashboardPage() {
     .filter((p) => p.partnershipHealth === "Strong")
     .map((p) => ({ id: p.id, name: p.name }));
 
+  const goodPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Good")
+    .map((p) => ({ id: p.id, name: p.name }));
+
   const fairPartners = activePartners
     .filter((p) => p.partnershipHealth === "Fair")
     .map((p) => ({ id: p.id, name: p.name }));
 
-  const monitoringPartners = activePartners
-    .filter((p) => p.partnershipHealth === "Monitoring")
+  const atRiskPartners = activePartners
+    .filter((p) => p.partnershipHealth === "At Risk")
     .map((p) => ({ id: p.id, name: p.name }));
 
-  const poorPartners = activePartners
-    .filter((p) => p.partnershipHealth === "Poor")
+  const monitoringPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Monitoring (New)")
     .map((p) => ({ id: p.id, name: p.name }));
 
   return (
@@ -91,34 +95,41 @@ export default function DashboardPage() {
         <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
           Active Partners ({activePartners.length})
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <MetricCard
             title="Strong"
             value={strongPartners.length}
             icon={ThumbsUp}
-            description="Healthy partnerships"
+            description="Excellent health"
             schools={strongPartners}
+          />
+          <MetricCard
+            title="Good"
+            value={goodPartners.length}
+            icon={Activity}
+            description="Healthy partnerships"
+            schools={goodPartners}
           />
           <MetricCard
             title="Fair"
             value={fairPartners.length}
-            icon={Activity}
+            icon={Eye}
             description="Stable partnerships"
             schools={fairPartners}
           />
           <MetricCard
-            title="Monitoring"
-            value={monitoringPartners.length}
-            icon={Eye}
+            title="At Risk"
+            value={atRiskPartners.length}
+            icon={AlertTriangle}
             description="Needs attention"
-            schools={monitoringPartners}
+            schools={atRiskPartners}
           />
           <MetricCard
-            title="Poor"
-            value={poorPartners.length}
-            icon={AlertTriangle}
-            description="At risk"
-            schools={poorPartners}
+            title="Monitoring (New)"
+            value={monitoringPartners.length}
+            icon={School}
+            description="New active partners"
+            schools={monitoringPartners}
           />
         </div>
       </div>
