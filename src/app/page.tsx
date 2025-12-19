@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import {
   School,
   UserPlus,
@@ -21,8 +23,60 @@ import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { UpcomingTasks } from "@/components/dashboard/upcoming-tasks";
 import { usePartners } from "@/hooks/usePartners";
 
+interface NextMeeting {
+  summary: string;
+  start: string;
+  htmlLink: string;
+}
+
 export default function DashboardPage() {
+  const { data: session, status: sessionStatus } = useSession();
   const { partners, loading, error } = usePartners();
+  const [meetings, setMeetings] = useState<Record<string, NextMeeting>>({});
+
+  // Fetch calendar meetings when authenticated and partners are loaded
+  useEffect(() => {
+    async function fetchMeetings() {
+      if (sessionStatus !== "authenticated" || !session?.accessToken) return;
+      if (partners.length === 0) return;
+
+      // Build map of partner IDs to contact emails
+      const partnerEmails: Record<string, string[]> = {};
+      for (const partner of partners) {
+        const emails: string[] = [];
+        if (partner.leadContact?.email) {
+          emails.push(partner.leadContact.email);
+        }
+        if (partner.contacts) {
+          for (const contact of partner.contacts) {
+            if (contact.email) emails.push(contact.email);
+          }
+        }
+        if (emails.length > 0) {
+          partnerEmails[partner.id] = emails;
+        }
+      }
+
+      if (Object.keys(partnerEmails).length === 0) return;
+
+      try {
+        const response = await fetch("/api/calendar/next-meetings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ partnerEmails }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setMeetings(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch calendar meetings:", err);
+      }
+    }
+
+    fetchMeetings();
+  }, [sessionStatus, session?.accessToken, partners]);
 
   if (loading) {
     return (
@@ -245,7 +299,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <UpcomingTasks partners={partners} />
+        <UpcomingTasks partners={partners} meetings={meetings} />
         <RecentActivity partners={partners} />
       </div>
 
