@@ -590,6 +590,39 @@ export function usePartner(id: string) {
     }
   };
 
+  // Delete a note (touchpoint)
+  const deleteNote = async (noteId: string) => {
+    if (!partner) return;
+
+    try {
+      // First delete any follow-up tasks associated with this note
+      await supabase
+        .from("follow_up_tasks")
+        .delete()
+        .eq("touchpoint_id", noteId);
+
+      // Then delete the note itself
+      const { error: deleteError } = await supabase
+        .from("touchpoints")
+        .delete()
+        .eq("id", noteId);
+
+      if (deleteError) throw deleteError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          notes: prev.notes.filter((n) => n.id !== noteId),
+        };
+      });
+    } catch (err) {
+      console.error("Error deleting note:", err);
+      throw err;
+    }
+  };
+
   // Update partnership health
   const updatePartnershipHealth = async (health: PartnershipHealth) => {
     if (!partner) return;
@@ -1189,6 +1222,7 @@ export function usePartner(id: string) {
     updateTaskDueDate,
     addCustomTask,
     addNote,
+    deleteNote,
     updatePartnershipHealth,
     updateStatus,
     updatePriority,

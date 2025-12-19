@@ -93,6 +93,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
     deleteFollowUpTask,
     addTask,
     updateTask,
+    deleteNote,
   } = usePartner(id);
 
   const [newNote, setNewNote] = useState("");
@@ -1150,19 +1151,36 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         key={note.id}
                         className="border-l-2 border-indigo-200 pl-4"
                       >
-                        <div className="flex items-center gap-2 text-sm flex-wrap">
-                          <Badge className={noteTypeColors[note.type]}>
-                            {note.type}
-                          </Badge>
-                          <span className="font-medium text-[var(--foreground)]">
-                            {note.author}
-                          </span>
-                          <span className="text-[var(--muted-foreground)]">
-                            •
-                          </span>
-                          <span className="text-[var(--muted-foreground)]">
-                            {formatDate(note.date)}
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-sm flex-wrap">
+                            <Badge className={noteTypeColors[note.type]}>
+                              {note.type}
+                            </Badge>
+                            <span className="font-medium text-[var(--foreground)]">
+                              {note.author}
+                            </span>
+                            <span className="text-[var(--muted-foreground)]">
+                              •
+                            </span>
+                            <span className="text-[var(--muted-foreground)]">
+                              {formatDate(note.date)}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  "Are you sure you want to delete this note?",
+                                )
+                              ) {
+                                deleteNote(note.id);
+                              }
+                            }}
+                            className="text-[var(--muted-foreground)] hover:text-red-500 p-1"
+                            title="Delete note"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
                         <p className="mt-1 text-[var(--muted-foreground)]">
                           {note.content}
