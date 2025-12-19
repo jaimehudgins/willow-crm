@@ -10,6 +10,10 @@ import {
   ThumbsUp,
   Eye,
   Loader2,
+  RefreshCw,
+  MessageCircle,
+  XCircle,
+  HelpCircle,
 } from "lucide-react";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { PipelineChart } from "@/components/dashboard/pipeline-chart";
@@ -80,6 +84,27 @@ export default function DashboardPage() {
     .filter((p) => p.partnershipHealth === "Monitoring (New)")
     .map((p) => ({ id: p.id, name: p.name }));
 
+  // Active partners by renewal status
+  const confirmedRenewals = activePartners
+    .filter((p) => p.renewalStatus === "Confirmed")
+    .map((p) => ({ id: p.id, name: p.name }));
+
+  const inDiscussionRenewals = activePartners
+    .filter((p) => p.renewalStatus === "In Discussion")
+    .map((p) => ({ id: p.id, name: p.name }));
+
+  const atRiskRenewals = activePartners
+    .filter((p) => p.renewalStatus === "At Risk")
+    .map((p) => ({ id: p.id, name: p.name }));
+
+  const notRenewingPartners = activePartners
+    .filter((p) => p.renewalStatus === "Not Renewing")
+    .map((p) => ({ id: p.id, name: p.name }));
+
+  const notYetDeterminedRenewals = activePartners
+    .filter((p) => !p.renewalStatus || p.renewalStatus === "Not Yet Determined")
+    .map((p) => ({ id: p.id, name: p.name }));
+
   return (
     <div className="space-y-8">
       <div>
@@ -131,6 +156,48 @@ export default function DashboardPage() {
             icon={School}
             description="New active partners"
             schools={monitoringPartners}
+          />
+        </div>
+
+        {/* 2026-27 Renewal Status Row */}
+        <h3 className="text-md font-medium text-[var(--muted-foreground)] mt-6 mb-3">
+          2026-27 Renewals
+        </h3>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <MetricCard
+            title="Confirmed"
+            value={confirmedRenewals.length}
+            icon={CheckCircle}
+            description="Renewing"
+            schools={confirmedRenewals}
+          />
+          <MetricCard
+            title="In Discussion"
+            value={inDiscussionRenewals.length}
+            icon={MessageCircle}
+            description="Talking about renewal"
+            schools={inDiscussionRenewals}
+          />
+          <MetricCard
+            title="At Risk"
+            value={atRiskRenewals.length}
+            icon={AlertTriangle}
+            description="May not renew"
+            schools={atRiskRenewals}
+          />
+          <MetricCard
+            title="Not Renewing"
+            value={notRenewingPartners.length}
+            icon={XCircle}
+            description="Won't continue"
+            schools={notRenewingPartners}
+          />
+          <MetricCard
+            title="Not Yet Determined"
+            value={notYetDeterminedRenewals.length}
+            icon={HelpCircle}
+            description="To be discussed"
+            schools={notYetDeterminedRenewals}
           />
         </div>
       </div>
