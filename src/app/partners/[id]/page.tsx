@@ -251,6 +251,25 @@ export default function PartnerDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  // Combine all tasks: standalone tasks + tasks from notes
+  const allTasks = [
+    ...(partner.tasks || []),
+    ...partner.notes.flatMap((note) =>
+      (note.followUpTasks || []).map((task) => ({
+        ...task,
+        noteId: note.id,
+        noteDate: note.date,
+      })),
+    ),
+  ].sort((a, b) => {
+    // Sort by due date (nulls last), then by completion status
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    if (!a.dueDate && !b.dueDate) return 0;
+    if (!a.dueDate) return 1;
+    if (!b.dueDate) return -1;
+    return a.dueDate.localeCompare(b.dueDate);
+  });
+
   const toggleTask = async (index: number) => {
     const currentTask = partner.onboardingChecklist[index];
     await updateOnboardingTask(index, !currentTask.completed);
@@ -1650,21 +1669,26 @@ export default function PartnerDetailPage({ params }: PageProps) {
                 </div>
               )}
 
-              {(!partner.tasks || partner.tasks.length === 0) &&
-              !showAddStandaloneTask ? (
+              {allTasks.length === 0 && !showAddStandaloneTask ? (
                 <p className="text-center text-[var(--muted-foreground)] py-4">
                   No tasks yet
                 </p>
               ) : (
                 <div className="space-y-2">
-                  {(partner.tasks || []).map((task) => (
+                  {allTasks.map((task) => (
                     <div
                       key={task.id}
                       className="flex items-start gap-2 p-3 bg-[var(--muted)] rounded-md"
                     >
                       <button
                         onClick={() =>
-                          updateTask(task.id, { completed: !task.completed })
+                          "noteId" in task
+                            ? updateFollowUpTask(task.id, {
+                                completed: !task.completed,
+                              })
+                            : updateTask(task.id, {
+                                completed: !task.completed,
+                              })
                         }
                         className="mt-0.5"
                       >
@@ -1684,12 +1708,25 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         >
                           {task.task}
                         </p>
-                        {task.dueDate && (
-                          <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1 mt-0.5">
-                            <Calendar className="h-3 w-3" />
-                            Due: {formatDate(task.dueDate)}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {task.dueDate && (
+                            <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1 mt-0.5">
+                              <Calendar className="h-3 w-3" />
+                              Due: {formatDate(task.dueDate)}
+                            </p>
+                          )}
+                          {"noteId" in task && (
+                            <p className="text-xs text-blue-600 flex items-center gap-1 mt-0.5">
+                              <MessageSquare className="h-3 w-3" />
+                              From note (
+                              {formatDate(
+                                (task as unknown as { noteDate: string })
+                                  .noteDate,
+                              )}
+                              )
+                            </p>
+                          )}
+                        </div>
                         {task.notes && (
                           <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
                             {task.notes}
