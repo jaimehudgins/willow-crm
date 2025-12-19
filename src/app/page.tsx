@@ -131,12 +131,12 @@ export default function DashboardPage() {
     .filter((p) => p.partnershipHealth === "Healthy")
     .map((p) => ({ id: p.id, name: p.name }));
 
-  const waveringPartners = activePartners
-    .filter((p) => p.partnershipHealth === "Wavering")
+  const watchPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Watch")
     .map((p) => ({ id: p.id, name: p.name }));
 
-  const stalledPartners = activePartners
-    .filter((p) => p.partnershipHealth === "Stalled")
+  const needsAttentionPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Needs Attention")
     .map((p) => ({ id: p.id, name: p.name }));
 
   const monitoringPartners = activePartners
@@ -198,18 +198,18 @@ export default function DashboardPage() {
             color="teal"
           />
           <MetricCard
-            title="Wavering"
-            value={waveringPartners.length}
+            title="Watch"
+            value={watchPartners.length}
             icon={Eye}
-            schools={waveringPartners}
+            schools={watchPartners}
             total={activePartners.length}
             color="yellow"
           />
           <MetricCard
-            title="Stalled"
-            value={stalledPartners.length}
+            title="Needs Attention"
+            value={needsAttentionPartners.length}
             icon={AlertTriangle}
-            schools={stalledPartners}
+            schools={needsAttentionPartners}
             total={activePartners.length}
             color="red"
           />

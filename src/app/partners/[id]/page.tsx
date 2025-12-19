@@ -1632,8 +1632,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
                 >
                   <option value="Thriving">Thriving</option>
                   <option value="Healthy">Healthy</option>
-                  <option value="Wavering">Wavering</option>
-                  <option value="Stalled">Stalled</option>
+                  <option value="Watch">Watch</option>
+                  <option value="Needs Attention">Needs Attention</option>
                   <option value="Monitoring (New)">Monitoring (New)</option>
                 </select>
               </CardContent>
