@@ -16,6 +16,7 @@ interface MetricCardProps {
   icon: LucideIcon;
   description?: string;
   schools?: SchoolItem[];
+  total?: number; // If provided, shows percentage with count in parentheses
 }
 
 export function MetricCard({
@@ -24,7 +25,12 @@ export function MetricCard({
   icon: Icon,
   description,
   schools,
+  total,
 }: MetricCardProps) {
+  const numericValue =
+    typeof value === "number" ? value : parseInt(value as string, 10) || 0;
+  const percentage =
+    total && total > 0 ? Math.round((numericValue / total) * 100) : null;
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
@@ -41,7 +47,16 @@ export function MetricCard({
                 {title}
               </p>
               <p className="mt-1 text-3xl font-bold text-[var(--foreground)]">
-                {value}
+                {percentage !== null ? (
+                  <>
+                    {percentage}%{" "}
+                    <span className="text-lg font-normal text-[var(--muted-foreground)]">
+                      ({numericValue})
+                    </span>
+                  </>
+                ) : (
+                  value
+                )}
               </p>
               {description && (
                 <p className="mt-1 text-xs text-[var(--muted-foreground)]">

@@ -128,6 +128,7 @@ export default function DashboardPage() {
             icon={ThumbsUp}
             description="Excellent health"
             schools={strongPartners}
+            total={activePartners.length}
           />
           <MetricCard
             title="Good"
@@ -135,6 +136,7 @@ export default function DashboardPage() {
             icon={Activity}
             description="Healthy partnerships"
             schools={goodPartners}
+            total={activePartners.length}
           />
           <MetricCard
             title="Fair"
@@ -142,6 +144,7 @@ export default function DashboardPage() {
             icon={Eye}
             description="Stable partnerships"
             schools={fairPartners}
+            total={activePartners.length}
           />
           <MetricCard
             title="At Risk"
@@ -149,6 +152,7 @@ export default function DashboardPage() {
             icon={AlertTriangle}
             description="Needs attention"
             schools={atRiskPartners}
+            total={activePartners.length}
           />
           <MetricCard
             title="Monitoring (New)"
@@ -156,6 +160,7 @@ export default function DashboardPage() {
             icon={School}
             description="New active partners"
             schools={monitoringPartners}
+            total={activePartners.length}
           />
         </div>
 
@@ -170,6 +175,7 @@ export default function DashboardPage() {
             icon={CheckCircle}
             description="Renewing"
             schools={confirmedRenewals}
+            total={activePartners.length}
           />
           <MetricCard
             title="In Discussion"
@@ -177,6 +183,7 @@ export default function DashboardPage() {
             icon={MessageCircle}
             description="Talking about renewal"
             schools={inDiscussionRenewals}
+            total={activePartners.length}
           />
           <MetricCard
             title="At Risk"
@@ -184,6 +191,7 @@ export default function DashboardPage() {
             icon={AlertTriangle}
             description="May not renew"
             schools={atRiskRenewals}
+            total={activePartners.length}
           />
           <MetricCard
             title="Not Renewing"
@@ -191,6 +199,7 @@ export default function DashboardPage() {
             icon={XCircle}
             description="Won't continue"
             schools={notRenewingPartners}
+            total={activePartners.length}
           />
           <MetricCard
             title="Not Yet Determined"
@@ -198,6 +207,7 @@ export default function DashboardPage() {
             icon={HelpCircle}
             description="To be discussed"
             schools={notYetDeterminedRenewals}
+            total={activePartners.length}
           />
         </div>
       </div>
