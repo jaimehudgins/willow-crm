@@ -202,7 +202,7 @@ export default function PartnersPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-slate-700" />
       </div>
     );
   }
@@ -398,7 +398,7 @@ export default function PartnersPage() {
                   >
                     <td className="py-4 pr-4">
                       <Link href={`/partners/${partner.id}`} className="block">
-                        <span className="font-medium text-[var(--foreground)] hover:text-indigo-600">
+                        <span className="font-medium text-[var(--foreground)] hover:text-slate-700">
                           {partner.name}
                         </span>
                         <div className="mt-1 flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
@@ -479,7 +479,7 @@ export default function PartnersPage() {
                         </p>
                         <a
                           href={`mailto:${partner.leadContact.email}`}
-                          className="flex items-center gap-1 text-xs text-indigo-600 hover:underline mt-0.5"
+                          className="flex items-center gap-1 text-xs text-slate-700 hover:underline mt-0.5"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Mail className="h-3 w-3" />
@@ -500,7 +500,7 @@ export default function PartnersPage() {
                               href={action.link}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-indigo-600 hover:underline"
+                              className="flex items-center gap-1 text-slate-700 hover:underline"
                               onClick={(e) => e.stopPropagation()}
                               title={action.summary}
                             >

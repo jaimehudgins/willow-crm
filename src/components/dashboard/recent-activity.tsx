@@ -97,7 +97,7 @@ export function RecentActivity({ partners }: RecentActivityProps) {
                         activity.note.followUpTasks.length > 0 && (
                           <>
                             <span>•</span>
-                            <span className="text-indigo-600">
+                            <span className="text-slate-700">
                               {
                                 activity.note.followUpTasks.filter(
                                   (t) => !t.completed,

@@ -1,14 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  School,
-  Leaf,
-  Calendar,
-  ListTodo,
-} from "lucide-react";
+import { LayoutDashboard, School, Calendar, ListTodo } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,9 +24,13 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-                <Leaf className="h-5 w-5 text-white" />
-              </div>
+              <Image
+                src="/willow-logo.png"
+                alt="Willow"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+              />
               <span className="text-xl font-bold text-[var(--foreground)]">
                 Willow Partner Success
               </span>
@@ -51,7 +50,7 @@ export function Navbar() {
                   className={cn(
                     "flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-indigo-600 text-white"
+                      ? "bg-slate-700 text-white"
                       : "text-[var(--foreground)] hover:bg-[var(--muted)]",
                   )}
                 >
@@ -66,7 +65,7 @@ export function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={() => signOut()}
-                  className="flex items-center gap-2 text-green-600"
+                  className="flex items-center gap-2 text-emerald-600"
                 >
                   <Calendar className="h-4 w-4" />
                   Calendar Connected

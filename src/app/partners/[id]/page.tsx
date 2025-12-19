@@ -208,7 +208,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-slate-700" />
       </div>
     );
   }
@@ -716,8 +716,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
-                    <Clock className="h-5 w-5 text-indigo-600" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-50">
+                    <Clock className="h-5 w-5 text-slate-700" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[var(--foreground)]">
@@ -770,7 +770,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                       href={partner.contractLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-indigo-600 hover:underline"
+                      className="text-sm text-slate-700 hover:underline"
                     >
                       View Contract
                     </a>
@@ -785,7 +785,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => setChecklistExpanded(!checklistExpanded)}
-                  className="flex items-center gap-2 hover:text-indigo-600 transition-colors"
+                  className="flex items-center gap-2 hover:text-slate-700 transition-colors"
                 >
                   {checklistExpanded ? (
                     <ChevronDown className="h-5 w-5" />
@@ -801,7 +801,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
               <div className="mt-2">
                 <div className="h-2 w-full rounded-full bg-[var(--muted)]">
                   <div
-                    className="h-2 rounded-full bg-indigo-600 transition-all duration-300"
+                    className="h-2 rounded-full bg-slate-700 transition-all duration-300"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -837,7 +837,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         <div className="flex items-center gap-2">
                           {/* Custom task being edited */}
                           {task.isCustom && editingTaskIndex === index ? (
-                            <div className="flex flex-1 items-center gap-2 rounded-lg border border-indigo-300 p-4 bg-indigo-50">
+                            <div className="flex flex-1 items-center gap-2 rounded-lg border border-slate-400 p-4 bg-slate-50">
                               <Circle className="h-5 w-5 text-[var(--muted-foreground)] shrink-0" />
                               <input
                                 type="text"
@@ -971,7 +971,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                               }
                               className={`p-2 rounded-lg border border-[var(--border)] transition-colors hover:bg-[var(--muted)] ${
                                 taskNotes[index]
-                                  ? "text-indigo-600"
+                                  ? "text-slate-700"
                                   : "text-[var(--muted-foreground)]"
                               }`}
                               title="Add note"
@@ -1009,8 +1009,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
                     {/* Add Task Button/Form */}
                     {showAddTask ? (
-                      <div className="flex items-center gap-2 rounded-lg border border-dashed border-indigo-300 p-4 bg-indigo-50">
-                        <Plus className="h-5 w-5 text-indigo-600 shrink-0" />
+                      <div className="flex items-center gap-2 rounded-lg border border-dashed border-slate-400 p-4 bg-slate-50">
+                        <Plus className="h-5 w-5 text-slate-700 shrink-0" />
                         <input
                           type="text"
                           value={newTaskText}
@@ -1055,7 +1055,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                     ) : (
                       <button
                         onClick={() => setShowAddTask(true)}
-                        className="flex items-center gap-2 w-full rounded-lg border border-dashed border-[var(--border)] p-4 text-left text-[var(--muted-foreground)] hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+                        className="flex items-center gap-2 w-full rounded-lg border border-dashed border-[var(--border)] p-4 text-left text-[var(--muted-foreground)] hover:border-slate-400 hover:text-slate-700 transition-colors"
                       >
                         <Plus className="h-5 w-5" />
                         <span>Add custom task</span>
@@ -1182,7 +1182,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                               href={attachment.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-indigo-600 hover:underline"
+                              className="text-slate-700 hover:underline"
                             >
                               {attachment.name}
                             </a>
@@ -1359,7 +1359,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                           ) : (
                             <button
                               onClick={() => setAddingTaskToNote(note.id)}
-                              className="text-xs text-indigo-600 hover:underline flex items-center gap-1"
+                              className="text-xs text-slate-700 hover:underline flex items-center gap-1"
                             >
                               <Plus className="h-3 w-3" />
                               Add follow-up task
@@ -1643,11 +1643,11 @@ export default function PartnerDetailPage({ params }: PageProps) {
                 .map((contact) => (
                   <div
                     key={contact.id}
-                    className="p-3 bg-indigo-50 rounded-lg border border-indigo-100"
+                    className="p-3 bg-slate-50 rounded-lg border border-slate-200"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium text-indigo-600 flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-indigo-600" />
+                      <span className="text-xs font-medium text-slate-700 flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-slate-700" />
                         Primary Contact
                       </span>
                     </div>
@@ -1659,7 +1659,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                             contact.name,
                           )
                         }
-                        className="font-medium text-[var(--foreground)] cursor-pointer hover:text-indigo-600 flex items-center gap-1"
+                        className="font-medium text-[var(--foreground)] cursor-pointer hover:text-slate-700 flex items-center gap-1"
                       >
                         {editingField === `contact-${contact.id}-name` ? (
                           <span className="flex items-center gap-1 flex-1">
@@ -1715,7 +1715,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                             contact.role || "",
                           )
                         }
-                        className="text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-indigo-600 flex items-center gap-1"
+                        className="text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-slate-700 flex items-center gap-1"
                       >
                         {editingField === `contact-${contact.id}-role` ? (
                           <span className="flex items-center gap-1">
@@ -1773,7 +1773,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                             contact.email,
                           )
                         }
-                        className="cursor-pointer hover:text-indigo-600"
+                        className="cursor-pointer hover:text-slate-700"
                       >
                         {editingField === `contact-${contact.id}-email` ? (
                           <span className="flex items-center gap-1">
@@ -1934,7 +1934,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                       .map((contact) => (
                         <div key={contact.id}>
                           {editingContactId === contact.id ? (
-                            <div className="p-3 bg-indigo-50 rounded-md border border-indigo-200 space-y-2">
+                            <div className="p-3 bg-slate-50 rounded-md border border-indigo-200 space-y-2">
                               <Input
                                 value={editingContact.name}
                                 onChange={(e) =>
@@ -2029,7 +2029,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                                       phone: contact.phone || "",
                                     });
                                   }}
-                                  className="p-1 text-[var(--muted-foreground)] hover:text-indigo-600"
+                                  className="p-1 text-[var(--muted-foreground)] hover:text-slate-700"
                                   title="Edit contact"
                                 >
                                   <Pencil className="h-4 w-4" />
@@ -2152,7 +2152,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
               ) : (
                 <button
                   onClick={() => setShowAddContact(true)}
-                  className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 mt-2"
+                  className="flex items-center gap-1 text-sm text-slate-700 hover:text-slate-800 mt-2"
                 >
                   <Plus className="h-4 w-4" />
                   Add contact
@@ -2307,8 +2307,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
-                  <User className="h-6 w-6 text-indigo-600" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                  <User className="h-6 w-6 text-slate-700" />
                 </div>
                 <div className="flex-1">
                   <select
@@ -2329,7 +2329,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         );
                       }
                     }}
-                    className="font-medium text-[var(--foreground)] bg-transparent border-none p-0 cursor-pointer hover:text-indigo-600 focus:outline-none"
+                    className="font-medium text-[var(--foreground)] bg-transparent border-none p-0 cursor-pointer hover:text-slate-700 focus:outline-none"
                   >
                     <option value="">Select lead...</option>
                     <option value="James Cryan">James Cryan</option>
@@ -2363,7 +2363,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                           href={attachment.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-indigo-600 hover:underline truncate"
+                          className="text-sm text-slate-700 hover:underline truncate"
                         >
                           {attachment.name}
                         </a>

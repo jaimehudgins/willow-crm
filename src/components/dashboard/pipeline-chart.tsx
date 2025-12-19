@@ -8,7 +8,7 @@ const statusBarColors: Record<PartnerStatus, string> = {
   Contacted: "bg-yellow-500",
   "Proposal Sent": "bg-purple-500",
   "Contract Preparation": "bg-orange-500",
-  Onboarding: "bg-indigo-500",
+  Onboarding: "bg-slate-500",
   Active: "bg-green-500",
 };
 

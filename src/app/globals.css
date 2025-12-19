@@ -1,37 +1,71 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --primary: #4f46e5;
-  --primary-foreground: #ffffff;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --border: #e5e5e5;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --accent: #f0f0ff;
-  --accent-foreground: #4f46e5;
+    --background: #ffffff;
+    --foreground: #171717;
+
+    /* Willow Brand Colors */
+    --willow-slate-50: #f8fbfa;
+    --willow-slate-100: #e8efee;
+    --willow-slate-200: #b1c0be;
+    --willow-slate-300: #8fa29f;
+    --willow-slate-400: #4c6a66;
+    --willow-slate-500: #2b4c46;
+    --willow-slate-600: #1d4b4b;
+    --willow-slate-700: #062f29;
+    --willow-slate-800: #052622;
+    --willow-slate-900: #041d1a;
+
+    --willow-mint-50: #d8fbdb;
+    --willow-mint-100: #acf7b2;
+    --willow-mint-200: #9aeba1;
+    --willow-mint-300: #8fd695;
+    --willow-mint-400: #6ea272;
+    --willow-mint-500: #557d58;
+    --willow-mint-600: #415e43;
+    --willow-mint-700: #2e4230;
+    --willow-mint-800: #1b251c;
+    --willow-mint-900: #0f120f;
+
+    /* Primary using Slate */
+    --primary: #1d4b4b;
+    --primary-foreground: #ffffff;
+
+    /* Accent using Mint */
+    --accent: #d8fbdb;
+    --accent-foreground: #1d4b4b;
+
+    --muted: #f8fbfa;
+    --muted-foreground: #4c6a66;
+    --border: #e8efee;
+    --card: #ffffff;
+    --card-foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --primary: #6366f1;
-    --primary-foreground: #ffffff;
-    --muted: #262626;
-    --muted-foreground: #a3a3a3;
-    --border: #262626;
-    --card: #171717;
-    --card-foreground: #ededed;
-    --accent: #1e1e3f;
-    --accent-foreground: #818cf8;
-  }
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+        --primary: #4c6a66;
+        --primary-foreground: #ffffff;
+        --muted: #262626;
+        --muted-foreground: #a3a3a3;
+        --border: #262626;
+        --card: #171717;
+        --card-foreground: #ededed;
+        --accent: #1b251c;
+        --accent-foreground: #acf7b2;
+    }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        sans-serif;
 }

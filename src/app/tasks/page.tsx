@@ -57,7 +57,7 @@ export default function TasksPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-slate-700" />
       </div>
     );
   }
@@ -184,7 +184,7 @@ export default function TasksPage() {
       case "followup":
         return "bg-purple-100 text-purple-800";
       case "onboarding":
-        return "bg-indigo-100 text-indigo-800";
+        return "bg-teal-100 text-teal-800";
     }
   };
 
@@ -401,7 +401,7 @@ export default function TasksPage() {
                 >
                   <div className="mt-0.5 shrink-0">
                     {updatingTaskId === item.id ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-indigo-600" />
+                      <Loader2 className="h-5 w-5 animate-spin text-slate-700" />
                     ) : (
                       getStatusIcon(item.status)
                     )}

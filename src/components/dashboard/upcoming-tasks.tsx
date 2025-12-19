@@ -106,7 +106,7 @@ export function UpcomingTasks({ partners, limit = 7 }: UpcomingTasksProps) {
       case "followup":
         return "bg-purple-100 text-purple-800";
       case "onboarding":
-        return "bg-indigo-100 text-indigo-800";
+        return "bg-teal-100 text-teal-800";
     }
   };
 

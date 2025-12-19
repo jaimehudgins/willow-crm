@@ -41,8 +41,8 @@ export function MetricCard({
     >
       <Card className="cursor-default h-full">
         <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-50 mb-3">
-            <Icon className="h-6 w-6 text-indigo-600" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-50 mb-3">
+            <Icon className="h-6 w-6 text-slate-700" />
           </div>
           <p className="text-sm font-medium text-[var(--muted-foreground)]">
             {title}
@@ -77,7 +77,7 @@ export function MetricCard({
               <li key={school.id}>
                 <Link
                   href={`/partners/${school.id}`}
-                  className="text-sm text-[var(--foreground)] hover:text-indigo-600 hover:underline block"
+                  className="text-sm text-[var(--foreground)] hover:text-slate-700 hover:underline block"
                 >
                   {school.name}
                 </Link>
