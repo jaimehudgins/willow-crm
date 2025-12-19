@@ -45,9 +45,11 @@ import {
   leadSourceColors,
   onboardingStepColors,
   partnershipHealthColors,
+  renewalStatusColors,
   noteTypeColors,
   statusOrder,
   type PartnershipHealth,
+  type RenewalStatus,
   type PartnerStatus,
   type Priority,
   type NoteType,
@@ -1500,6 +1502,29 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   <option value="Fair">Fair</option>
                   <option value="At Risk">At Risk</option>
                   <option value="Monitoring (New)">Monitoring (New)</option>
+                </select>
+              </CardContent>
+            </Card>
+          )}
+
+          {partner.status === "Active" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>2026-27 Renewal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <select
+                  value={partner.renewalStatus || "Not Yet Determined"}
+                  onChange={(e) =>
+                    updatePartnerField("renewalStatus", e.target.value)
+                  }
+                  className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${renewalStatusColors[(partner.renewalStatus as RenewalStatus) || "Not Yet Determined"]}`}
+                >
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="In Discussion">In Discussion</option>
+                  <option value="At Risk">At Risk</option>
+                  <option value="Not Renewing">Not Renewing</option>
+                  <option value="Not Yet Determined">Not Yet Determined</option>
                 </select>
               </CardContent>
             </Card>

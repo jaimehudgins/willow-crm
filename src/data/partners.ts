@@ -17,6 +17,13 @@ export type PartnershipHealth =
   | "At Risk"
   | "Monitoring (New)";
 
+export type RenewalStatus =
+  | "Confirmed"
+  | "In Discussion"
+  | "At Risk"
+  | "Not Renewing"
+  | "Not Yet Determined";
+
 export type NoteType =
   | "Call"
   | "Email"
@@ -102,6 +109,7 @@ export interface Partner {
   leadSource?: LeadSource;
   onboardingStep?: OnboardingStep;
   partnershipHealth?: PartnershipHealth;
+  renewalStatus?: RenewalStatus;
   priority: Priority;
   schoolType: SchoolType;
   studentCount: number;
@@ -165,6 +173,14 @@ export const partnershipHealthColors: Record<PartnershipHealth, string> = {
   Fair: "bg-yellow-100 text-yellow-800",
   "At Risk": "bg-red-100 text-red-800",
   "Monitoring (New)": "bg-blue-100 text-blue-800",
+};
+
+export const renewalStatusColors: Record<RenewalStatus, string> = {
+  Confirmed: "bg-green-100 text-green-800",
+  "In Discussion": "bg-blue-100 text-blue-800",
+  "At Risk": "bg-orange-100 text-orange-800",
+  "Not Renewing": "bg-red-100 text-red-800",
+  "Not Yet Determined": "bg-gray-100 text-gray-800",
 };
 
 export const statusOrder: PartnerStatus[] = [

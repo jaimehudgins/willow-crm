@@ -28,8 +28,10 @@ import {
   leadSourceColors,
   onboardingStepColors,
   partnershipHealthColors,
+  renewalStatusColors,
   statusOrder,
   type PartnerStatus,
+  type RenewalStatus,
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
 import { usePartners } from "@/hooks/usePartners";
@@ -441,13 +443,23 @@ export default function PartnersPage() {
                               </Badge>
                             )}
                         </div>
-                        {partner.status === "Active" &&
-                        partner.partnershipHealth ? (
-                          <Badge
-                            className={`${partnershipHealthColors[partner.partnershipHealth]} w-fit`}
-                          >
-                            {partner.partnershipHealth}
-                          </Badge>
+                        {partner.status === "Active" ? (
+                          <div className="flex items-center gap-1 flex-wrap">
+                            {partner.partnershipHealth && (
+                              <Badge
+                                className={`${partnershipHealthColors[partner.partnershipHealth]} w-fit`}
+                              >
+                                {partner.partnershipHealth}
+                              </Badge>
+                            )}
+                            {partner.renewalStatus && (
+                              <Badge
+                                className={`${renewalStatusColors[partner.renewalStatus as RenewalStatus]} w-fit`}
+                              >
+                                {partner.renewalStatus}
+                              </Badge>
+                            )}
+                          </div>
                         ) : (
                           <Badge
                             className={`${priorityColors[partner.priority]} w-fit`}

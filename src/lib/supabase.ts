@@ -13,6 +13,7 @@ export interface DbPartner {
   lead_source?: string;
   onboarding_step?: string;
   relationship_health?: string;
+  renewal_status?: string;
   priority: string;
   school_type: string;
   student_count: number;

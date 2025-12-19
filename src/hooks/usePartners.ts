@@ -16,6 +16,7 @@ import type {
   LeadSource,
   OnboardingStep,
   PartnershipHealth,
+  RenewalStatus,
   Priority,
   SchoolType,
   Note,
@@ -48,6 +49,7 @@ function transformPartner(
     partnershipHealth: dbPartner.relationship_health as
       | PartnershipHealth
       | undefined,
+    renewalStatus: dbPartner.renewal_status as RenewalStatus | undefined,
     priority: (dbPartner.priority as Priority) || "Medium",
     schoolType: (dbPartner.school_type as SchoolType) || "Public",
     studentCount: dbPartner.student_count ?? 0,
@@ -707,6 +709,7 @@ export function usePartner(id: string) {
       willowStaffLead: "willow_staff_lead",
       painPoints: "pain_points",
       partnershipHealth: "relationship_health",
+      renewalStatus: "renewal_status",
       lastContactDate: "last_contact_date",
       nextFollowUp: "next_follow_up",
       proposalDeadline: "proposal_deadline",
