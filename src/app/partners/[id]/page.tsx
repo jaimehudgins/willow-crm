@@ -36,6 +36,7 @@ import {
   Trash2,
   Globe,
   Video,
+  ListTodo,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -216,6 +217,10 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [editingNoteType, setEditingNoteType] =
     useState<NoteType>("Internal Note");
   const [editingNoteDate, setEditingNoteDate] = useState("");
+  // Inline task for new note
+  const [newNoteTask, setNewNoteTask] = useState("");
+  const [newNoteTaskDueDate, setNewNoteTaskDueDate] = useState("");
+  const [showNewNoteTask, setShowNewNoteTask] = useState(false);
 
   if (loading) {
     return (
@@ -256,10 +261,35 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
     setIsAddingNote(true);
     try {
-      await addNote(newNote.trim(), "You", noteType, noteDate);
+      const noteData = await addNote(newNote.trim(), "You", noteType, noteDate);
+
+      // If there's an inline task, create it linked to this note
+      if (newNoteTask.trim() && noteData?.id) {
+        await addFollowUpTask(
+          noteData.id,
+          newNoteTask.trim(),
+          newNoteTaskDueDate || null,
+          "",
+        );
+      }
+
+      // If there are attachments, save them to the partner's files
+      for (const attachment of noteAttachments) {
+        if (attachment.type === "link") {
+          await addAttachment(attachment.name, attachment.url, "link");
+        }
+        // Note: file uploads would need cloud storage - for now just links work
+      }
+
+      // Reset form
       setNewNote("");
       setNoteType("Internal Note");
       setNoteDate(getLocalDateString());
+      setNewNoteTask("");
+      setNewNoteTaskDueDate("");
+      setShowNewNoteTask(false);
+      setNoteAttachments([]);
+      setShowLinkForm(false);
     } catch (err) {
       console.error("Failed to add note:", err);
       alert(
@@ -1143,21 +1173,24 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   />
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <label className="cursor-pointer">
-                        <input
-                          type="file"
-                          multiple
-                          onChange={handleFileUpload}
-                          className="hidden"
-                        />
-                        <div className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-                          <Paperclip className="h-4 w-4" />
-                          <span>Attach file</span>
-                        </div>
-                      </label>
+                      <button
+                        onClick={() => setShowNewNoteTask(!showNewNoteTask)}
+                        className={`flex items-center gap-1 text-sm transition-colors ${
+                          showNewNoteTask || newNoteTask
+                            ? "text-slate-700"
+                            : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                        }`}
+                      >
+                        <ListTodo className="h-4 w-4" />
+                        <span>Add task</span>
+                      </button>
                       <button
                         onClick={() => setShowLinkForm(!showLinkForm)}
-                        className="flex items-center gap-1 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                        className={`flex items-center gap-1 text-sm transition-colors ${
+                          showLinkForm || noteAttachments.length > 0
+                            ? "text-slate-700"
+                            : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                        }`}
                       >
                         <LinkIcon className="h-4 w-4" />
                         <span>Add link</span>
@@ -1176,6 +1209,61 @@ export default function PartnerDetailPage({ params }: PageProps) {
                       Add Note
                     </Button>
                   </div>
+
+                  {showNewNoteTask && (
+                    <div className="flex items-center gap-2 p-3 bg-[var(--muted)] rounded-lg">
+                      <Input
+                        value={newNoteTask}
+                        onChange={(e) => setNewNoteTask(e.target.value)}
+                        placeholder="Task description..."
+                        className="flex-1"
+                      />
+                      <Input
+                        type="date"
+                        value={newNoteTaskDueDate}
+                        onChange={(e) => setNewNoteTaskDueDate(e.target.value)}
+                        className="w-40"
+                      />
+                      <Button
+                        onClick={() => {
+                          setShowNewNoteTask(false);
+                        }}
+                        variant="ghost"
+                        size="sm"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {newNoteTask && !showNewNoteTask && (
+                    <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg text-sm">
+                      <ListTodo className="h-4 w-4 text-blue-600" />
+                      <span className="flex-1 text-blue-800">
+                        {newNoteTask}
+                      </span>
+                      {newNoteTaskDueDate && (
+                        <span className="text-blue-600 text-xs">
+                          Due: {newNoteTaskDueDate}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => setShowNewNoteTask(true)}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setNewNoteTask("");
+                          setNewNoteTaskDueDate("");
+                        }}
+                        className="text-blue-600 hover:text-red-500"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  )}
 
                   {showLinkForm && (
                     <div className="flex items-center gap-2 p-3 bg-[var(--muted)] rounded-lg">
