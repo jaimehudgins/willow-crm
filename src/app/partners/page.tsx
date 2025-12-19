@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -15,6 +16,7 @@ import {
   Plus,
   X,
   Building,
+  Calendar,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,8 +35,15 @@ import { formatDate } from "@/lib/utils";
 import { usePartners } from "@/hooks/usePartners";
 import { supabase } from "@/lib/supabase";
 
+interface NextMeeting {
+  summary: string;
+  start: string;
+  htmlLink: string;
+}
+
 export default function PartnersPage() {
   const router = useRouter();
+  const { data: session, status: sessionStatus } = useSession();
   const { partners, loading, error, refetch } = usePartners();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<PartnerStatus | "all">(
@@ -48,6 +57,57 @@ export default function PartnersPage() {
     district: "",
     city_state: "",
   });
+  const [nextMeetings, setNextMeetings] = useState<Record<string, NextMeeting>>(
+    {},
+  );
+  const [loadingMeetings, setLoadingMeetings] = useState(false);
+
+  // Fetch calendar meetings when authenticated and partners are loaded
+  useEffect(() => {
+    async function fetchMeetings() {
+      if (sessionStatus !== "authenticated" || !session?.accessToken) return;
+      if (partners.length === 0) return;
+
+      // Build map of partner IDs to contact emails
+      const partnerEmails: Record<string, string[]> = {};
+      for (const partner of partners) {
+        const emails: string[] = [];
+        if (partner.leadContact?.email) {
+          emails.push(partner.leadContact.email);
+        }
+        if (partner.contacts) {
+          for (const contact of partner.contacts) {
+            if (contact.email) emails.push(contact.email);
+          }
+        }
+        if (emails.length > 0) {
+          partnerEmails[partner.id] = emails;
+        }
+      }
+
+      if (Object.keys(partnerEmails).length === 0) return;
+
+      setLoadingMeetings(true);
+      try {
+        const response = await fetch("/api/calendar/next-meetings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ partnerEmails }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setNextMeetings(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch calendar meetings:", err);
+      } finally {
+        setLoadingMeetings(false);
+      }
+    }
+
+    fetchMeetings();
+  }, [sessionStatus, session?.accessToken, partners]);
 
   const filteredPartners = useMemo(() => {
     return partners.filter((partner) => {
@@ -72,13 +132,29 @@ export default function PartnersPage() {
   }, [partners, searchQuery, statusFilter]);
 
   const getNextAction = (partner: (typeof partners)[0]) => {
+    // Check for calendar meeting first
+    const meeting = nextMeetings[partner.id];
+    if (meeting) {
+      return {
+        type: "meeting" as const,
+        date: formatDate(meeting.start),
+        summary: meeting.summary,
+        link: meeting.htmlLink,
+      };
+    }
     if (partner.nextFollowUp) {
-      return formatDate(partner.nextFollowUp);
+      return {
+        type: "followup" as const,
+        date: formatDate(partner.nextFollowUp),
+      };
     }
     if (partner.proposalDeadline) {
-      return formatDate(partner.proposalDeadline);
+      return {
+        type: "deadline" as const,
+        date: formatDate(partner.proposalDeadline),
+      };
     }
-    return "—";
+    return null;
   };
 
   const handleCreatePartner = async () => {
@@ -403,7 +479,26 @@ export default function PartnersPage() {
                       {partner.willowStaffLead}
                     </td>
                     <td className="hidden py-4 pr-4 text-[var(--muted-foreground)] sm:table-cell">
-                      {getNextAction(partner)}
+                      {(() => {
+                        const action = getNextAction(partner);
+                        if (!action) return "—";
+                        if (action.type === "meeting") {
+                          return (
+                            <a
+                              href={action.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-indigo-600 hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                              title={action.summary}
+                            >
+                              <Calendar className="h-3 w-3" />
+                              {action.date}
+                            </a>
+                          );
+                        }
+                        return action.date;
+                      })()}
                     </td>
                     <td className="py-4 text-right">
                       <Link href={`/partners/${partner.id}`}>

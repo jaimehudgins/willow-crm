@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, School, Leaf } from "lucide-react";
+import { LayoutDashboard, School, Leaf, Calendar } from "lucide-react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -12,6 +14,7 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   return (
     <nav className="border-b border-[var(--border)] bg-[var(--card)]">
@@ -50,6 +53,29 @@ export function Navbar() {
                 </Link>
               );
             })}
+            <div className="ml-4 border-l border-[var(--border)] pl-4">
+              {status === "authenticated" ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => signOut()}
+                  className="flex items-center gap-2 text-green-600"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Calendar Connected
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => signIn("google")}
+                  className="flex items-center gap-2"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Connect Calendar
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
