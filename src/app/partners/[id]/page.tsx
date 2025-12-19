@@ -184,6 +184,10 @@ export default function PartnerDetailPage({ params }: PageProps) {
       setNoteDate(new Date().toISOString().split("T")[0]);
     } catch (err) {
       console.error("Failed to add note:", err);
+      alert(
+        "Failed to add note: " +
+          (err instanceof Error ? err.message : String(err)),
+      );
     } finally {
       setIsAddingNote(false);
     }
