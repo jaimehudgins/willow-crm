@@ -126,7 +126,6 @@ export default function DashboardPage() {
             title="Thriving"
             value={thrivingPartners.length}
             icon={ThumbsUp}
-            description="Excellent health"
             schools={thrivingPartners}
             total={activePartners.length}
           />
@@ -134,7 +133,6 @@ export default function DashboardPage() {
             title="Healthy"
             value={healthyPartners.length}
             icon={Activity}
-            description="Solid partnerships"
             schools={healthyPartners}
             total={activePartners.length}
           />
@@ -142,7 +140,6 @@ export default function DashboardPage() {
             title="Wavering"
             value={waveringPartners.length}
             icon={Eye}
-            description="Needs attention"
             schools={waveringPartners}
             total={activePartners.length}
           />
@@ -150,7 +147,6 @@ export default function DashboardPage() {
             title="Stalled"
             value={stalledPartners.length}
             icon={AlertTriangle}
-            description="Requires action"
             schools={stalledPartners}
             total={activePartners.length}
           />
@@ -158,7 +154,6 @@ export default function DashboardPage() {
             title="Monitoring (New)"
             value={monitoringPartners.length}
             icon={School}
-            description="New active partners"
             schools={monitoringPartners}
             total={activePartners.length}
           />
