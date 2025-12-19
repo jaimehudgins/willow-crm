@@ -25,6 +25,7 @@ import {
   priorityColors,
   leadSourceColors,
   onboardingStepColors,
+  partnershipHealthColors,
   statusOrder,
   type PartnerStatus,
 } from "@/data/partners";
@@ -364,11 +365,20 @@ export default function PartnersPage() {
                               </Badge>
                             )}
                         </div>
-                        <Badge
-                          className={`${priorityColors[partner.priority]} w-fit`}
-                        >
-                          {partner.priority}
-                        </Badge>
+                        {partner.status === "Active" &&
+                        partner.partnershipHealth ? (
+                          <Badge
+                            className={`${partnershipHealthColors[partner.partnershipHealth]} w-fit`}
+                          >
+                            {partner.partnershipHealth}
+                          </Badge>
+                        ) : (
+                          <Badge
+                            className={`${priorityColors[partner.priority]} w-fit`}
+                          >
+                            {partner.priority}
+                          </Badge>
+                        )}
                       </div>
                     </td>
                     <td className="hidden py-4 pr-4 lg:table-cell">
