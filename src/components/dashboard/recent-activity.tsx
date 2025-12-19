@@ -61,7 +61,7 @@ export function RecentActivity({ partners }: RecentActivityProps) {
         <CardTitle>Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-96 overflow-y-auto">
           {recentActivities.length === 0 ? (
             <p className="text-center text-[var(--muted-foreground)] py-4">
               No recent activity

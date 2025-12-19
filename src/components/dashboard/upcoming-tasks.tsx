@@ -149,7 +149,7 @@ export function UpcomingTasks({ partners, limit = 7 }: UpcomingTasksProps) {
             No upcoming tasks
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 max-h-96 overflow-y-auto">
             {pendingItems.map((item) => (
               <Link
                 key={item.id}
