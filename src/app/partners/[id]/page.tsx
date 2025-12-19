@@ -2054,41 +2054,93 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         <p className="font-medium text-[var(--foreground)]">
                           {school.name}
                         </p>
-                        <div className="mt-2 grid grid-cols-3 gap-2">
-                          <div>
-                            <label className="text-xs text-[var(--muted-foreground)] block mb-1">
-                              Students
-                            </label>
-                            <input
-                              type="number"
-                              value={school.studentCount}
-                              onChange={(e) =>
-                                updateSchool(school.id, {
-                                  studentCount: parseInt(e.target.value) || 0,
-                                })
-                              }
-                              className="w-full px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs text-[var(--muted-foreground)] block mb-1">
-                              Staff
-                            </label>
-                            <input
-                              type="number"
-                              value={school.staffCount}
-                              onChange={(e) =>
-                                updateSchool(school.id, {
-                                  staffCount: parseInt(e.target.value) || 0,
-                                })
-                              }
-                              className="w-full px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs text-[var(--muted-foreground)] block mb-1">
-                              Type
-                            </label>
+                        <div className="mt-1 flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
+                          <span className="flex items-center gap-1 group">
+                            <GraduationCap className="h-3 w-3" />
+                            {editingField === `school-${school.id}-students` ? (
+                              <span className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  onKeyDown={async (e) => {
+                                    if (e.key === "Enter") {
+                                      await updateSchool(school.id, {
+                                        studentCount: parseInt(editValue) || 0,
+                                      });
+                                      cancelEditing();
+                                    }
+                                    if (e.key === "Escape") cancelEditing();
+                                  }}
+                                  onBlur={async () => {
+                                    await updateSchool(school.id, {
+                                      studentCount: parseInt(editValue) || 0,
+                                    });
+                                    cancelEditing();
+                                  }}
+                                  className="w-16 px-1 py-0.5 text-xs border border-[var(--border)] rounded bg-[var(--background)]"
+                                  autoFocus
+                                />
+                              </span>
+                            ) : (
+                              <span
+                                onClick={() =>
+                                  startEditing(
+                                    `school-${school.id}-students`,
+                                    school.studentCount.toString(),
+                                  )
+                                }
+                                className="cursor-pointer hover:text-[var(--foreground)] flex items-center gap-1"
+                              >
+                                {school.studentCount.toLocaleString()} students
+                                <Pencil className="h-2.5 w-2.5 opacity-0 group-hover:opacity-50" />
+                              </span>
+                            )}
+                          </span>
+                          <span className="flex items-center gap-1 group">
+                            <Users className="h-3 w-3" />
+                            {editingField === `school-${school.id}-staff` ? (
+                              <span className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  onKeyDown={async (e) => {
+                                    if (e.key === "Enter") {
+                                      await updateSchool(school.id, {
+                                        staffCount: parseInt(editValue) || 0,
+                                      });
+                                      cancelEditing();
+                                    }
+                                    if (e.key === "Escape") cancelEditing();
+                                  }}
+                                  onBlur={async () => {
+                                    await updateSchool(school.id, {
+                                      staffCount: parseInt(editValue) || 0,
+                                    });
+                                    cancelEditing();
+                                  }}
+                                  className="w-12 px-1 py-0.5 text-xs border border-[var(--border)] rounded bg-[var(--background)]"
+                                  autoFocus
+                                />
+                              </span>
+                            ) : (
+                              <span
+                                onClick={() =>
+                                  startEditing(
+                                    `school-${school.id}-staff`,
+                                    school.staffCount.toString(),
+                                  )
+                                }
+                                className="cursor-pointer hover:text-[var(--foreground)] flex items-center gap-1"
+                              >
+                                {school.staffCount} staff
+                                <Pencil className="h-2.5 w-2.5 opacity-0 group-hover:opacity-50" />
+                              </span>
+                            )}
+                          </span>
+                          <span className="flex items-center gap-1 group">
+                            <Building className="h-3 w-3" />
                             <select
                               value={school.schoolType || partner.schoolType}
                               onChange={(e) =>
@@ -2096,16 +2148,16 @@ export default function PartnerDetailPage({ params }: PageProps) {
                                   schoolType: e.target.value,
                                 })
                               }
-                              className="w-full px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                              className="bg-transparent border-none p-0 text-xs text-[var(--muted-foreground)] cursor-pointer hover:text-[var(--foreground)] focus:outline-none"
                             >
                               <option value="Public">Public</option>
                               <option value="Charter">Charter</option>
                               <option value="Non-Profit">Non-Profit</option>
                             </select>
-                          </div>
+                          </span>
                         </div>
                         {school.address && (
-                          <p className="mt-2 text-xs text-[var(--muted-foreground)]">
+                          <p className="mt-1 text-xs text-[var(--muted-foreground)]">
                             {school.address}
                           </p>
                         )}
