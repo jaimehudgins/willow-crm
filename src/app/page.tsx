@@ -21,6 +21,7 @@ import { MetricCard } from "@/components/dashboard/metric-card";
 import { PipelineChart } from "@/components/dashboard/pipeline-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { UpcomingTasks } from "@/components/dashboard/upcoming-tasks";
+import { UpcomingMeetings } from "@/components/dashboard/upcoming-meetings";
 import { usePartners } from "@/hooks/usePartners";
 
 interface NextMeeting {
@@ -299,11 +300,12 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <UpcomingTasks partners={partners} meetings={meetings} />
-        <RecentActivity partners={partners} />
+        <UpcomingMeetings partners={partners} meetings={meetings} />
+        <UpcomingTasks partners={partners} />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
+        <RecentActivity partners={partners} />
         <PipelineChart partners={partners} />
       </div>
     </div>
