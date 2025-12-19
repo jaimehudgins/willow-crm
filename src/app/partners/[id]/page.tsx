@@ -92,6 +92,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
     addTask,
     updateTask,
     deleteNote,
+    updateNote,
     updateSchool,
     addAttachment,
     deleteAttachment,
@@ -210,6 +211,11 @@ export default function PartnerDetailPage({ params }: PageProps) {
     email: "",
     phone: "",
   });
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editingNoteContent, setEditingNoteContent] = useState("");
+  const [editingNoteType, setEditingNoteType] =
+    useState<NoteType>("Internal Note");
+  const [editingNoteDate, setEditingNoteDate] = useState("");
 
   if (loading) {
     return (
@@ -1246,42 +1252,120 @@ export default function PartnerDetailPage({ params }: PageProps) {
                     partner.notes.map((note) => (
                       <div
                         key={note.id}
-                        className="border-l-2 border-indigo-200 pl-4"
+                        className="border-l-2 border-slate-200 pl-4"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-sm flex-wrap">
-                            <Badge className={noteTypeColors[note.type]}>
-                              {note.type}
-                            </Badge>
-                            <span className="font-medium text-[var(--foreground)]">
-                              {note.author}
-                            </span>
-                            <span className="text-[var(--muted-foreground)]">
-                              •
-                            </span>
-                            <span className="text-[var(--muted-foreground)]">
-                              {formatDate(note.date)}
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => {
-                              if (
-                                confirm(
-                                  "Are you sure you want to delete this note?",
-                                )
-                              ) {
-                                deleteNote(note.id);
+                        {editingNoteId === note.id ? (
+                          // Edit mode
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <select
+                                value={editingNoteType}
+                                onChange={(e) =>
+                                  setEditingNoteType(e.target.value as NoteType)
+                                }
+                                className="h-9 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm"
+                              >
+                                <option value="Call">Call</option>
+                                <option value="Email">Email</option>
+                                <option value="Meeting">Meeting</option>
+                                <option value="Site Visit">Site Visit</option>
+                                <option value="Internal Note">
+                                  Internal Note
+                                </option>
+                              </select>
+                              <input
+                                type="date"
+                                value={editingNoteDate}
+                                onChange={(e) =>
+                                  setEditingNoteDate(e.target.value)
+                                }
+                                className="h-9 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm"
+                              />
+                            </div>
+                            <textarea
+                              value={editingNoteContent}
+                              onChange={(e) =>
+                                setEditingNoteContent(e.target.value)
                               }
-                            }}
-                            className="text-[var(--muted-foreground)] hover:text-red-500 p-1"
-                            title="Delete note"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <p className="mt-1 text-[var(--muted-foreground)]">
-                          {note.content}
-                        </p>
+                              className="w-full min-h-[100px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm resize-none"
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={async () => {
+                                  await updateNote(note.id, {
+                                    content: editingNoteContent,
+                                    type: editingNoteType,
+                                    date: editingNoteDate,
+                                  });
+                                  setEditingNoteId(null);
+                                }}
+                              >
+                                <Check className="h-4 w-4 mr-1" />
+                                Save
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setEditingNoteId(null)}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          // View mode
+                          <>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 text-sm flex-wrap">
+                                <Badge className={noteTypeColors[note.type]}>
+                                  {note.type}
+                                </Badge>
+                                <span className="font-medium text-[var(--foreground)]">
+                                  {note.author}
+                                </span>
+                                <span className="text-[var(--muted-foreground)]">
+                                  •
+                                </span>
+                                <span className="text-[var(--muted-foreground)]">
+                                  {formatDate(note.date)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => {
+                                    setEditingNoteId(note.id);
+                                    setEditingNoteContent(note.content);
+                                    setEditingNoteType(note.type);
+                                    setEditingNoteDate(note.date);
+                                  }}
+                                  className="text-[var(--muted-foreground)] hover:text-slate-700 p-1"
+                                  title="Edit note"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (
+                                      confirm(
+                                        "Are you sure you want to delete this note?",
+                                      )
+                                    ) {
+                                      deleteNote(note.id);
+                                    }
+                                  }}
+                                  className="text-[var(--muted-foreground)] hover:text-red-500 p-1"
+                                  title="Delete note"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                            <p className="mt-1 text-[var(--muted-foreground)]">
+                              {note.content}
+                            </p>
+                          </>
+                        )}
 
                         {/* Follow-up Tasks Section */}
                         <div className="mt-3">

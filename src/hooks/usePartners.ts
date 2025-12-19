@@ -577,9 +577,18 @@ export function usePartner(id: string) {
     if (!partner) return;
 
     try {
+      // Use local date if no date provided
+      const getLocalDate = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+
       const newTouchpoint = {
         partner_id: id,
-        date: date || new Date().toISOString().split("T")[0],
+        date: date || getLocalDate(),
         author,
         title: type,
         notes: content,
@@ -644,6 +653,56 @@ export function usePartner(id: string) {
       });
     } catch (err) {
       console.error("Error deleting note:", err);
+      throw err;
+    }
+  };
+
+  // Update a note (touchpoint)
+  const updateNote = async (
+    noteId: string,
+    updates: {
+      content?: string;
+      type?: NoteType;
+      date?: string;
+    },
+  ) => {
+    if (!partner) return;
+
+    try {
+      const dbUpdates: Record<string, unknown> = {};
+      if (updates.content !== undefined) dbUpdates.notes = updates.content;
+      if (updates.type !== undefined) {
+        dbUpdates.type = updates.type;
+        dbUpdates.title = updates.type;
+      }
+      if (updates.date !== undefined) dbUpdates.date = updates.date;
+
+      const { error: updateError } = await supabase
+        .from("touchpoints")
+        .update(dbUpdates)
+        .eq("id", noteId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          notes: prev.notes.map((n) =>
+            n.id === noteId
+              ? {
+                  ...n,
+                  content: updates.content ?? n.content,
+                  type: updates.type ?? n.type,
+                  date: updates.date ?? n.date,
+                }
+              : n,
+          ),
+        };
+      });
+    } catch (err) {
+      console.error("Error updating note:", err);
       throw err;
     }
   };
@@ -1379,6 +1438,7 @@ export function usePartner(id: string) {
     addCustomTask,
     addNote,
     deleteNote,
+    updateNote,
     updatePartnershipHealth,
     updateStatus,
     updatePriority,
