@@ -88,6 +88,7 @@ function transformPartner(
         task: t.title || "",
         completed: t.status === "completed",
         isCustom: t.is_custom ?? false,
+        dueDate: t.due_date || undefined,
       })),
     notes: (touchpoints || []).map((t) => ({
       date: t.date || "",
@@ -372,6 +373,48 @@ export function usePartner(id: string) {
       });
     } catch (err) {
       console.error("Error updating custom task:", err);
+      throw err;
+    }
+  };
+
+  // Update a task's due date
+  const updateTaskDueDate = async (
+    taskIndex: number,
+    dueDate: string | null,
+  ) => {
+    if (!partner) return;
+
+    try {
+      const { data: tasks, error: fetchError } = await supabase
+        .from("onboarding_tasks")
+        .select("*")
+        .eq("partner_id", id)
+        .order("order_index");
+
+      if (fetchError) throw fetchError;
+
+      const task = tasks?.[taskIndex];
+      if (!task) return;
+
+      const { error: updateError } = await supabase
+        .from("onboarding_tasks")
+        .update({ due_date: dueDate })
+        .eq("id", task.id);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const newChecklist = [...prev.onboardingChecklist];
+        newChecklist[taskIndex] = {
+          ...newChecklist[taskIndex],
+          dueDate: dueDate || undefined,
+        };
+        return { ...prev, onboardingChecklist: newChecklist };
+      });
+    } catch (err) {
+      console.error("Error updating task due date:", err);
       throw err;
     }
   };
@@ -824,6 +867,7 @@ export function usePartner(id: string) {
     updateOnboardingTask,
     initializeOnboardingTasks,
     updateCustomTaskText,
+    updateTaskDueDate,
     addCustomTask,
     addNote,
     updatePartnershipHealth,

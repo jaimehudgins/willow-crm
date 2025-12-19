@@ -74,6 +74,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
     updateOnboardingTask,
     initializeOnboardingTasks,
     updateCustomTaskText,
+    updateTaskDueDate,
     addCustomTask,
     addNote,
     updatePartnershipHealth,
@@ -797,6 +798,27 @@ export default function PartnerDetailPage({ params }: PageProps) {
                                 <Pencil className="h-5 w-5" />
                               </button>
                             )}
+                          {/* Due date picker */}
+                          {editingTaskIndex !== index && (
+                            <div className="relative">
+                              <input
+                                type="date"
+                                value={task.dueDate || ""}
+                                onChange={async (e) => {
+                                  await updateTaskDueDate(
+                                    index,
+                                    e.target.value || null,
+                                  );
+                                }}
+                                className={`h-10 px-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-sm transition-colors hover:bg-[var(--muted)] cursor-pointer ${
+                                  task.dueDate
+                                    ? "text-[var(--foreground)]"
+                                    : "text-[var(--muted-foreground)]"
+                                }`}
+                                title="Set due date"
+                              />
+                            </div>
+                          )}
                           {/* Note button */}
                           {editingTaskIndex !== index && (
                             <button

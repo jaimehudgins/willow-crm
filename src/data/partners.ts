@@ -16,6 +16,7 @@ export interface OnboardingTask {
   task: string;
   completed: boolean;
   isCustom?: boolean;
+  dueDate?: string;
 }
 
 // Core onboarding tasks that are auto-populated for every partner
