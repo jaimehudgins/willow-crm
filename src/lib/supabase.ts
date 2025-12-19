@@ -62,12 +62,16 @@ export interface DbContact {
 export interface DbTouchpoint {
   id: string;
   partner_id: string;
+  school_id?: string;
+  contact_id?: string;
   date: string;
   author: string;
-  content: string;
+  title?: string;
+  notes: string;
+  next_steps?: string;
+  next_steps_due_date?: string;
   type: string;
   created_at?: string;
-  updated_at?: string;
 }
 
 export interface DbFollowUpTask {

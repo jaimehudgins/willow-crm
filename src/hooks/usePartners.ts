@@ -97,7 +97,7 @@ function transformPartner(
       id: t.id,
       date: t.date || "",
       author: t.author || "",
-      content: t.content || "",
+      content: t.notes || "",
       type: (t.type as NoteType) || "Internal Note",
       followUpTasks: followUpTasks
         .filter((ft) => ft.touchpoint_id === t.id)
@@ -540,7 +540,7 @@ export function usePartner(id: string) {
         partner_id: id,
         date: date || new Date().toISOString().split("T")[0],
         author,
-        content,
+        notes: content,
         type,
       };
 
@@ -559,7 +559,7 @@ export function usePartner(id: string) {
           id: data.id,
           date: data.date,
           author: data.author,
-          content: data.content,
+          content: data.notes,
           type: data.type as NoteType,
           followUpTasks: [],
         };
