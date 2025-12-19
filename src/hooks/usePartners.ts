@@ -22,7 +22,7 @@ import type {
   Contact,
   School,
 } from "@/data/partners";
-import { CORE_ONBOARDING_TASKS, CUSTOM_TASK_SLOTS } from "@/data/partners";
+import { CORE_ONBOARDING_TASKS } from "@/data/partners";
 
 // Transform database partner to frontend Partner type
 function transformPartner(
@@ -316,23 +316,14 @@ export function usePartner(id: string) {
         return;
       }
 
-      // Create core tasks + custom task slots
-      const allTasks = [
-        ...CORE_ONBOARDING_TASKS.map((task, index) => ({
-          partner_id: id,
-          title: task,
-          status: "pending",
-          order_index: index,
-          is_custom: false,
-        })),
-        ...Array.from({ length: CUSTOM_TASK_SLOTS }, (_, i) => ({
-          partner_id: id,
-          title: "",
-          status: "pending",
-          order_index: CORE_ONBOARDING_TASKS.length + i,
-          is_custom: true,
-        })),
-      ];
+      // Create core tasks only
+      const allTasks = CORE_ONBOARDING_TASKS.map((task, index) => ({
+        partner_id: id,
+        title: task,
+        status: "pending",
+        order_index: index,
+        is_custom: false,
+      }));
 
       const { error: insertError } = await supabase
         .from("onboarding_tasks")
@@ -381,6 +372,57 @@ export function usePartner(id: string) {
       });
     } catch (err) {
       console.error("Error updating custom task:", err);
+      throw err;
+    }
+  };
+
+  // Add a new custom task
+  const addCustomTask = async (taskTitle: string) => {
+    if (!partner) return;
+
+    try {
+      // Get the highest order_index
+      const { data: tasks, error: fetchError } = await supabase
+        .from("onboarding_tasks")
+        .select("order_index")
+        .eq("partner_id", id)
+        .order("order_index", { ascending: false })
+        .limit(1);
+
+      if (fetchError) throw fetchError;
+
+      const nextIndex =
+        tasks && tasks.length > 0 ? tasks[0].order_index + 1 : 0;
+
+      const { data, error: insertError } = await supabase
+        .from("onboarding_tasks")
+        .insert({
+          partner_id: id,
+          title: taskTitle,
+          status: "pending",
+          order_index: nextIndex,
+          is_custom: true,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          onboardingChecklist: [
+            ...prev.onboardingChecklist,
+            { task: taskTitle, completed: false, isCustom: true },
+          ],
+        };
+      });
+
+      return data;
+    } catch (err) {
+      console.error("Error adding custom task:", err);
       throw err;
     }
   };
@@ -782,6 +824,7 @@ export function usePartner(id: string) {
     updateOnboardingTask,
     initializeOnboardingTasks,
     updateCustomTaskText,
+    addCustomTask,
     addNote,
     updatePartnershipHealth,
     updateStatus,

@@ -74,6 +74,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
     updateOnboardingTask,
     initializeOnboardingTasks,
     updateCustomTaskText,
+    addCustomTask,
     addNote,
     updatePartnershipHealth,
     updateStatus,
@@ -101,6 +102,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [taskNotes, setTaskNotes] = useState<Record<number, string>>({});
   const [editingTaskIndex, setEditingTaskIndex] = useState<number | null>(null);
   const [editingTaskText, setEditingTaskText] = useState("");
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [newTaskText, setNewTaskText] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
@@ -839,6 +842,61 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         )}
                       </div>
                     ))}
+
+                    {/* Add Task Button/Form */}
+                    {showAddTask ? (
+                      <div className="flex items-center gap-2 rounded-lg border border-dashed border-indigo-300 p-4 bg-indigo-50">
+                        <Plus className="h-5 w-5 text-indigo-600 shrink-0" />
+                        <input
+                          type="text"
+                          value={newTaskText}
+                          onChange={(e) => setNewTaskText(e.target.value)}
+                          onKeyDown={async (e) => {
+                            if (e.key === "Enter" && newTaskText.trim()) {
+                              await addCustomTask(newTaskText.trim());
+                              setNewTaskText("");
+                              setShowAddTask(false);
+                            }
+                            if (e.key === "Escape") {
+                              setNewTaskText("");
+                              setShowAddTask(false);
+                            }
+                          }}
+                          placeholder="Enter task name..."
+                          className="flex-1 px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                          autoFocus
+                        />
+                        <button
+                          onClick={async () => {
+                            if (newTaskText.trim()) {
+                              await addCustomTask(newTaskText.trim());
+                              setNewTaskText("");
+                              setShowAddTask(false);
+                            }
+                          }}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <Check className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setNewTaskText("");
+                            setShowAddTask(false);
+                          }}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowAddTask(true)}
+                        className="flex items-center gap-2 w-full rounded-lg border border-dashed border-[var(--border)] p-4 text-left text-[var(--muted-foreground)] hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+                      >
+                        <Plus className="h-5 w-5" />
+                        <span>Add custom task</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </CardContent>

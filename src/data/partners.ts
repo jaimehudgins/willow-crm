@@ -30,9 +30,6 @@ export const CORE_ONBOARDING_TASKS = [
   "Initial Training",
 ];
 
-// Number of custom task slots available
-export const CUSTOM_TASK_SLOTS = 3;
-
 export interface Note {
   date: string;
   author: string;
