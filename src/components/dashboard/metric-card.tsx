@@ -41,8 +41,8 @@ export function MetricCard({
     >
       <Card className="cursor-default h-full">
         <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-50 mb-3">
-            <Icon className="h-6 w-6 text-slate-700" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 mb-3">
+            <Icon className="h-6 w-6 text-slate-800" />
           </div>
           <p className="text-sm font-medium text-[var(--muted-foreground)]">
             {title}
