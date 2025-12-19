@@ -85,8 +85,8 @@ function transformPartner(
     onboardingChecklist: (onboardingTasks || [])
       .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
       .map((t) => ({
-        task: t.task || "",
-        completed: t.completed ?? false,
+        task: t.title || "",
+        completed: t.status === "completed",
         isCustom: t.is_custom ?? false,
       })),
     notes: (touchpoints || []).map((t) => ({
@@ -283,7 +283,7 @@ export function usePartner(id: string) {
 
       const { error: updateError } = await supabase
         .from("onboarding_tasks")
-        .update({ completed })
+        .update({ status: completed ? "completed" : "pending" })
         .eq("id", task.id);
 
       if (updateError) throw updateError;
@@ -320,15 +320,15 @@ export function usePartner(id: string) {
       const allTasks = [
         ...CORE_ONBOARDING_TASKS.map((task, index) => ({
           partner_id: id,
-          task,
-          completed: false,
+          title: task,
+          status: "pending",
           order_index: index,
           is_custom: false,
         })),
         ...Array.from({ length: CUSTOM_TASK_SLOTS }, (_, i) => ({
           partner_id: id,
-          task: "",
-          completed: false,
+          title: "",
+          status: "pending",
           order_index: CORE_ONBOARDING_TASKS.length + i,
           is_custom: true,
         })),
@@ -367,7 +367,7 @@ export function usePartner(id: string) {
 
       const { error: updateError } = await supabase
         .from("onboarding_tasks")
-        .update({ task: newText })
+        .update({ title: newText })
         .eq("id", task.id);
 
       if (updateError) throw updateError;

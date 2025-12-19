@@ -74,10 +74,10 @@ export interface DbTouchpoint {
 export interface DbOnboardingTask {
   id: string;
   partner_id: string;
-  task: string;
-  completed: boolean;
+  title: string;
+  status: string;
   order_index: number;
   is_custom?: boolean;
+  due_date?: string;
   created_at?: string;
-  updated_at?: string;
 }
