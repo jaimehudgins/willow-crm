@@ -128,8 +128,8 @@ export interface Partner {
   painPoints: string[];
   onboardingChecklist: OnboardingTask[];
   notes: Note[];
+  tasks?: FollowUpTask[];
 }
-
 
 export const partners: Partner[] = [];
 

@@ -91,6 +91,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
     addFollowUpTask,
     updateFollowUpTask,
     deleteFollowUpTask,
+    addTask,
+    updateTask,
   } = usePartner(id);
 
   const [newNote, setNewNote] = useState("");
@@ -124,6 +126,10 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [newFollowUpDueDate, setNewFollowUpDueDate] = useState("");
   const [newFollowUpNotes, setNewFollowUpNotes] = useState("");
   const [isAddingNote, setIsAddingNote] = useState(false);
+  const [showAddStandaloneTask, setShowAddStandaloneTask] = useState(false);
+  const [newStandaloneTask, setNewStandaloneTask] = useState("");
+  const [newStandaloneTaskDueDate, setNewStandaloneTaskDueDate] = useState("");
+  const [newStandaloneTaskNotes, setNewStandaloneTaskNotes] = useState("");
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContact, setNewContact] = useState({
     name: "",
@@ -209,6 +215,24 @@ export default function PartnerDetailPage({ params }: PageProps) {
       setAddingTaskToNote(null);
     } catch (err) {
       console.error("Failed to add follow-up task:", err);
+    }
+  };
+
+  const handleAddStandaloneTask = async () => {
+    if (!newStandaloneTask.trim()) return;
+
+    try {
+      await addTask(
+        newStandaloneTask.trim(),
+        newStandaloneTaskDueDate || null,
+        newStandaloneTaskNotes.trim(),
+      );
+      setNewStandaloneTask("");
+      setNewStandaloneTaskDueDate("");
+      setNewStandaloneTaskNotes("");
+      setShowAddStandaloneTask(false);
+    } catch (err) {
+      console.error("Failed to add task:", err);
     }
   };
 
@@ -1270,6 +1294,128 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   )}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Tasks</CardTitle>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    setShowAddStandaloneTask(!showAddStandaloneTask)
+                  }
+                >
+                  <Plus className="mr-1 h-4 w-4" />
+                  Add Task
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {showAddStandaloneTask && (
+                <div className="space-y-2 p-3 bg-[var(--muted)] rounded-md mb-4">
+                  <Input
+                    value={newStandaloneTask}
+                    onChange={(e) => setNewStandaloneTask(e.target.value)}
+                    placeholder="Task description..."
+                    className="text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      type="date"
+                      value={newStandaloneTaskDueDate}
+                      onChange={(e) =>
+                        setNewStandaloneTaskDueDate(e.target.value)
+                      }
+                      className="text-sm flex-1"
+                    />
+                    <Input
+                      value={newStandaloneTaskNotes}
+                      onChange={(e) =>
+                        setNewStandaloneTaskNotes(e.target.value)
+                      }
+                      placeholder="Notes (optional)"
+                      className="text-sm flex-1"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleAddStandaloneTask}>
+                      Add Task
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setShowAddStandaloneTask(false);
+                        setNewStandaloneTask("");
+                        setNewStandaloneTaskDueDate("");
+                        setNewStandaloneTaskNotes("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {(!partner.tasks || partner.tasks.length === 0) &&
+              !showAddStandaloneTask ? (
+                <p className="text-center text-[var(--muted-foreground)] py-4">
+                  No tasks yet
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {(partner.tasks || []).map((task) => (
+                    <div
+                      key={task.id}
+                      className="flex items-start gap-2 p-3 bg-[var(--muted)] rounded-md"
+                    >
+                      <button
+                        onClick={() =>
+                          updateTask(task.id, { completed: !task.completed })
+                        }
+                        className="mt-0.5"
+                      >
+                        {task.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-[var(--muted-foreground)]" />
+                        )}
+                      </button>
+                      <div className="flex-1">
+                        <p
+                          className={
+                            task.completed
+                              ? "line-through text-[var(--muted-foreground)]"
+                              : "text-[var(--foreground)]"
+                          }
+                        >
+                          {task.task}
+                        </p>
+                        {task.dueDate && (
+                          <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1 mt-0.5">
+                            <Calendar className="h-3 w-3" />
+                            Due: {formatDate(task.dueDate)}
+                          </p>
+                        )}
+                        {task.notes && (
+                          <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                            {task.notes}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => deleteFollowUpTask(task.id)}
+                        className="text-[var(--muted-foreground)] hover:text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

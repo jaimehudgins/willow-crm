@@ -34,6 +34,7 @@ function transformPartner(
   touchpoints: DbTouchpoint[],
   onboardingTasks: DbOnboardingTask[],
   followUpTasks: DbFollowUpTask[] = [],
+  standaloneTasks: DbFollowUpTask[] = [],
 ): Partner {
   const primaryContact =
     contacts.find((c) => c.is_primary_contact) || contacts[0];
@@ -108,6 +109,13 @@ function transformPartner(
           completed: ft.completed,
           notes: ft.notes,
         })),
+    })),
+    tasks: standaloneTasks.map((ft) => ({
+      id: ft.id,
+      task: ft.task,
+      dueDate: ft.due_date,
+      completed: ft.completed,
+      notes: ft.notes,
     })),
   };
 }
@@ -190,6 +198,9 @@ export function usePartners() {
           tasks.filter((t) => t.partner_id === dbPartner.id),
           followUpTasks.filter((ft) =>
             touchpointIds.includes(ft.touchpoint_id),
+          ),
+          followUpTasks.filter(
+            (ft) => ft.partner_id === dbPartner.id && !ft.touchpoint_id,
           ),
         );
       });
@@ -279,8 +290,12 @@ export function usePartner(id: string) {
 
       const touchpoints = touchpointsResult.data || [];
       const touchpointIds = touchpoints.map((t) => t.id);
-      const followUpTasks = (followUpTasksResult.data || []).filter((ft) =>
+      const allFollowUpTasks = followUpTasksResult.data || [];
+      const followUpTasks = allFollowUpTasks.filter((ft) =>
         touchpointIds.includes(ft.touchpoint_id),
+      );
+      const standaloneTasks = allFollowUpTasks.filter(
+        (ft) => ft.partner_id === id && !ft.touchpoint_id,
       );
 
       const transformedPartner = transformPartner(
@@ -289,6 +304,7 @@ export function usePartner(id: string) {
         touchpoints,
         tasksResult.data || [],
         followUpTasks,
+        standaloneTasks,
       );
 
       setPartner(transformedPartner);
@@ -1045,7 +1061,7 @@ export function usePartner(id: string) {
 
       if (deleteError) throw deleteError;
 
-      // Update local state
+      // Update local state - check both notes and standalone tasks
       setPartner((prev) => {
         if (!prev) return prev;
         const updatedNotes = prev.notes.map((note) => ({
@@ -1054,10 +1070,109 @@ export function usePartner(id: string) {
             (ft) => ft.id !== taskId,
           ),
         }));
-        return { ...prev, notes: updatedNotes };
+        const updatedTasks = (prev.tasks || []).filter((t) => t.id !== taskId);
+        return { ...prev, notes: updatedNotes, tasks: updatedTasks };
       });
     } catch (err) {
       console.error("Error deleting follow-up task:", err);
+      throw err;
+    }
+  };
+
+  // Add a standalone task (not linked to a note)
+  const addTask = async (
+    task: string,
+    dueDate: string | null = null,
+    notes: string = "",
+  ) => {
+    if (!partner) return;
+
+    try {
+      const { data, error: insertError } = await supabase
+        .from("follow_up_tasks")
+        .insert({
+          partner_id: id,
+          task,
+          due_date: dueDate,
+          completed: false,
+          notes,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          tasks: [
+            ...(prev.tasks || []),
+            {
+              id: data.id,
+              task: data.task,
+              dueDate: data.due_date,
+              completed: data.completed,
+              notes: data.notes,
+            },
+          ],
+        };
+      });
+
+      return data;
+    } catch (err) {
+      console.error("Error adding task:", err);
+      throw err;
+    }
+  };
+
+  // Update a standalone task
+  const updateTask = async (
+    taskId: string,
+    updates: {
+      task?: string;
+      dueDate?: string | null;
+      completed?: boolean;
+      notes?: string;
+    },
+  ) => {
+    if (!partner) return;
+
+    try {
+      const dbUpdates: Record<string, unknown> = {};
+      if (updates.task !== undefined) dbUpdates.task = updates.task;
+      if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+      if (updates.completed !== undefined)
+        dbUpdates.completed = updates.completed;
+      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+
+      const { error: updateError } = await supabase
+        .from("follow_up_tasks")
+        .update(dbUpdates)
+        .eq("id", taskId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const updatedTasks = (prev.tasks || []).map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                task: updates.task ?? t.task,
+                dueDate:
+                  updates.dueDate !== undefined ? updates.dueDate : t.dueDate,
+                completed: updates.completed ?? t.completed,
+                notes: updates.notes ?? t.notes,
+              }
+            : t,
+        );
+        return { ...prev, tasks: updatedTasks };
+      });
+    } catch (err) {
+      console.error("Error updating task:", err);
       throw err;
     }
   };
@@ -1086,5 +1201,7 @@ export function usePartner(id: string) {
     addFollowUpTask,
     updateFollowUpTask,
     deleteFollowUpTask,
+    addTask,
+    updateTask,
   };
 }

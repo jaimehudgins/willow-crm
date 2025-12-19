@@ -76,7 +76,8 @@ export interface DbTouchpoint {
 
 export interface DbFollowUpTask {
   id: string;
-  touchpoint_id: string;
+  touchpoint_id: string | null;
+  partner_id: string | null;
   task: string;
   due_date: string | null;
   completed: boolean;
