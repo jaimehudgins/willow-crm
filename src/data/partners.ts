@@ -40,7 +40,6 @@ export interface Note {
 export interface Contact {
   id: string;
   name: string;
-  title: string;
   role: string;
   email: string;
   phone: string;
@@ -81,7 +80,7 @@ export interface Partner {
   willowStaffLead: string;
   leadContact: {
     name: string;
-    title: string;
+    role: string;
     email: string;
     phone: string;
   };
@@ -112,7 +111,7 @@ export const partners: Partner[] = [
     willowStaffLead: "Sarah Mitchell",
     leadContact: {
       name: "Dr. Maria Santos",
-      title: "Principal",
+      role: "Principal",
       email: "m.santos@riversideusd.edu",
       phone: "(951) 555-0123",
     },
@@ -168,7 +167,7 @@ export const partners: Partner[] = [
     willowStaffLead: "Michael Torres",
     leadContact: {
       name: "Principal James Richardson",
-      title: "Principal",
+      role: "Principal",
       email: "j.richardson@sdusd.edu",
       phone: "(858) 555-0456",
     },
@@ -222,7 +221,7 @@ export const partners: Partner[] = [
     willowStaffLead: "Sarah Mitchell",
     leadContact: {
       name: "James Nakamura",
-      title: "Executive Director",
+      role: "Executive Director",
       email: "j.nakamura@summitprep.org",
       phone: "(408) 555-0789",
     },
@@ -277,7 +276,7 @@ export const partners: Partner[] = [
     willowStaffLead: "David Kim",
     leadContact: {
       name: "Dr. Elena Rodriguez",
-      title: "Head of School",
+      role: "Head of School",
       email: "e.rodriguez@gatewayhigh.org",
       phone: "(626) 555-0234",
     },
@@ -326,7 +325,7 @@ export const partners: Partner[] = [
     willowStaffLead: "Michael Torres",
     leadContact: {
       name: "Principal Denise Washington",
-      title: "Principal",
+      role: "Principal",
       email: "d.washington@ousd.org",
       phone: "(510) 555-0567",
     },
@@ -382,7 +381,7 @@ export const partners: Partner[] = [
     willowStaffLead: "Sarah Mitchell",
     leadContact: {
       name: "Dr. Kevin Patel",
-      title: "School Leader",
+      role: "School Leader",
       email: "k.patel@kippbayarea.org",
       phone: "(415) 555-0890",
     },
@@ -438,7 +437,7 @@ export const partners: Partner[] = [
     willowStaffLead: "David Kim",
     leadContact: {
       name: "Assistant Principal Robert Chen",
-      title: "Assistant Principal, Student Services",
+      role: "Assistant Principal, Student Services",
       email: "r.chen@fremont.k12.ca.us",
       phone: "(510) 555-0345",
     },
@@ -488,7 +487,7 @@ export const partners: Partner[] = [
     willowStaffLead: "Michael Torres",
     leadContact: {
       name: "Jennifer Martinez",
-      title: "Executive Director",
+      role: "Executive Director",
       email: "j.martinez@egcharter.org",
       phone: "(916) 555-0678",
     },
@@ -544,7 +543,7 @@ export const partners: Partner[] = [
     willowStaffLead: "Sarah Mitchell",
     leadContact: {
       name: "Dr. Angela Brooks",
-      title: "Founder & CEO",
+      role: "Founder & CEO",
       email: "a.brooks@saccharterhigh.org",
       phone: "(916) 555-0912",
     },
@@ -594,7 +593,7 @@ export const partners: Partner[] = [
     willowStaffLead: "Michael Torres",
     leadContact: {
       name: "Principal Simone Kennel",
-      title: "Principal",
+      role: "Principal",
       email: "s.kennel@seq.org",
       phone: "(650) 555-0234",
     },

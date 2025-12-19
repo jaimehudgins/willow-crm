@@ -61,20 +61,19 @@ function transformPartner(
     leadContact: primaryContact
       ? {
           name: primaryContact.name || "",
-          title: primaryContact.title || "",
+          role: primaryContact.role || "",
           email: primaryContact.email || "",
           phone: primaryContact.phone || "",
         }
       : {
           name: "",
-          title: "",
+          role: "",
           email: "",
           phone: "",
         },
     contacts: contacts.map((c) => ({
       id: c.id,
       name: c.name || "",
-      title: c.title || "",
       role: c.role || "",
       email: c.email || "",
       phone: c.phone || "",
@@ -624,7 +623,7 @@ export function usePartner(id: string) {
   // Update lead contact
   const updateLeadContact = async (contact: {
     name: string;
-    title: string;
+    role: string;
     email: string;
     phone: string;
   }) => {
@@ -647,7 +646,7 @@ export function usePartner(id: string) {
           .from("contacts")
           .update({
             name: contact.name,
-            title: contact.title,
+            role: contact.role,
             email: contact.email,
             phone: contact.phone,
           })
@@ -659,7 +658,7 @@ export function usePartner(id: string) {
         const { error: insertError } = await supabase.from("contacts").insert({
           partner_id: id,
           name: contact.name,
-          title: contact.title,
+          role: contact.role,
           email: contact.email,
           phone: contact.phone,
           is_primary_contact: true,
@@ -681,7 +680,7 @@ export function usePartner(id: string) {
   // Add a new contact
   const addContact = async (contact: {
     name: string;
-    title: string;
+    role: string;
     email: string;
     phone: string;
   }) => {
@@ -693,7 +692,7 @@ export function usePartner(id: string) {
         .insert({
           partner_id: id,
           name: contact.name,
-          title: contact.title,
+          role: contact.role,
           email: contact.email,
           phone: contact.phone,
           is_primary_contact: (partner.contacts || []).length === 0, // First contact is primary
@@ -706,7 +705,6 @@ export function usePartner(id: string) {
       const newContact: Contact = {
         id: data.id,
         name: data.name || "",
-        title: data.title || "",
         role: data.role || "",
         email: data.email || "",
         phone: data.phone || "",
@@ -732,7 +730,7 @@ export function usePartner(id: string) {
   // Update a contact
   const updateContact = async (
     contactId: string,
-    contact: { name: string; title: string; email: string; phone: string },
+    contact: { name: string; role: string; email: string; phone: string },
   ) => {
     if (!partner) return;
 
@@ -741,7 +739,7 @@ export function usePartner(id: string) {
         .from("contacts")
         .update({
           name: contact.name,
-          title: contact.title,
+          role: contact.role,
           email: contact.email,
           phone: contact.phone,
         })
@@ -761,7 +759,7 @@ export function usePartner(id: string) {
           leadContact: primaryContact
             ? {
                 name: primaryContact.name,
-                title: primaryContact.title,
+                role: primaryContact.role,
                 email: primaryContact.email,
                 phone: primaryContact.phone,
               }
@@ -798,11 +796,11 @@ export function usePartner(id: string) {
           leadContact: primaryContact
             ? {
                 name: primaryContact.name,
-                title: primaryContact.title,
+                role: primaryContact.role,
                 email: primaryContact.email,
                 phone: primaryContact.phone,
               }
-            : { name: "", title: "", email: "", phone: "" },
+            : { name: "", role: "", email: "", phone: "" },
         };
       });
     } catch (err) {
@@ -845,7 +843,7 @@ export function usePartner(id: string) {
           leadContact: primaryContact
             ? {
                 name: primaryContact.name,
-                title: primaryContact.title,
+                role: primaryContact.role,
                 email: primaryContact.email,
                 phone: primaryContact.phone,
               }

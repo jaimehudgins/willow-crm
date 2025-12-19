@@ -377,7 +377,7 @@ export default function PartnersPage() {
                           {partner.leadContact.name}
                         </p>
                         <p className="text-xs text-[var(--muted-foreground)]">
-                          {partner.leadContact.title}
+                          {partner.leadContact.role}
                         </p>
                         <a
                           href={`mailto:${partner.leadContact.email}`}

@@ -113,7 +113,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContact, setNewContact] = useState({
     name: "",
-    title: "",
+    role: "",
     email: "",
     phone: "",
   });
@@ -1466,14 +1466,14 @@ export default function PartnerDetailPage({ params }: PageProps) {
                     className="text-sm"
                   />
                   <Input
-                    value={newContact.title}
+                    value={newContact.role}
                     onChange={(e) =>
                       setNewContact((prev) => ({
                         ...prev,
-                        title: e.target.value,
+                        role: e.target.value,
                       }))
                     }
-                    placeholder="Title (optional)"
+                    placeholder="Role (optional)"
                     className="text-sm"
                   />
                   <Input
@@ -1495,7 +1495,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                           await addContact(newContact);
                           setNewContact({
                             name: "",
-                            title: "",
+                            role: "",
                             email: "",
                             phone: "",
                           });

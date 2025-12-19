@@ -51,7 +51,6 @@ export interface DbContact {
   id: string;
   partner_id: string;
   name: string;
-  title: string;
   role?: string;
   email: string;
   phone: string;
