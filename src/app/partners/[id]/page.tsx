@@ -151,11 +151,18 @@ export default function PartnerDetailPage({ params }: PageProps) {
     fetchMeeting();
   }, [sessionStatus, session?.accessToken, partner]);
 
+  // Helper to get local date string (avoids timezone issues with toISOString)
+  const getLocalDateString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const [newNote, setNewNote] = useState("");
   const [noteType, setNoteType] = useState<NoteType>("Internal Note");
-  const [noteDate, setNoteDate] = useState(
-    () => new Date().toISOString().split("T")[0],
-  );
+  const [noteDate, setNoteDate] = useState(getLocalDateString);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [checklistExpanded, setChecklistExpanded] = useState(true);
@@ -246,7 +253,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
       await addNote(newNote.trim(), "You", noteType, noteDate);
       setNewNote("");
       setNoteType("Internal Note");
-      setNoteDate(new Date().toISOString().split("T")[0]);
+      setNoteDate(getLocalDateString());
     } catch (err) {
       console.error("Failed to add note:", err);
       alert(
