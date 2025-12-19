@@ -94,6 +94,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
     addTask,
     updateTask,
     deleteNote,
+    updateSchool,
   } = usePartner(id);
 
   const [newNote, setNewNote] = useState("");
@@ -2053,19 +2054,58 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         <p className="font-medium text-[var(--foreground)]">
                           {school.name}
                         </p>
-                        <div className="mt-1 flex items-center gap-3 text-xs text-[var(--muted-foreground)]">
-                          <span className="flex items-center gap-1">
-                            <GraduationCap className="h-3 w-3" />
-                            {school.studentCount.toLocaleString()}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {school.staffCount}
-                          </span>
-                          <span>{school.schoolType}</span>
+                        <div className="mt-2 grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="text-xs text-[var(--muted-foreground)] block mb-1">
+                              Students
+                            </label>
+                            <input
+                              type="number"
+                              value={school.studentCount}
+                              onChange={(e) =>
+                                updateSchool(school.id, {
+                                  studentCount: parseInt(e.target.value) || 0,
+                                })
+                              }
+                              className="w-full px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-[var(--muted-foreground)] block mb-1">
+                              Staff
+                            </label>
+                            <input
+                              type="number"
+                              value={school.staffCount}
+                              onChange={(e) =>
+                                updateSchool(school.id, {
+                                  staffCount: parseInt(e.target.value) || 0,
+                                })
+                              }
+                              className="w-full px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-[var(--muted-foreground)] block mb-1">
+                              Type
+                            </label>
+                            <select
+                              value={school.schoolType || partner.schoolType}
+                              onChange={(e) =>
+                                updateSchool(school.id, {
+                                  schoolType: e.target.value,
+                                })
+                              }
+                              className="w-full px-2 py-1 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                            >
+                              <option value="Public">Public</option>
+                              <option value="Charter">Charter</option>
+                              <option value="Non-Profit">Non-Profit</option>
+                            </select>
+                          </div>
                         </div>
                         {school.address && (
-                          <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                          <p className="mt-2 text-xs text-[var(--muted-foreground)]">
                             {school.address}
                           </p>
                         )}

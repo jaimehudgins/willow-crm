@@ -1210,6 +1210,59 @@ export function usePartner(id: string) {
     }
   };
 
+  // Update a school
+  const updateSchool = async (
+    schoolId: string,
+    updates: {
+      name?: string;
+      schoolType?: string;
+      studentCount?: number;
+      staffCount?: number;
+      district?: string;
+      address?: string;
+    },
+  ) => {
+    try {
+      const dbUpdates: Record<string, unknown> = {};
+      if (updates.name !== undefined) dbUpdates.name = updates.name;
+      if (updates.schoolType !== undefined)
+        dbUpdates.school_type = updates.schoolType;
+      if (updates.studentCount !== undefined)
+        dbUpdates.student_count = updates.studentCount;
+      if (updates.staffCount !== undefined)
+        dbUpdates.staff_count = updates.staffCount;
+      if (updates.district !== undefined) dbUpdates.district = updates.district;
+      if (updates.address !== undefined) dbUpdates.address = updates.address;
+
+      const { error: updateError } = await supabase
+        .from("schools")
+        .update(dbUpdates)
+        .eq("id", schoolId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setSchools((prev) =>
+        prev.map((s) =>
+          s.id === schoolId
+            ? {
+                ...s,
+                name: updates.name ?? s.name,
+                schoolType: updates.schoolType ?? s.schoolType,
+                studentCount: updates.studentCount ?? s.studentCount,
+                staffCount: updates.staffCount ?? s.staffCount,
+                district: updates.district ?? s.district,
+                address: updates.address ?? s.address,
+              }
+            : s,
+        ),
+      );
+    } catch (err) {
+      console.error("Error updating school:", err);
+      throw err;
+    }
+  };
+
   return {
     partner,
     schools,
@@ -1237,5 +1290,6 @@ export function usePartner(id: string) {
     deleteFollowUpTask,
     addTask,
     updateTask,
+    updateSchool,
   };
 }
