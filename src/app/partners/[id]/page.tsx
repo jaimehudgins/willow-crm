@@ -1212,17 +1212,19 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
                   {showNewNoteTask && (
                     <div className="flex items-center gap-2 p-3 bg-[var(--muted)] rounded-lg">
-                      <Input
-                        value={newNoteTask}
-                        onChange={(e) => setNewNoteTask(e.target.value)}
-                        placeholder="Task description..."
-                        className="flex-1"
-                      />
-                      <Input
+                      <div className="flex-1 min-w-0">
+                        <Input
+                          value={newNoteTask}
+                          onChange={(e) => setNewNoteTask(e.target.value)}
+                          placeholder="Task description..."
+                          className="w-full"
+                        />
+                      </div>
+                      <input
                         type="date"
                         value={newNoteTaskDueDate}
                         onChange={(e) => setNewNoteTaskDueDate(e.target.value)}
-                        className="w-40"
+                        className="h-9 px-2 rounded-md border border-[var(--border)] bg-[var(--background)] text-sm shrink-0"
                       />
                       <Button
                         onClick={() => {
@@ -1230,6 +1232,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         }}
                         variant="ghost"
                         size="sm"
+                        className="shrink-0"
                       >
                         <X className="h-4 w-4" />
                       </Button>
