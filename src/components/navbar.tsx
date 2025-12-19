@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, School, Leaf, Calendar } from "lucide-react";
+import {
+  LayoutDashboard,
+  School,
+  Leaf,
+  Calendar,
+  ListTodo,
+} from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,6 +16,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/partners", label: "Partners", icon: School },
+  { href: "/tasks", label: "Tasks", icon: ListTodo },
 ];
 
 export function Navbar() {
