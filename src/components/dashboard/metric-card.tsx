@@ -10,13 +10,35 @@ interface SchoolItem {
   name: string;
 }
 
+type ColorVariant =
+  | "green"
+  | "teal"
+  | "yellow"
+  | "red"
+  | "blue"
+  | "orange"
+  | "gray"
+  | "default";
+
+const colorStyles: Record<ColorVariant, { bg: string; icon: string }> = {
+  green: { bg: "bg-green-100", icon: "text-green-700" },
+  teal: { bg: "bg-teal-100", icon: "text-teal-700" },
+  yellow: { bg: "bg-yellow-100", icon: "text-yellow-700" },
+  red: { bg: "bg-red-100", icon: "text-red-700" },
+  blue: { bg: "bg-blue-100", icon: "text-blue-700" },
+  orange: { bg: "bg-orange-100", icon: "text-orange-700" },
+  gray: { bg: "bg-gray-100", icon: "text-gray-600" },
+  default: { bg: "bg-slate-100", icon: "text-slate-800" },
+};
+
 interface MetricCardProps {
   title: string;
   value: number | string;
   icon: LucideIcon;
   description?: string;
   schools?: SchoolItem[];
-  total?: number; // If provided, shows percentage with count in parentheses
+  total?: number;
+  color?: ColorVariant;
 }
 
 export function MetricCard({
@@ -26,12 +48,15 @@ export function MetricCard({
   description,
   schools,
   total,
+  color = "default",
 }: MetricCardProps) {
   const numericValue =
     typeof value === "number" ? value : parseInt(value as string, 10) || 0;
   const percentage =
     total && total > 0 ? Math.round((numericValue / total) * 100) : null;
   const [showTooltip, setShowTooltip] = useState(false);
+
+  const styles = colorStyles[color];
 
   return (
     <div
@@ -41,8 +66,10 @@ export function MetricCard({
     >
       <Card className="cursor-default h-full">
         <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 mb-3">
-            <Icon className="h-6 w-6 text-slate-800" />
+          <div
+            className={`flex h-12 w-12 items-center justify-center rounded-lg ${styles.bg} mb-3`}
+          >
+            <Icon className={`h-6 w-6 ${styles.icon}`} />
           </div>
           <p className="text-sm font-medium text-[var(--muted-foreground)]">
             {title}

@@ -187,6 +187,7 @@ export default function DashboardPage() {
             icon={ThumbsUp}
             schools={thrivingPartners}
             total={activePartners.length}
+            color="green"
           />
           <MetricCard
             title="Healthy"
@@ -194,6 +195,7 @@ export default function DashboardPage() {
             icon={Activity}
             schools={healthyPartners}
             total={activePartners.length}
+            color="teal"
           />
           <MetricCard
             title="Wavering"
@@ -201,6 +203,7 @@ export default function DashboardPage() {
             icon={Eye}
             schools={waveringPartners}
             total={activePartners.length}
+            color="yellow"
           />
           <MetricCard
             title="Stalled"
@@ -208,6 +211,7 @@ export default function DashboardPage() {
             icon={AlertTriangle}
             schools={stalledPartners}
             total={activePartners.length}
+            color="red"
           />
           <MetricCard
             title="Monitoring (New)"
@@ -215,6 +219,7 @@ export default function DashboardPage() {
             icon={School}
             schools={monitoringPartners}
             total={activePartners.length}
+            color="blue"
           />
         </div>
 
@@ -239,6 +244,7 @@ export default function DashboardPage() {
               description="Renewing"
               schools={confirmedRenewals}
               total={activePartners.length}
+              color="green"
             />
             <MetricCard
               title="In Discussion"
@@ -247,6 +253,7 @@ export default function DashboardPage() {
               description="Talking about renewal"
               schools={inDiscussionRenewals}
               total={activePartners.length}
+              color="blue"
             />
             <MetricCard
               title="At Risk"
@@ -255,6 +262,7 @@ export default function DashboardPage() {
               description="May not renew"
               schools={atRiskRenewals}
               total={activePartners.length}
+              color="orange"
             />
             <MetricCard
               title="Not Renewing"
@@ -263,6 +271,7 @@ export default function DashboardPage() {
               description="Won't continue"
               schools={notRenewingPartners}
               total={activePartners.length}
+              color="red"
             />
             <MetricCard
               title="Not Yet Determined"
@@ -271,6 +280,7 @@ export default function DashboardPage() {
               description="To be discussed"
               schools={notYetDeterminedRenewals}
               total={activePartners.length}
+              color="gray"
             />
           </div>
         )}
