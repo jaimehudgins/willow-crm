@@ -65,7 +65,18 @@ export interface DbTouchpoint {
   date: string;
   author: string;
   content: string;
-  type?: string;
+  type: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DbFollowUpTask {
+  id: string;
+  touchpoint_id: string;
+  task: string;
+  due_date: string | null;
+  completed: boolean;
+  notes?: string;
   created_at?: string;
   updated_at?: string;
 }

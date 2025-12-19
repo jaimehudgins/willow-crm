@@ -45,10 +45,12 @@ import {
   leadSourceColors,
   onboardingStepColors,
   partnershipHealthColors,
+  noteTypeColors,
   statusOrder,
   type PartnershipHealth,
   type PartnerStatus,
   type Priority,
+  type NoteType,
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
 import { usePartner } from "@/hooks/usePartners";
@@ -86,9 +88,13 @@ export default function PartnerDetailPage({ params }: PageProps) {
     updateContact,
     deleteContact,
     setPrimaryContact,
+    addFollowUpTask,
+    updateFollowUpTask,
+    deleteFollowUpTask,
   } = usePartner(id);
 
   const [newNote, setNewNote] = useState("");
+  const [noteType, setNoteType] = useState<NoteType>("Internal Note");
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [checklistExpanded, setChecklistExpanded] = useState(true);
@@ -109,6 +115,11 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
   const [showLinkForm, setShowLinkForm] = useState(false);
+  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
+  const [addingTaskToNote, setAddingTaskToNote] = useState<string | null>(null);
+  const [newFollowUpTask, setNewFollowUpTask] = useState("");
+  const [newFollowUpDueDate, setNewFollowUpDueDate] = useState("");
+  const [newFollowUpNotes, setNewFollowUpNotes] = useState("");
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContact, setNewContact] = useState({
@@ -164,13 +175,45 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
     setIsAddingNote(true);
     try {
-      await addNote(newNote.trim());
+      await addNote(newNote.trim(), "You", noteType);
       setNewNote("");
+      setNoteType("Internal Note");
     } catch (err) {
       console.error("Failed to add note:", err);
     } finally {
       setIsAddingNote(false);
     }
+  };
+
+  const handleAddFollowUpTask = async (noteId: string) => {
+    if (!newFollowUpTask.trim()) return;
+
+    try {
+      await addFollowUpTask(
+        noteId,
+        newFollowUpTask.trim(),
+        newFollowUpDueDate || null,
+        newFollowUpNotes.trim(),
+      );
+      setNewFollowUpTask("");
+      setNewFollowUpDueDate("");
+      setNewFollowUpNotes("");
+      setAddingTaskToNote(null);
+    } catch (err) {
+      console.error("Failed to add follow-up task:", err);
+    }
+  };
+
+  const toggleNoteExpanded = (noteId: string) => {
+    setExpandedNotes((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(noteId)) {
+        newSet.delete(noteId);
+      } else {
+        newSet.add(noteId);
+      }
+      return newSet;
+    });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -939,6 +982,19 @@ export default function PartnerDetailPage({ params }: PageProps) {
             <CardContent>
               <div className="space-y-4">
                 <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <select
+                      value={noteType}
+                      onChange={(e) => setNoteType(e.target.value as NoteType)}
+                      className="h-9 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+                    >
+                      <option value="Call">Call</option>
+                      <option value="Email">Email</option>
+                      <option value="Meeting">Meeting</option>
+                      <option value="Site Visit">Site Visit</option>
+                      <option value="Internal Note">Internal Note</option>
+                    </select>
+                  </div>
                   <textarea
                     value={newNote}
                     onChange={(e) => setNewNote(e.target.value)}
@@ -1051,12 +1107,15 @@ export default function PartnerDetailPage({ params }: PageProps) {
                       No notes yet
                     </p>
                   ) : (
-                    partner.notes.map((note, index) => (
+                    partner.notes.map((note) => (
                       <div
-                        key={index}
+                        key={note.id}
                         className="border-l-2 border-indigo-200 pl-4"
                       >
-                        <div className="flex items-center gap-2 text-sm">
+                        <div className="flex items-center gap-2 text-sm flex-wrap">
+                          <Badge className={noteTypeColors[note.type]}>
+                            {note.type}
+                          </Badge>
                           <span className="font-medium text-[var(--foreground)]">
                             {note.author}
                           </span>
@@ -1070,6 +1129,128 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         <p className="mt-1 text-[var(--muted-foreground)]">
                           {note.content}
                         </p>
+
+                        {/* Follow-up Tasks Section */}
+                        <div className="mt-3">
+                          {note.followUpTasks &&
+                            note.followUpTasks.length > 0 && (
+                              <div className="space-y-2 mb-2">
+                                <p className="text-xs font-medium text-[var(--foreground)]">
+                                  Follow-up Tasks
+                                </p>
+                                {note.followUpTasks.map((task) => (
+                                  <div
+                                    key={task.id}
+                                    className="flex items-start gap-2 text-sm bg-[var(--muted)] p-2 rounded-md"
+                                  >
+                                    <button
+                                      onClick={() =>
+                                        updateFollowUpTask(task.id, {
+                                          completed: !task.completed,
+                                        })
+                                      }
+                                      className="mt-0.5"
+                                    >
+                                      {task.completed ? (
+                                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                      ) : (
+                                        <Circle className="h-4 w-4 text-[var(--muted-foreground)]" />
+                                      )}
+                                    </button>
+                                    <div className="flex-1">
+                                      <p
+                                        className={
+                                          task.completed
+                                            ? "line-through text-[var(--muted-foreground)]"
+                                            : "text-[var(--foreground)]"
+                                        }
+                                      >
+                                        {task.task}
+                                      </p>
+                                      {task.dueDate && (
+                                        <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1 mt-0.5">
+                                          <Calendar className="h-3 w-3" />
+                                          Due: {formatDate(task.dueDate)}
+                                        </p>
+                                      )}
+                                      {task.notes && (
+                                        <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                                          {task.notes}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <button
+                                      onClick={() =>
+                                        deleteFollowUpTask(task.id)
+                                      }
+                                      className="text-[var(--muted-foreground)] hover:text-red-500"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                          {addingTaskToNote === note.id ? (
+                            <div className="space-y-2 p-2 bg-[var(--muted)] rounded-md">
+                              <Input
+                                value={newFollowUpTask}
+                                onChange={(e) =>
+                                  setNewFollowUpTask(e.target.value)
+                                }
+                                placeholder="Task description..."
+                                className="text-sm"
+                              />
+                              <div className="flex gap-2">
+                                <Input
+                                  type="date"
+                                  value={newFollowUpDueDate}
+                                  onChange={(e) =>
+                                    setNewFollowUpDueDate(e.target.value)
+                                  }
+                                  className="text-sm flex-1"
+                                />
+                                <Input
+                                  value={newFollowUpNotes}
+                                  onChange={(e) =>
+                                    setNewFollowUpNotes(e.target.value)
+                                  }
+                                  placeholder="Notes (optional)"
+                                  className="text-sm flex-1"
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleAddFollowUpTask(note.id)}
+                                >
+                                  Add Task
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setAddingTaskToNote(null);
+                                    setNewFollowUpTask("");
+                                    setNewFollowUpDueDate("");
+                                    setNewFollowUpNotes("");
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setAddingTaskToNote(note.id)}
+                              className="text-xs text-indigo-600 hover:underline flex items-center gap-1"
+                            >
+                              <Plus className="h-3 w-3" />
+                              Add follow-up task
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))
                   )}

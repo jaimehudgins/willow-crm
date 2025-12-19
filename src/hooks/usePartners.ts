@@ -8,6 +8,7 @@ import {
   DbTouchpoint,
   DbOnboardingTask,
   DbSchool,
+  DbFollowUpTask,
 } from "@/lib/supabase";
 import type {
   Partner,
@@ -18,6 +19,8 @@ import type {
   Priority,
   SchoolType,
   Note,
+  NoteType,
+  FollowUpTask,
   OnboardingTask,
   Contact,
   School,
@@ -30,6 +33,7 @@ function transformPartner(
   contacts: DbContact[],
   touchpoints: DbTouchpoint[],
   onboardingTasks: DbOnboardingTask[],
+  followUpTasks: DbFollowUpTask[] = [],
 ): Partner {
   const primaryContact =
     contacts.find((c) => c.is_primary_contact) || contacts[0];
@@ -90,9 +94,20 @@ function transformPartner(
         dueDate: t.due_date || undefined,
       })),
     notes: (touchpoints || []).map((t) => ({
+      id: t.id,
       date: t.date || "",
       author: t.author || "",
       content: t.content || "",
+      type: (t.type as NoteType) || "Internal Note",
+      followUpTasks: followUpTasks
+        .filter((ft) => ft.touchpoint_id === t.id)
+        .map((ft) => ({
+          id: ft.id,
+          task: ft.task,
+          dueDate: ft.due_date,
+          completed: ft.completed,
+          notes: ft.notes,
+        })),
     })),
   };
 }
@@ -123,38 +138,61 @@ export function usePartners() {
       const partnerIds = partnersData.map((p) => p.id);
 
       // Fetch all related data in parallel
-      const [contactsResult, touchpointsResult, tasksResult] =
-        await Promise.all([
-          supabase.from("contacts").select("*").in("partner_id", partnerIds),
-          supabase
-            .from("touchpoints")
-            .select("*")
-            .in("partner_id", partnerIds)
-            .order("date", { ascending: false }),
-          supabase
-            .from("onboarding_tasks")
-            .select("*")
-            .in("partner_id", partnerIds)
-            .order("order_index"),
-        ]);
+      const [
+        contactsResult,
+        touchpointsResult,
+        tasksResult,
+        followUpTasksResult,
+      ] = await Promise.all([
+        supabase.from("contacts").select("*").in("partner_id", partnerIds),
+        supabase
+          .from("touchpoints")
+          .select("*")
+          .in("partner_id", partnerIds)
+          .order("date", { ascending: false }),
+        supabase
+          .from("onboarding_tasks")
+          .select("*")
+          .in("partner_id", partnerIds)
+          .order("order_index"),
+        supabase
+          .from("follow_up_tasks")
+          .select("*")
+          .order("due_date", { ascending: true }),
+      ]);
 
       if (contactsResult.error) throw contactsResult.error;
       if (touchpointsResult.error) throw touchpointsResult.error;
       if (tasksResult.error) throw tasksResult.error;
+      // follow_up_tasks table may not exist yet
+      if (followUpTasksResult.error) {
+        console.warn(
+          "Follow-up tasks table not available:",
+          followUpTasksResult.error,
+        );
+      }
 
       const contacts = contactsResult.data || [];
       const touchpoints = touchpointsResult.data || [];
       const tasks = tasksResult.data || [];
+      const followUpTasks = followUpTasksResult.data || [];
 
       // Transform each partner with its related data
-      const transformedPartners = partnersData.map((dbPartner) =>
-        transformPartner(
+      const transformedPartners = partnersData.map((dbPartner) => {
+        const partnerTouchpoints = touchpoints.filter(
+          (t) => t.partner_id === dbPartner.id,
+        );
+        const touchpointIds = partnerTouchpoints.map((t) => t.id);
+        return transformPartner(
           dbPartner,
           contacts.filter((c) => c.partner_id === dbPartner.id),
-          touchpoints.filter((t) => t.partner_id === dbPartner.id),
+          partnerTouchpoints,
           tasks.filter((t) => t.partner_id === dbPartner.id),
-        ),
-      );
+          followUpTasks.filter((ft) =>
+            touchpointIds.includes(ft.touchpoint_id),
+          ),
+        );
+      });
 
       setPartners(transformedPartners);
     } catch (err) {
@@ -199,25 +237,30 @@ export function usePartner(id: string) {
       }
 
       // Fetch related data in parallel
-      const [contactsResult, touchpointsResult, tasksResult, schoolsResult] =
-        await Promise.all([
-          supabase.from("contacts").select("*").eq("partner_id", id),
-          supabase
-            .from("touchpoints")
-            .select("*")
-            .eq("partner_id", id)
-            .order("date", { ascending: false }),
-          supabase
-            .from("onboarding_tasks")
-            .select("*")
-            .eq("partner_id", id)
-            .order("order_index"),
-          supabase
-            .from("schools")
-            .select("*")
-            .eq("partner_id", id)
-            .order("name"),
-        ]);
+      const [
+        contactsResult,
+        touchpointsResult,
+        tasksResult,
+        schoolsResult,
+        followUpTasksResult,
+      ] = await Promise.all([
+        supabase.from("contacts").select("*").eq("partner_id", id),
+        supabase
+          .from("touchpoints")
+          .select("*")
+          .eq("partner_id", id)
+          .order("date", { ascending: false }),
+        supabase
+          .from("onboarding_tasks")
+          .select("*")
+          .eq("partner_id", id)
+          .order("order_index"),
+        supabase.from("schools").select("*").eq("partner_id", id).order("name"),
+        supabase
+          .from("follow_up_tasks")
+          .select("*")
+          .order("due_date", { ascending: true }),
+      ]);
 
       if (contactsResult.error) throw contactsResult.error;
       if (touchpointsResult.error) throw touchpointsResult.error;
@@ -226,12 +269,26 @@ export function usePartner(id: string) {
       if (schoolsResult.error) {
         console.warn("Schools table not available:", schoolsResult.error);
       }
+      // follow_up_tasks table may not exist yet
+      if (followUpTasksResult.error) {
+        console.warn(
+          "Follow-up tasks table not available:",
+          followUpTasksResult.error,
+        );
+      }
+
+      const touchpoints = touchpointsResult.data || [];
+      const touchpointIds = touchpoints.map((t) => t.id);
+      const followUpTasks = (followUpTasksResult.data || []).filter((ft) =>
+        touchpointIds.includes(ft.touchpoint_id),
+      );
 
       const transformedPartner = transformPartner(
         partnerData,
         contactsResult.data || [],
-        touchpointsResult.data || [],
+        touchpoints,
         tasksResult.data || [],
+        followUpTasks,
       );
 
       setPartner(transformedPartner);
@@ -470,7 +527,11 @@ export function usePartner(id: string) {
   };
 
   // Add a note (touchpoint)
-  const addNote = async (content: string, author: string = "You") => {
+  const addNote = async (
+    content: string,
+    author: string = "You",
+    type: NoteType = "Internal Note",
+  ) => {
     if (!partner) return;
 
     try {
@@ -479,6 +540,7 @@ export function usePartner(id: string) {
         date: new Date().toISOString().split("T")[0],
         author,
         content,
+        type,
       };
 
       const { data, error: insertError } = await supabase
@@ -493,9 +555,12 @@ export function usePartner(id: string) {
       setPartner((prev) => {
         if (!prev) return prev;
         const newNote: Note = {
+          id: data.id,
           date: data.date,
           author: data.author,
           content: data.content,
+          type: data.type as NoteType,
+          followUpTasks: [],
         };
         return { ...prev, notes: [newNote, ...prev.notes] };
       });
@@ -856,6 +921,145 @@ export function usePartner(id: string) {
     }
   };
 
+  // Add a follow-up task to a note
+  const addFollowUpTask = async (
+    noteId: string,
+    task: string,
+    dueDate: string | null = null,
+    notes: string = "",
+  ) => {
+    if (!partner) return;
+
+    try {
+      const { data, error: insertError } = await supabase
+        .from("follow_up_tasks")
+        .insert({
+          touchpoint_id: noteId,
+          task,
+          due_date: dueDate,
+          completed: false,
+          notes,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const updatedNotes = prev.notes.map((note) => {
+          if (note.id === noteId) {
+            return {
+              ...note,
+              followUpTasks: [
+                ...(note.followUpTasks || []),
+                {
+                  id: data.id,
+                  task: data.task,
+                  dueDate: data.due_date,
+                  completed: data.completed,
+                  notes: data.notes,
+                },
+              ],
+            };
+          }
+          return note;
+        });
+        return { ...prev, notes: updatedNotes };
+      });
+
+      return data;
+    } catch (err) {
+      console.error("Error adding follow-up task:", err);
+      throw err;
+    }
+  };
+
+  // Update a follow-up task
+  const updateFollowUpTask = async (
+    taskId: string,
+    updates: {
+      task?: string;
+      dueDate?: string | null;
+      completed?: boolean;
+      notes?: string;
+    },
+  ) => {
+    if (!partner) return;
+
+    try {
+      const dbUpdates: Record<string, unknown> = {};
+      if (updates.task !== undefined) dbUpdates.task = updates.task;
+      if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+      if (updates.completed !== undefined)
+        dbUpdates.completed = updates.completed;
+      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+
+      const { error: updateError } = await supabase
+        .from("follow_up_tasks")
+        .update(dbUpdates)
+        .eq("id", taskId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const updatedNotes = prev.notes.map((note) => ({
+          ...note,
+          followUpTasks: (note.followUpTasks || []).map((ft) =>
+            ft.id === taskId
+              ? {
+                  ...ft,
+                  task: updates.task ?? ft.task,
+                  dueDate:
+                    updates.dueDate !== undefined
+                      ? updates.dueDate
+                      : ft.dueDate,
+                  completed: updates.completed ?? ft.completed,
+                  notes: updates.notes ?? ft.notes,
+                }
+              : ft,
+          ),
+        }));
+        return { ...prev, notes: updatedNotes };
+      });
+    } catch (err) {
+      console.error("Error updating follow-up task:", err);
+      throw err;
+    }
+  };
+
+  // Delete a follow-up task
+  const deleteFollowUpTask = async (taskId: string) => {
+    if (!partner) return;
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("follow_up_tasks")
+        .delete()
+        .eq("id", taskId);
+
+      if (deleteError) throw deleteError;
+
+      // Update local state
+      setPartner((prev) => {
+        if (!prev) return prev;
+        const updatedNotes = prev.notes.map((note) => ({
+          ...note,
+          followUpTasks: (note.followUpTasks || []).filter(
+            (ft) => ft.id !== taskId,
+          ),
+        }));
+        return { ...prev, notes: updatedNotes };
+      });
+    } catch (err) {
+      console.error("Error deleting follow-up task:", err);
+      throw err;
+    }
+  };
+
   return {
     partner,
     schools,
@@ -877,5 +1081,8 @@ export function usePartner(id: string) {
     updateContact,
     deleteContact,
     setPrimaryContact,
+    addFollowUpTask,
+    updateFollowUpTask,
+    deleteFollowUpTask,
   };
 }
