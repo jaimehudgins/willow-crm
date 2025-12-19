@@ -540,6 +540,7 @@ export function usePartner(id: string) {
         partner_id: id,
         date: date || new Date().toISOString().split("T")[0],
         author,
+        title: type,
         notes: content,
         type,
       };
