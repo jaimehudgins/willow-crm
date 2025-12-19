@@ -117,6 +117,13 @@ export default function PartnerDetailPage({ params }: PageProps) {
     email: "",
     phone: "",
   });
+  const [editingContactId, setEditingContactId] = useState<string | null>(null);
+  const [editingContact, setEditingContact] = useState({
+    name: "",
+    role: "",
+    email: "",
+    phone: "",
+  });
 
   if (loading) {
     return (
@@ -1212,11 +1219,63 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         )}
                       </p>
                     </div>
-                    {contact.role && (
-                      <p className="text-sm text-[var(--muted-foreground)] mt-0.5">
-                        {contact.role}
-                      </p>
-                    )}
+                    <div className="group mt-0.5">
+                      <span
+                        onClick={() =>
+                          startEditing(
+                            `contact-${contact.id}-role`,
+                            contact.role || "",
+                          )
+                        }
+                        className="text-sm text-[var(--muted-foreground)] cursor-pointer hover:text-indigo-600 flex items-center gap-1"
+                      >
+                        {editingField === `contact-${contact.id}-role` ? (
+                          <span className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onKeyDown={async (e) => {
+                                if (e.key === "Enter") {
+                                  await updateContact(contact.id, {
+                                    ...contact,
+                                    role: editValue,
+                                  });
+                                  cancelEditing();
+                                }
+                                if (e.key === "Escape") cancelEditing();
+                              }}
+                              placeholder="Add role..."
+                              className="px-2 py-0.5 text-sm border border-[var(--border)] rounded bg-[var(--background)]"
+                              autoFocus
+                            />
+                            <button
+                              onClick={async () => {
+                                await updateContact(contact.id, {
+                                  ...contact,
+                                  role: editValue,
+                                });
+                                cancelEditing();
+                              }}
+                              className="text-green-600 hover:text-green-700"
+                            >
+                              <Check className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="text-red-500 hover:text-red-600"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ) : (
+                          <>
+                            {contact.role || "Click to add role"}
+                            <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50" />
+                          </>
+                        )}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2 mt-1 text-sm text-[var(--muted-foreground)]">
                       <Mail className="h-3 w-3" />
                       <span
@@ -1385,51 +1444,137 @@ export default function PartnerDetailPage({ params }: PageProps) {
                     {(partner.contacts || [])
                       .filter((c) => !c.isPrimary)
                       .map((contact) => (
-                        <div
-                          key={contact.id}
-                          className="flex items-center justify-between p-2 bg-[var(--muted)] rounded-md"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-[var(--foreground)] truncate">
-                              {contact.name}
-                            </p>
-                            {contact.role && (
-                              <p className="text-xs text-[var(--muted-foreground)] truncate">
-                                {contact.role}
-                              </p>
-                            )}
-                            <p className="text-xs text-[var(--muted-foreground)] truncate">
-                              {contact.email}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={async () => {
-                                try {
-                                  await setPrimaryContact(contact.id);
-                                } catch (err) {
-                                  console.error(
-                                    "Failed to set primary contact:",
-                                    err,
-                                  );
-                                  alert(
-                                    "Failed to set primary contact. Check console for details.",
-                                  );
+                        <div key={contact.id}>
+                          {editingContactId === contact.id ? (
+                            <div className="p-3 bg-indigo-50 rounded-md border border-indigo-200 space-y-2">
+                              <Input
+                                value={editingContact.name}
+                                onChange={(e) =>
+                                  setEditingContact((prev) => ({
+                                    ...prev,
+                                    name: e.target.value,
+                                  }))
                                 }
-                              }}
-                              className="p-1 text-[var(--muted-foreground)] hover:text-amber-500"
-                              title="Set as primary"
-                            >
-                              <Star className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => deleteContact(contact.id)}
-                              className="p-1 text-[var(--muted-foreground)] hover:text-red-500"
-                              title="Delete contact"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
+                                placeholder="Name"
+                                className="text-sm"
+                              />
+                              <Input
+                                value={editingContact.role}
+                                onChange={(e) =>
+                                  setEditingContact((prev) => ({
+                                    ...prev,
+                                    role: e.target.value,
+                                  }))
+                                }
+                                placeholder="Role"
+                                className="text-sm"
+                              />
+                              <Input
+                                value={editingContact.email}
+                                onChange={(e) =>
+                                  setEditingContact((prev) => ({
+                                    ...prev,
+                                    email: e.target.value,
+                                  }))
+                                }
+                                placeholder="Email"
+                                type="email"
+                                className="text-sm"
+                              />
+                              <Input
+                                value={editingContact.phone}
+                                onChange={(e) =>
+                                  setEditingContact((prev) => ({
+                                    ...prev,
+                                    phone: e.target.value,
+                                  }))
+                                }
+                                placeholder="Phone"
+                                className="text-sm"
+                              />
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={async () => {
+                                    await updateContact(
+                                      contact.id,
+                                      editingContact,
+                                    );
+                                    setEditingContactId(null);
+                                  }}
+                                >
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Save
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setEditingContactId(null)}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between p-2 bg-[var(--muted)] rounded-md">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[var(--foreground)] truncate">
+                                  {contact.name}
+                                </p>
+                                {contact.role && (
+                                  <p className="text-xs text-[var(--muted-foreground)] truncate">
+                                    {contact.role}
+                                  </p>
+                                )}
+                                <p className="text-xs text-[var(--muted-foreground)] truncate">
+                                  {contact.email}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => {
+                                    setEditingContactId(contact.id);
+                                    setEditingContact({
+                                      name: contact.name,
+                                      role: contact.role || "",
+                                      email: contact.email,
+                                      phone: contact.phone || "",
+                                    });
+                                  }}
+                                  className="p-1 text-[var(--muted-foreground)] hover:text-indigo-600"
+                                  title="Edit contact"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await setPrimaryContact(contact.id);
+                                    } catch (err) {
+                                      console.error(
+                                        "Failed to set primary contact:",
+                                        err,
+                                      );
+                                      alert(
+                                        "Failed to set primary contact. Check console for details.",
+                                      );
+                                    }
+                                  }}
+                                  className="p-1 text-[var(--muted-foreground)] hover:text-amber-500"
+                                  title="Set as primary"
+                                >
+                                  <Star className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => deleteContact(contact.id)}
+                                  className="p-1 text-[var(--muted-foreground)] hover:text-red-500"
+                                  title="Delete contact"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                   </div>
