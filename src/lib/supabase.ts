@@ -82,6 +82,7 @@ export interface DbFollowUpTask {
   task: string;
   due_date: string | null;
   completed: boolean;
+  status: string;
   notes?: string;
   created_at?: string;
   updated_at?: string;

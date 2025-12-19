@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, use, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -34,6 +35,7 @@ import {
   Star,
   Trash2,
   Globe,
+  Video,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -98,6 +100,60 @@ export default function PartnerDetailPage({ params }: PageProps) {
     deleteNote,
     updateSchool,
   } = usePartner(id);
+
+  const { data: session, status: sessionStatus } = useSession();
+
+  interface NextMeeting {
+    summary: string;
+    start: string;
+    htmlLink: string;
+  }
+
+  const [nextMeeting, setNextMeeting] = useState<NextMeeting | null>(null);
+  const [loadingMeeting, setLoadingMeeting] = useState(false);
+
+  // Fetch next meeting for this partner
+  useEffect(() => {
+    async function fetchMeeting() {
+      if (sessionStatus !== "authenticated" || !session?.accessToken) return;
+      if (!partner) return;
+
+      // Collect all contact emails
+      const emails: string[] = [];
+      if (partner.leadContact?.email) {
+        emails.push(partner.leadContact.email);
+      }
+      if (partner.contacts) {
+        for (const contact of partner.contacts) {
+          if (contact.email) emails.push(contact.email);
+        }
+      }
+
+      if (emails.length === 0) return;
+
+      setLoadingMeeting(true);
+      try {
+        const response = await fetch("/api/calendar/next-meetings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ partnerEmails: { [partner.id]: emails } }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data[partner.id]) {
+            setNextMeeting(data[partner.id]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch meeting:", err);
+      } finally {
+        setLoadingMeeting(false);
+      }
+    }
+
+    fetchMeeting();
+  }, [sessionStatus, session?.accessToken, partner]);
 
   const [newNote, setNewNote] = useState("");
   const [noteType, setNoteType] = useState<NoteType>("Internal Note");
@@ -1460,6 +1516,52 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   </option>
                 ))}
               </select>
+            </CardContent>
+          </Card>
+
+          {/* Next Meeting */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Video className="h-4 w-4" />
+                Next Meeting
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingMeeting ? (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-[var(--muted-foreground)]" />
+                </div>
+              ) : nextMeeting ? (
+                <a
+                  href={nextMeeting.htmlLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block hover:bg-[var(--muted)] rounded-lg p-2 -m-2 transition-colors"
+                >
+                  <p className="text-sm font-medium text-[var(--foreground)]">
+                    {nextMeeting.summary}
+                  </p>
+                  <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(nextMeeting.start).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}{" "}
+                    at{" "}
+                    {new Date(nextMeeting.start).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </p>
+                </a>
+              ) : (
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  No upcoming meetings
+                </p>
+              )}
             </CardContent>
           </Card>
 

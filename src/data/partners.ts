@@ -66,11 +66,27 @@ export const CORE_ONBOARDING_TASKS = [
   "Initial Training",
 ];
 
+export type TaskStatus =
+  | "Not Started"
+  | "In Progress"
+  | "Waiting"
+  | "Paused"
+  | "Complete";
+
+export const taskStatusColors: Record<TaskStatus, string> = {
+  "Not Started": "bg-gray-100 text-gray-800",
+  "In Progress": "bg-blue-100 text-blue-800",
+  Waiting: "bg-yellow-100 text-yellow-800",
+  Paused: "bg-orange-100 text-orange-800",
+  Complete: "bg-green-100 text-green-800",
+};
+
 export interface FollowUpTask {
   id: string;
   task: string;
   dueDate: string | null;
   completed: boolean;
+  status: TaskStatus;
   notes?: string;
 }
 

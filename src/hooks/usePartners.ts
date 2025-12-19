@@ -25,6 +25,7 @@ import type {
   OnboardingTask,
   Contact,
   School,
+  TaskStatus,
 } from "@/data/partners";
 import { CORE_ONBOARDING_TASKS } from "@/data/partners";
 
@@ -109,6 +110,7 @@ function transformPartner(
           task: ft.task,
           dueDate: ft.due_date,
           completed: ft.completed,
+          status: (ft.status as TaskStatus) || "Not Started",
           notes: ft.notes,
         })),
     })),
@@ -117,6 +119,7 @@ function transformPartner(
       task: ft.task,
       dueDate: ft.due_date,
       completed: ft.completed,
+      status: (ft.status as TaskStatus) || "Not Started",
       notes: ft.notes,
     })),
   };
@@ -992,6 +995,7 @@ export function usePartner(id: string) {
           task,
           due_date: dueDate,
           completed: false,
+          status: "Not Started",
           notes,
         })
         .select()
@@ -1013,6 +1017,7 @@ export function usePartner(id: string) {
                   task: data.task,
                   dueDate: data.due_date,
                   completed: data.completed,
+                  status: (data.status as TaskStatus) || "Not Started",
                   notes: data.notes,
                 },
               ],
@@ -1037,6 +1042,7 @@ export function usePartner(id: string) {
       task?: string;
       dueDate?: string | null;
       completed?: boolean;
+      status?: TaskStatus;
       notes?: string;
     },
   ) => {
@@ -1048,6 +1054,11 @@ export function usePartner(id: string) {
       if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
       if (updates.completed !== undefined)
         dbUpdates.completed = updates.completed;
+      if (updates.status !== undefined) {
+        dbUpdates.status = updates.status;
+        // Sync completed flag with status
+        dbUpdates.completed = updates.status === "Complete";
+      }
       if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
 
       const { error: updateError } = await supabase
@@ -1071,7 +1082,10 @@ export function usePartner(id: string) {
                     updates.dueDate !== undefined
                       ? updates.dueDate
                       : ft.dueDate,
-                  completed: updates.completed ?? ft.completed,
+                  completed: updates.status
+                    ? updates.status === "Complete"
+                    : (updates.completed ?? ft.completed),
+                  status: updates.status ?? ft.status,
                   notes: updates.notes ?? ft.notes,
                 }
               : ft,
@@ -1131,6 +1145,7 @@ export function usePartner(id: string) {
           task,
           due_date: dueDate,
           completed: false,
+          status: "Not Started",
           notes,
         })
         .select()
@@ -1150,6 +1165,7 @@ export function usePartner(id: string) {
               task: data.task,
               dueDate: data.due_date,
               completed: data.completed,
+              status: (data.status as TaskStatus) || "Not Started",
               notes: data.notes,
             },
           ],
@@ -1170,6 +1186,7 @@ export function usePartner(id: string) {
       task?: string;
       dueDate?: string | null;
       completed?: boolean;
+      status?: TaskStatus;
       notes?: string;
     },
   ) => {
@@ -1181,6 +1198,11 @@ export function usePartner(id: string) {
       if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
       if (updates.completed !== undefined)
         dbUpdates.completed = updates.completed;
+      if (updates.status !== undefined) {
+        dbUpdates.status = updates.status;
+        // Sync completed flag with status
+        dbUpdates.completed = updates.status === "Complete";
+      }
       if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
 
       const { error: updateError } = await supabase
@@ -1200,7 +1222,10 @@ export function usePartner(id: string) {
                 task: updates.task ?? t.task,
                 dueDate:
                   updates.dueDate !== undefined ? updates.dueDate : t.dueDate,
-                completed: updates.completed ?? t.completed,
+                completed: updates.status
+                  ? updates.status === "Complete"
+                  : (updates.completed ?? t.completed),
+                status: updates.status ?? t.status,
                 notes: updates.notes ?? t.notes,
               }
             : t,

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Calendar,
   CheckCircle2,
   Circle,
   Clock,
@@ -11,12 +10,18 @@ import {
   ListTodo,
   Loader2,
   AlertTriangle,
+  Search,
+  Pause,
+  Play,
+  Hourglass,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { usePartners } from "@/hooks/usePartners";
 import { formatDate } from "@/lib/utils";
+import { type TaskStatus, taskStatusColors } from "@/data/partners";
+import { supabase } from "@/lib/supabase";
 
 interface TaskItem {
   id: string;
@@ -24,19 +29,30 @@ interface TaskItem {
   title: string;
   dueDate: string | null;
   completed: boolean;
+  status: TaskStatus;
   partnerId: string;
   partnerName: string;
   noteId?: string;
 }
 
 type FilterType = "all" | "task" | "onboarding" | "followup";
-type StatusFilter = "pending" | "completed" | "all";
+type StatusFilter = TaskStatus | "all" | "active";
+
+const STATUS_OPTIONS: TaskStatus[] = [
+  "Not Started",
+  "In Progress",
+  "Waiting",
+  "Paused",
+  "Complete",
+];
 
 export default function TasksPage() {
-  const { partners, loading, error } = usePartners();
+  const { partners, loading, error, refetch } = usePartners();
   const [typeFilter, setTypeFilter] = useState<FilterType>("all");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [partnerFilter, setPartnerFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
 
   if (loading) {
     return (
@@ -69,6 +85,7 @@ export default function TasksPage() {
         title: task.task,
         dueDate: task.dueDate,
         completed: task.completed,
+        status: task.status || "Not Started",
         partnerId: partner.id,
         partnerName: partner.name,
       });
@@ -83,6 +100,7 @@ export default function TasksPage() {
           title: task.task,
           dueDate: task.dueDate,
           completed: task.completed,
+          status: task.status || "Not Started",
           partnerId: partner.id,
           partnerName: partner.name,
           noteId: note.id,
@@ -99,6 +117,7 @@ export default function TasksPage() {
           title: task.task,
           dueDate: task.dueDate,
           completed: task.completed,
+          status: task.completed ? "Complete" : "Not Started",
           partnerId: partner.id,
           partnerName: partner.name,
         });
@@ -109,19 +128,31 @@ export default function TasksPage() {
   // Apply filters
   let filteredItems = allItems;
 
+  // Search filter
+  if (searchQuery.trim()) {
+    const query = searchQuery.toLowerCase();
+    filteredItems = filteredItems.filter(
+      (item) =>
+        item.title.toLowerCase().includes(query) ||
+        item.partnerName.toLowerCase().includes(query),
+    );
+  }
+
   if (typeFilter !== "all") {
     filteredItems = filteredItems.filter((item) => item.type === typeFilter);
   }
 
-  if (statusFilter === "pending") {
-    filteredItems = filteredItems.filter((item) => !item.completed);
-  } else if (statusFilter === "completed") {
-    filteredItems = filteredItems.filter((item) => item.completed);
+  if (statusFilter === "active") {
+    filteredItems = filteredItems.filter((item) => item.status !== "Complete");
+  } else if (statusFilter !== "all") {
+    filteredItems = filteredItems.filter(
+      (item) => item.status === statusFilter,
+    );
   }
 
   if (partnerFilter !== "all") {
     filteredItems = filteredItems.filter(
-      (item) => item.partnerId === partnerFilter
+      (item) => item.partnerId === partnerFilter,
     );
   }
 
@@ -157,6 +188,21 @@ export default function TasksPage() {
     }
   };
 
+  const getStatusIcon = (status: TaskStatus) => {
+    switch (status) {
+      case "Complete":
+        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+      case "In Progress":
+        return <Play className="h-5 w-5 text-blue-600" />;
+      case "Waiting":
+        return <Hourglass className="h-5 w-5 text-yellow-600" />;
+      case "Paused":
+        return <Pause className="h-5 w-5 text-orange-600" />;
+      default:
+        return <Circle className="h-5 w-5 text-gray-400" />;
+    }
+  };
+
   const isOverdue = (dueDate: string | null) => {
     if (!dueDate) return false;
     return dueDate < today;
@@ -167,13 +213,44 @@ export default function TasksPage() {
     return dueDate === today;
   };
 
-  const pendingCount = allItems.filter((item) => !item.completed).length;
+  const activeCount = allItems.filter(
+    (item) => item.status !== "Complete",
+  ).length;
   const overdueCount = allItems.filter(
-    (item) => !item.completed && isOverdue(item.dueDate)
+    (item) => item.status !== "Complete" && isOverdue(item.dueDate),
   ).length;
   const dueTodayCount = allItems.filter(
-    (item) => !item.completed && isDueToday(item.dueDate)
+    (item) => item.status !== "Complete" && isDueToday(item.dueDate),
   ).length;
+
+  const handleStatusChange = async (
+    taskId: string,
+    newStatus: TaskStatus,
+    taskType: TaskItem["type"],
+  ) => {
+    // Onboarding tasks use a different system
+    if (taskType === "onboarding") return;
+
+    setUpdatingTaskId(taskId);
+    try {
+      const { error: updateError } = await supabase
+        .from("follow_up_tasks")
+        .update({
+          status: newStatus,
+          completed: newStatus === "Complete",
+        })
+        .eq("id", taskId);
+
+      if (updateError) throw updateError;
+
+      // Refetch to update the UI
+      await refetch();
+    } catch (err) {
+      console.error("Error updating task status:", err);
+    } finally {
+      setUpdatingTaskId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -193,10 +270,10 @@ export default function TasksPage() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-3xl font-bold text-[var(--foreground)]">
-                {pendingCount}
+                {activeCount}
               </p>
               <p className="text-sm text-[var(--muted-foreground)]">
-                Pending Tasks
+                Active Tasks
               </p>
             </div>
           </CardContent>
@@ -204,8 +281,12 @@ export default function TasksPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-3xl font-bold text-amber-600">{dueTodayCount}</p>
-              <p className="text-sm text-[var(--muted-foreground)]">Due Today</p>
+              <p className="text-3xl font-bold text-amber-600">
+                {dueTodayCount}
+              </p>
+              <p className="text-sm text-[var(--muted-foreground)]">
+                Due Today
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -217,6 +298,17 @@ export default function TasksPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
+        <Input
+          placeholder="Search tasks or partners..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
       </div>
 
       {/* Filters */}
@@ -235,12 +327,18 @@ export default function TasksPage() {
               </label>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value as StatusFilter)
+                }
                 className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
               >
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
+                <option value="active">Active (Not Complete)</option>
                 <option value="all">All</option>
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Waiting">Waiting</option>
+                <option value="Paused">Paused</option>
+                <option value="Complete">Complete</option>
               </select>
             </div>
             <div>
@@ -283,7 +381,8 @@ export default function TasksPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {filteredItems.length} {filteredItems.length === 1 ? "Task" : "Tasks"}
+            {filteredItems.length}{" "}
+            {filteredItems.length === 1 ? "Task" : "Tasks"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -294,47 +393,56 @@ export default function TasksPage() {
           ) : (
             <div className="space-y-2">
               {filteredItems.map((item) => (
-                <Link
+                <div
                   key={item.id}
-                  href={`/partners/${item.partnerId}`}
-                  className="block"
+                  className={`flex items-start gap-3 p-4 rounded-lg border border-[var(--border)] hover:bg-[var(--muted)] transition-colors ${
+                    item.status === "Complete" ? "opacity-60" : ""
+                  }`}
                 >
-                  <div
-                    className={`flex items-start gap-3 p-4 rounded-lg border border-[var(--border)] hover:bg-[var(--muted)] transition-colors ${
-                      item.completed ? "opacity-60" : ""
-                    }`}
-                  >
-                    {item.completed ? (
-                      <CheckCircle2 className="h-5 w-5 mt-0.5 text-green-600 shrink-0" />
+                  <div className="mt-0.5 shrink-0">
+                    {updatingTaskId === item.id ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-indigo-600" />
                     ) : (
-                      <Circle className="h-5 w-5 mt-0.5 text-[var(--muted-foreground)] shrink-0" />
+                      getStatusIcon(item.status)
                     )}
-                    <div className="flex-1 min-w-0">
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/partners/${item.partnerId}`}>
                       <p
-                        className={`text-sm ${
-                          item.completed
+                        className={`text-sm hover:underline ${
+                          item.status === "Complete"
                             ? "line-through text-[var(--muted-foreground)]"
                             : "text-[var(--foreground)]"
                         }`}
                       >
                         {item.title}
                       </p>
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <Badge
-                          variant="secondary"
-                          className={`text-xs ${getTypeColor(item.type)}`}
-                        >
-                          {getTypeLabel(item.type)}
-                        </Badge>
-                        <span className="text-xs text-[var(--muted-foreground)]">
+                    </Link>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs ${getTypeColor(item.type)}`}
+                      >
+                        {getTypeLabel(item.type)}
+                      </Badge>
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs ${taskStatusColors[item.status]}`}
+                      >
+                        {item.status}
+                      </Badge>
+                      <Link href={`/partners/${item.partnerId}`}>
+                        <span className="text-xs text-[var(--muted-foreground)] hover:underline">
                           {item.partnerName}
                         </span>
-                      </div>
+                      </Link>
                     </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
                     {item.dueDate && (
                       <div
-                        className={`flex items-center gap-1 text-sm shrink-0 ${
-                          item.completed
+                        className={`flex items-center gap-1 text-sm ${
+                          item.status === "Complete"
                             ? "text-[var(--muted-foreground)]"
                             : isOverdue(item.dueDate)
                               ? "text-red-600 font-medium"
@@ -344,15 +452,37 @@ export default function TasksPage() {
                         }`}
                       >
                         <Clock className="h-4 w-4" />
-                        {isOverdue(item.dueDate) && !item.completed
+                        {isOverdue(item.dueDate) && item.status !== "Complete"
                           ? "Overdue"
-                          : isDueToday(item.dueDate) && !item.completed
+                          : isDueToday(item.dueDate) &&
+                              item.status !== "Complete"
                             ? "Today"
                             : formatDate(item.dueDate)}
                       </div>
                     )}
+                    {item.type !== "onboarding" && (
+                      <select
+                        value={item.status}
+                        onChange={(e) =>
+                          handleStatusChange(
+                            item.id,
+                            e.target.value as TaskStatus,
+                            item.type,
+                          )
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        disabled={updatingTaskId === item.id}
+                        className={`rounded-md border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs ${taskStatusColors[item.status]}`}
+                      >
+                        {STATUS_OPTIONS.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}

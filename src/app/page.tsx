@@ -16,7 +16,10 @@ import {
   MessageCircle,
   XCircle,
   HelpCircle,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { PipelineChart } from "@/components/dashboard/pipeline-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
@@ -34,6 +37,7 @@ export default function DashboardPage() {
   const { data: session, status: sessionStatus } = useSession();
   const { partners, loading, error } = usePartners();
   const [meetings, setMeetings] = useState<Record<string, NextMeeting>>({});
+  const [showRenewals, setShowRenewals] = useState(false);
 
   // Fetch calendar meetings when authenticated and partners are loaded
   useEffect(() => {
@@ -215,51 +219,61 @@ export default function DashboardPage() {
         </div>
 
         {/* 2026-27 Renewal Status Row */}
-        <h3 className="text-md font-medium text-[var(--muted-foreground)] mt-6 mb-3">
+        <button
+          onClick={() => setShowRenewals(!showRenewals)}
+          className="flex items-center gap-2 text-md font-medium text-[var(--muted-foreground)] mt-6 mb-3 hover:text-[var(--foreground)] transition-colors"
+        >
+          {showRenewals ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
           2026-27 Renewals
-        </h3>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <MetricCard
-            title="Confirmed"
-            value={confirmedRenewals.length}
-            icon={CheckCircle}
-            description="Renewing"
-            schools={confirmedRenewals}
-            total={activePartners.length}
-          />
-          <MetricCard
-            title="In Discussion"
-            value={inDiscussionRenewals.length}
-            icon={MessageCircle}
-            description="Talking about renewal"
-            schools={inDiscussionRenewals}
-            total={activePartners.length}
-          />
-          <MetricCard
-            title="At Risk"
-            value={atRiskRenewals.length}
-            icon={AlertTriangle}
-            description="May not renew"
-            schools={atRiskRenewals}
-            total={activePartners.length}
-          />
-          <MetricCard
-            title="Not Renewing"
-            value={notRenewingPartners.length}
-            icon={XCircle}
-            description="Won't continue"
-            schools={notRenewingPartners}
-            total={activePartners.length}
-          />
-          <MetricCard
-            title="Not Yet Determined"
-            value={notYetDeterminedRenewals.length}
-            icon={HelpCircle}
-            description="To be discussed"
-            schools={notYetDeterminedRenewals}
-            total={activePartners.length}
-          />
-        </div>
+        </button>
+        {showRenewals && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <MetricCard
+              title="Confirmed"
+              value={confirmedRenewals.length}
+              icon={CheckCircle}
+              description="Renewing"
+              schools={confirmedRenewals}
+              total={activePartners.length}
+            />
+            <MetricCard
+              title="In Discussion"
+              value={inDiscussionRenewals.length}
+              icon={MessageCircle}
+              description="Talking about renewal"
+              schools={inDiscussionRenewals}
+              total={activePartners.length}
+            />
+            <MetricCard
+              title="At Risk"
+              value={atRiskRenewals.length}
+              icon={AlertTriangle}
+              description="May not renew"
+              schools={atRiskRenewals}
+              total={activePartners.length}
+            />
+            <MetricCard
+              title="Not Renewing"
+              value={notRenewingPartners.length}
+              icon={XCircle}
+              description="Won't continue"
+              schools={notRenewingPartners}
+              total={activePartners.length}
+            />
+            <MetricCard
+              title="Not Yet Determined"
+              value={notYetDeterminedRenewals.length}
+              icon={HelpCircle}
+              description="To be discussed"
+              schools={notYetDeterminedRenewals}
+              total={activePartners.length}
+            />
+          </div>
+        )}
       </div>
 
       {/* Potential Partners Section */}
