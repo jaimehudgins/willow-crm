@@ -98,3 +98,13 @@ export interface DbOnboardingTask {
   due_date?: string;
   created_at?: string;
 }
+
+export interface DbAttachment {
+  id: string;
+  partner_id: string;
+  name: string;
+  url: string;
+  type: string;
+  created_at?: string;
+  updated_at?: string;
+}

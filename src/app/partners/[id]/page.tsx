@@ -59,13 +59,6 @@ import {
 import { formatDate } from "@/lib/utils";
 import { usePartner } from "@/hooks/usePartners";
 
-interface Attachment {
-  id: string;
-  name: string;
-  url: string;
-  type: "file" | "link";
-}
-
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -75,6 +68,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const {
     partner,
     schools,
+    attachments,
     loading,
     error,
     updateOnboardingTask,
@@ -99,6 +93,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
     updateTask,
     deleteNote,
     updateSchool,
+    addAttachment,
+    deleteAttachment,
   } = usePartner(id);
 
   const { data: session, status: sessionStatus } = useSession();
@@ -176,10 +172,13 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [editingTaskText, setEditingTaskText] = useState("");
   const [showAddTask, setShowAddTask] = useState(false);
   const [newTaskText, setNewTaskText] = useState("");
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
   const [showLinkForm, setShowLinkForm] = useState(false);
+  const [showAddAttachmentForm, setShowAddAttachmentForm] = useState(false);
+  const [noteAttachments, setNoteAttachments] = useState<
+    { id: string; name: string; url: string; type: "file" | "link" }[]
+  >([]);
   const [expandedNotes, setExpandedNotes] = useState<Set<string>>(new Set());
   const [addingTaskToNote, setAddingTaskToNote] = useState<string | null>(null);
   const [newFollowUpTask, setNewFollowUpTask] = useState("");
@@ -308,41 +307,71 @@ export default function PartnerDetailPage({ params }: PageProps) {
     });
   };
 
+  // Handle file upload for note attachments (local state only)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
     Array.from(files).forEach((file) => {
-      const attachment: Attachment = {
+      const attachment = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         name: file.name,
         url: URL.createObjectURL(file),
-        type: "file",
+        type: "file" as const,
       };
-      setAttachments((prev) => [...prev, attachment]);
+      setNoteAttachments((prev) => [...prev, attachment]);
     });
 
     e.target.value = "";
   };
 
-  const handleAddLink = () => {
+  // Handle adding a link for note attachments (local state only)
+  const handleAddNoteLink = () => {
     if (!linkUrl.trim()) return;
 
-    const attachment: Attachment = {
+    const attachment = {
       id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
       name: linkName.trim() || linkUrl,
       url: linkUrl.startsWith("http") ? linkUrl : `https://${linkUrl}`,
-      type: "link",
+      type: "link" as const,
     };
 
-    setAttachments((prev) => [...prev, attachment]);
+    setNoteAttachments((prev) => [...prev, attachment]);
     setLinkUrl("");
     setLinkName("");
     setShowLinkForm(false);
   };
 
-  const removeAttachment = (attachmentId: string) => {
-    setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
+  // Remove a note attachment (local state only)
+  const removeNoteAttachment = (attachmentId: string) => {
+    setNoteAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
+  };
+
+  // Handle adding a link to the partner's Files & Links (persisted to database)
+  const handleAddLink = async () => {
+    if (!linkUrl.trim()) return;
+
+    const name = linkName.trim() || linkUrl;
+    const url = linkUrl.startsWith("http") ? linkUrl : `https://${linkUrl}`;
+
+    try {
+      await addAttachment(name, url, "link");
+      setLinkUrl("");
+      setLinkName("");
+      setShowAddAttachmentForm(false);
+    } catch (err) {
+      console.error("Failed to add link:", err);
+      alert("Failed to add link. Please try again.");
+    }
+  };
+
+  const handleRemoveAttachment = async (attachmentId: string) => {
+    try {
+      await deleteAttachment(attachmentId);
+    } catch (err) {
+      console.error("Failed to remove attachment:", err);
+      alert("Failed to remove attachment. Please try again.");
+    }
   };
 
   const handleHealthChange = async (health: PartnershipHealth) => {
@@ -1149,7 +1178,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         placeholder="https://..."
                         className="flex-1"
                       />
-                      <Button onClick={handleAddLink} size="sm">
+                      <Button onClick={handleAddNoteLink} size="sm">
                         Add
                       </Button>
                       <Button
@@ -1162,13 +1191,13 @@ export default function PartnerDetailPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  {attachments.length > 0 && (
+                  {noteAttachments.length > 0 && (
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-[var(--foreground)]">
                         Attachments
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        {attachments.map((attachment) => (
+                        {noteAttachments.map((attachment) => (
                           <div
                             key={attachment.id}
                             className="flex items-center gap-2 px-3 py-1.5 bg-[var(--muted)] rounded-md text-sm"
@@ -1187,7 +1216,9 @@ export default function PartnerDetailPage({ params }: PageProps) {
                               {attachment.name}
                             </a>
                             <button
-                              onClick={() => removeAttachment(attachment.id)}
+                              onClick={() =>
+                                removeNoteAttachment(attachment.id)
+                              }
                               className="text-[var(--muted-foreground)] hover:text-red-500"
                             >
                               <X className="h-3 w-3" />
@@ -2343,9 +2374,53 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
           <Card>
             <CardHeader>
-              <CardTitle>Files & Links</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Files & Links</CardTitle>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    setShowAddAttachmentForm(!showAddAttachmentForm)
+                  }
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
+              {showAddAttachmentForm && (
+                <div className="mb-4 p-3 bg-[var(--muted)] rounded-lg space-y-2">
+                  <Input
+                    value={linkName}
+                    onChange={(e) => setLinkName(e.target.value)}
+                    placeholder="Link name (e.g., Contract, School Calendar)"
+                    className="text-sm"
+                  />
+                  <Input
+                    value={linkUrl}
+                    onChange={(e) => setLinkUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleAddLink}>
+                      <LinkIcon className="h-4 w-4 mr-1" />
+                      Add Link
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setShowAddAttachmentForm(false);
+                        setLinkName("");
+                        setLinkUrl("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
               {attachments.length > 0 ? (
                 <div className="space-y-2">
                   {attachments.map((attachment) => (
@@ -2369,7 +2444,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                         </a>
                       </div>
                       <button
-                        onClick={() => removeAttachment(attachment.id)}
+                        onClick={() => handleRemoveAttachment(attachment.id)}
                         className="text-[var(--muted-foreground)] hover:text-red-500 shrink-0"
                       >
                         <X className="h-4 w-4" />
@@ -2379,7 +2454,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                 </div>
               ) : (
                 <p className="text-sm text-[var(--muted-foreground)]">
-                  No files or links attached yet.
+                  No files or links attached yet. Click + to add a link.
                 </p>
               )}
             </CardContent>

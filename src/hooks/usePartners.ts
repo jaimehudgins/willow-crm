@@ -9,6 +9,7 @@ import {
   DbOnboardingTask,
   DbSchool,
   DbFollowUpTask,
+  DbAttachment,
 } from "@/lib/supabase";
 import type {
   Partner,
@@ -26,6 +27,7 @@ import type {
   Contact,
   School,
   TaskStatus,
+  Attachment,
 } from "@/data/partners";
 import { CORE_ONBOARDING_TASKS } from "@/data/partners";
 
@@ -229,6 +231,7 @@ export function usePartners() {
 export function usePartner(id: string) {
   const [partner, setPartner] = useState<Partner | null>(null);
   const [schools, setSchools] = useState<School[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -259,6 +262,7 @@ export function usePartner(id: string) {
         tasksResult,
         schoolsResult,
         followUpTasksResult,
+        attachmentsResult,
       ] = await Promise.all([
         supabase.from("contacts").select("*").eq("partner_id", id),
         supabase
@@ -276,6 +280,11 @@ export function usePartner(id: string) {
           .from("follow_up_tasks")
           .select("*")
           .order("due_date", { ascending: true }),
+        supabase
+          .from("attachments")
+          .select("*")
+          .eq("partner_id", id)
+          .order("created_at", { ascending: false }),
       ]);
 
       if (contactsResult.error) throw contactsResult.error;
@@ -327,6 +336,17 @@ export function usePartner(id: string) {
         }),
       );
       setSchools(transformedSchools);
+
+      // Transform attachments
+      const transformedAttachments: Attachment[] = (
+        attachmentsResult.data || []
+      ).map((a: DbAttachment) => ({
+        id: a.id,
+        name: a.name || "",
+        url: a.url || "",
+        type: (a.type as "file" | "link") || "link",
+      }));
+      setAttachments(transformedAttachments);
     } catch (err) {
       console.error("Error fetching partner:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch partner");
@@ -1291,9 +1311,64 @@ export function usePartner(id: string) {
     }
   };
 
+  // Add an attachment (file or link)
+  const addAttachment = async (
+    name: string,
+    url: string,
+    type: "file" | "link",
+  ) => {
+    try {
+      const { data, error: insertError } = await supabase
+        .from("attachments")
+        .insert({
+          partner_id: id,
+          name,
+          url,
+          type,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Update local state
+      const newAttachment: Attachment = {
+        id: data.id,
+        name: data.name,
+        url: data.url,
+        type: data.type as "file" | "link",
+      };
+      setAttachments((prev) => [newAttachment, ...prev]);
+
+      return data;
+    } catch (err) {
+      console.error("Error adding attachment:", err);
+      throw err;
+    }
+  };
+
+  // Delete an attachment
+  const deleteAttachment = async (attachmentId: string) => {
+    try {
+      const { error: deleteError } = await supabase
+        .from("attachments")
+        .delete()
+        .eq("id", attachmentId);
+
+      if (deleteError) throw deleteError;
+
+      // Update local state
+      setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
+    } catch (err) {
+      console.error("Error deleting attachment:", err);
+      throw err;
+    }
+  };
+
   return {
     partner,
     schools,
+    attachments,
     loading,
     error,
     refetch: fetchPartner,
@@ -1319,5 +1394,7 @@ export function usePartner(id: string) {
     addTask,
     updateTask,
     updateSchool,
+    addAttachment,
+    deleteAttachment,
   };
 }

@@ -118,6 +118,13 @@ export interface School {
   address: string;
 }
 
+export interface Attachment {
+  id: string;
+  name: string;
+  url: string;
+  type: "file" | "link";
+}
+
 export interface Partner {
   id: string;
   name: string;
@@ -153,6 +160,7 @@ export interface Partner {
   onboardingChecklist: OnboardingTask[];
   notes: Note[];
   tasks?: FollowUpTask[];
+  attachments?: Attachment[];
 }
 
 export const partners: Partner[] = [];
