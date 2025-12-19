@@ -531,13 +531,14 @@ export function usePartner(id: string) {
     content: string,
     author: string = "You",
     type: NoteType = "Internal Note",
+    date?: string,
   ) => {
     if (!partner) return;
 
     try {
       const newTouchpoint = {
         partner_id: id,
-        date: new Date().toISOString().split("T")[0],
+        date: date || new Date().toISOString().split("T")[0],
         author,
         content,
         type,

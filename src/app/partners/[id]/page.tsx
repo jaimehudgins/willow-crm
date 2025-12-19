@@ -95,6 +95,9 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
   const [newNote, setNewNote] = useState("");
   const [noteType, setNoteType] = useState<NoteType>("Internal Note");
+  const [noteDate, setNoteDate] = useState(
+    () => new Date().toISOString().split("T")[0],
+  );
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [checklistExpanded, setChecklistExpanded] = useState(true);
@@ -175,9 +178,10 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
     setIsAddingNote(true);
     try {
-      await addNote(newNote.trim(), "You", noteType);
+      await addNote(newNote.trim(), "You", noteType, noteDate);
       setNewNote("");
       setNoteType("Internal Note");
+      setNoteDate(new Date().toISOString().split("T")[0]);
     } catch (err) {
       console.error("Failed to add note:", err);
     } finally {
@@ -994,6 +998,12 @@ export default function PartnerDetailPage({ params }: PageProps) {
                       <option value="Site Visit">Site Visit</option>
                       <option value="Internal Note">Internal Note</option>
                     </select>
+                    <input
+                      type="date"
+                      value={noteDate}
+                      onChange={(e) => setNoteDate(e.target.value)}
+                      className="h-9 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+                    />
                   </div>
                   <textarea
                     value={newNote}
