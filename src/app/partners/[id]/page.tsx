@@ -1497,10 +1497,10 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   }
                   className={`w-full rounded-md border border-[var(--border)] px-3 py-2 text-sm font-medium ${partnershipHealthColors[partner.partnershipHealth || "Monitoring (New)"]}`}
                 >
-                  <option value="Strong">Strong</option>
-                  <option value="Good">Good</option>
-                  <option value="Fair">Fair</option>
-                  <option value="At Risk">At Risk</option>
+                  <option value="Thriving">Thriving</option>
+                  <option value="Healthy">Healthy</option>
+                  <option value="Wavering">Wavering</option>
+                  <option value="Stalled">Stalled</option>
                   <option value="Monitoring (New)">Monitoring (New)</option>
                 </select>
               </CardContent>

@@ -64,20 +64,20 @@ export default function DashboardPage() {
   // Active partners by health status
   const activePartners = partners.filter((p) => p.status === "Active");
 
-  const strongPartners = activePartners
-    .filter((p) => p.partnershipHealth === "Strong")
+  const thrivingPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Thriving")
     .map((p) => ({ id: p.id, name: p.name }));
 
-  const goodPartners = activePartners
-    .filter((p) => p.partnershipHealth === "Good")
+  const healthyPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Healthy")
     .map((p) => ({ id: p.id, name: p.name }));
 
-  const fairPartners = activePartners
-    .filter((p) => p.partnershipHealth === "Fair")
+  const waveringPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Wavering")
     .map((p) => ({ id: p.id, name: p.name }));
 
-  const atRiskPartners = activePartners
-    .filter((p) => p.partnershipHealth === "At Risk")
+  const stalledPartners = activePartners
+    .filter((p) => p.partnershipHealth === "Stalled")
     .map((p) => ({ id: p.id, name: p.name }));
 
   const monitoringPartners = activePartners
@@ -123,35 +123,35 @@ export default function DashboardPage() {
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <MetricCard
-            title="Strong"
-            value={strongPartners.length}
+            title="Thriving"
+            value={thrivingPartners.length}
             icon={ThumbsUp}
             description="Excellent health"
-            schools={strongPartners}
+            schools={thrivingPartners}
             total={activePartners.length}
           />
           <MetricCard
-            title="Good"
-            value={goodPartners.length}
+            title="Healthy"
+            value={healthyPartners.length}
             icon={Activity}
-            description="Healthy partnerships"
-            schools={goodPartners}
+            description="Solid partnerships"
+            schools={healthyPartners}
             total={activePartners.length}
           />
           <MetricCard
-            title="Fair"
-            value={fairPartners.length}
+            title="Wavering"
+            value={waveringPartners.length}
             icon={Eye}
-            description="Stable partnerships"
-            schools={fairPartners}
+            description="Needs attention"
+            schools={waveringPartners}
             total={activePartners.length}
           />
           <MetricCard
-            title="At Risk"
-            value={atRiskPartners.length}
+            title="Stalled"
+            value={stalledPartners.length}
             icon={AlertTriangle}
-            description="Needs attention"
-            schools={atRiskPartners}
+            description="Requires action"
+            schools={stalledPartners}
             total={activePartners.length}
           />
           <MetricCard

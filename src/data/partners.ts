@@ -11,10 +11,10 @@ export type OnboardingStep = "Step 1" | "Step 2" | "Step 3";
 export type SchoolType = "Public" | "Charter" | "Non-Profit";
 export type Priority = "High" | "Medium" | "Low";
 export type PartnershipHealth =
-  | "Strong"
-  | "Good"
-  | "Fair"
-  | "At Risk"
+  | "Thriving"
+  | "Healthy"
+  | "Wavering"
+  | "Stalled"
   | "Monitoring (New)";
 
 export type RenewalStatus =
@@ -168,10 +168,10 @@ export const onboardingStepColors: Record<OnboardingStep, string> = {
 };
 
 export const partnershipHealthColors: Record<PartnershipHealth, string> = {
-  Strong: "bg-green-100 text-green-800",
-  Good: "bg-emerald-100 text-emerald-800",
-  Fair: "bg-yellow-100 text-yellow-800",
-  "At Risk": "bg-red-100 text-red-800",
+  Thriving: "bg-green-100 text-green-800",
+  Healthy: "bg-emerald-100 text-emerald-800",
+  Wavering: "bg-yellow-100 text-yellow-800",
+  Stalled: "bg-red-100 text-red-800",
   "Monitoring (New)": "bg-blue-100 text-blue-800",
 };
 
