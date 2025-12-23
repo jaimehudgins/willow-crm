@@ -14,9 +14,12 @@ import {
   Pause,
   Play,
   Hourglass,
+  Plus,
+  X,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePartners } from "@/hooks/usePartners";
 import { formatDate } from "@/lib/utils";
@@ -53,6 +56,13 @@ export default function TasksPage() {
   const [partnerFilter, setPartnerFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
+
+  // Add task state
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [newTaskText, setNewTaskText] = useState("");
+  const [newTaskDueDate, setNewTaskDueDate] = useState("");
+  const [newTaskPartnerId, setNewTaskPartnerId] = useState("");
+  const [isAddingTask, setIsAddingTask] = useState(false);
 
   if (loading) {
     return (
@@ -252,17 +262,148 @@ export default function TasksPage() {
     }
   };
 
+  const handleAddTask = async () => {
+    if (!newTaskText.trim() || !newTaskPartnerId) return;
+
+    setIsAddingTask(true);
+    try {
+      const { error: insertError } = await supabase
+        .from("follow_up_tasks")
+        .insert({
+          partner_id: newTaskPartnerId,
+          task: newTaskText.trim(),
+          due_date: newTaskDueDate || null,
+          completed: false,
+          status: "Not Started",
+        });
+
+      if (insertError) throw insertError;
+
+      // Reset form and refetch
+      setNewTaskText("");
+      setNewTaskDueDate("");
+      setNewTaskPartnerId("");
+      setShowAddTask(false);
+      await refetch();
+    } catch (err) {
+      console.error("Error adding task:", err);
+    } finally {
+      setIsAddingTask(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--foreground)] flex items-center gap-2">
-          <ListTodo className="h-6 w-6" />
-          Tasks
-        </h1>
-        <p className="mt-1 text-[var(--muted-foreground)]">
-          All tasks across your partners
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--foreground)] flex items-center gap-2">
+            <ListTodo className="h-6 w-6" />
+            Tasks
+          </h1>
+          <p className="mt-1 text-[var(--muted-foreground)]">
+            All tasks across your partners
+          </p>
+        </div>
+        <Button
+          onClick={() => setShowAddTask(true)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add Task
+        </Button>
       </div>
+
+      {/* Add Task Form */}
+      {showAddTask && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-base">
+              <span>New Task</span>
+              <button
+                onClick={() => {
+                  setShowAddTask(false);
+                  setNewTaskText("");
+                  setNewTaskDueDate("");
+                  setNewTaskPartnerId("");
+                }}
+                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-[var(--foreground)] block mb-1">
+                  Partner *
+                </label>
+                <select
+                  value={newTaskPartnerId}
+                  onChange={(e) => setNewTaskPartnerId(e.target.value)}
+                  className="w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
+                >
+                  <option value="">Select a partner...</option>
+                  {partners.map((partner) => (
+                    <option key={partner.id} value={partner.id}>
+                      {partner.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[var(--foreground)] block mb-1">
+                  Task *
+                </label>
+                <Input
+                  placeholder="Enter task description..."
+                  value={newTaskText}
+                  onChange={(e) => setNewTaskText(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[var(--foreground)] block mb-1">
+                  Due Date
+                </label>
+                <input
+                  type="date"
+                  value={newTaskDueDate}
+                  onChange={(e) => setNewTaskDueDate(e.target.value)}
+                  className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowAddTask(false);
+                    setNewTaskText("");
+                    setNewTaskDueDate("");
+                    setNewTaskPartnerId("");
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleAddTask}
+                  disabled={
+                    !newTaskText.trim() || !newTaskPartnerId || isAddingTask
+                  }
+                >
+                  {isAddingTask ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add Task"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-3">
