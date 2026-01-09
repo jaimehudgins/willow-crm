@@ -270,9 +270,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
     return a.dueDate.localeCompare(b.dueDate);
   });
 
-  const toggleTask = async (index: number) => {
-    const currentTask = partner.onboardingChecklist[index];
-    await updateOnboardingTask(index, !currentTask.completed);
+  const toggleTask = async (task: { id: string; completed: boolean }) => {
+    await updateOnboardingTask(task.id, !task.completed);
   };
 
   const handleAddNote = async () => {
@@ -986,7 +985,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                                   setEditingTaskText(task.task);
                                 } else {
                                   // Toggle completion
-                                  toggleTask(index);
+                                  toggleTask(task);
                                 }
                               }}
                               className={`flex flex-1 items-center gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-[var(--muted)] ${

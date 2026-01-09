@@ -48,6 +48,7 @@ export const noteTypeColors: Record<NoteType, string> = {
 };
 
 export interface OnboardingTask {
+  id: string;
   task: string;
   completed: boolean;
   isCustom?: boolean;

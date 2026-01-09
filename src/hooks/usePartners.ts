@@ -91,27 +91,15 @@ function transformPartner(
     })),
     summary: dbPartner.summary || "",
     painPoints: dbPartner.pain_points || [],
-    onboardingChecklist: (() => {
-      const sorted = (onboardingTasks || []).sort(
-        (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0),
-      );
-      console.log(
-        "Transforming onboarding tasks:",
-        sorted.map((t, i) => ({
-          index: i,
-          id: t.id,
-          title: t.title,
-          status: t.status,
-          order_index: t.order_index,
-        })),
-      );
-      return sorted.map((t) => ({
+    onboardingChecklist: (onboardingTasks || [])
+      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
+      .map((t) => ({
+        id: t.id,
         task: t.title || "",
         completed: t.status === "completed",
         isCustom: t.is_custom ?? false,
         dueDate: t.due_date || undefined,
-      }));
-    })(),
+      })),
     notes: (touchpoints || []).map((t) => ({
       id: t.id,
       date: t.date || "",
@@ -373,74 +361,28 @@ export function usePartner(id: string) {
   }, [fetchPartner]);
 
   // Update onboarding task
-  const updateOnboardingTask = async (
-    taskIndex: number,
-    completed: boolean,
-  ) => {
+  const updateOnboardingTask = async (taskId: string, completed: boolean) => {
     if (!partner) return;
 
     try {
-      // Get the task from the database
-      const { data: tasks, error: fetchError } = await supabase
-        .from("onboarding_tasks")
-        .select("*")
-        .eq("partner_id", id)
-        .order("order_index");
-
-      if (fetchError) throw fetchError;
-
-      const task = tasks?.[taskIndex];
-      if (!task) {
-        console.error("Task not found at index:", taskIndex);
-        return;
-      }
-
       const newStatus = completed ? "completed" : "pending";
-      console.log(
-        "Updating task:",
-        task.id,
-        "title:",
-        task.title,
-        "to status:",
-        newStatus,
-      );
 
-      const { data: updatedTask, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from("onboarding_tasks")
         .update({ status: newStatus })
-        .eq("id", task.id)
-        .select()
-        .single();
-
-      console.log("Update result:", { updatedTask, updateError });
+        .eq("id", taskId);
 
       if (updateError) {
         console.error("Supabase update error:", updateError);
         throw updateError;
       }
 
-      if (!updatedTask || updatedTask.status !== newStatus) {
-        console.error(
-          "Update may have failed. Expected status:",
-          newStatus,
-          "Got:",
-          updatedTask?.status,
-        );
-      }
-
-      // Verify by re-fetching
-      const { data: verifyTask } = await supabase
-        .from("onboarding_tasks")
-        .select("*")
-        .eq("id", task.id)
-        .single();
-      console.log("Verification fetch after update:", verifyTask);
-
       // Update local state
       setPartner((prev) => {
         if (!prev) return prev;
-        const newChecklist = [...prev.onboardingChecklist];
-        newChecklist[taskIndex] = { ...newChecklist[taskIndex], completed };
+        const newChecklist = prev.onboardingChecklist.map((task) =>
+          task.id === taskId ? { ...task, completed } : task,
+        );
         return { ...prev, onboardingChecklist: newChecklist };
       });
     } catch (err) {
@@ -606,7 +548,7 @@ export function usePartner(id: string) {
           ...prev,
           onboardingChecklist: [
             ...prev.onboardingChecklist,
-            { task: taskTitle, completed: false, isCustom: true },
+            { id: data.id, task: taskTitle, completed: false, isCustom: true },
           ],
         };
       });
