@@ -377,14 +377,32 @@ export function usePartner(id: string) {
       if (fetchError) throw fetchError;
 
       const task = tasks?.[taskIndex];
-      if (!task) return;
+      if (!task) {
+        console.error("Task not found at index:", taskIndex);
+        return;
+      }
 
-      const { error: updateError } = await supabase
+      const newStatus = completed ? "completed" : "pending";
+      const { data: updatedTask, error: updateError } = await supabase
         .from("onboarding_tasks")
-        .update({ status: completed ? "completed" : "pending" })
-        .eq("id", task.id);
+        .update({ status: newStatus })
+        .eq("id", task.id)
+        .select()
+        .single();
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error("Supabase update error:", updateError);
+        throw updateError;
+      }
+
+      if (!updatedTask || updatedTask.status !== newStatus) {
+        console.error(
+          "Update may have failed. Expected status:",
+          newStatus,
+          "Got:",
+          updatedTask?.status,
+        );
+      }
 
       // Update local state
       setPartner((prev) => {
@@ -395,6 +413,7 @@ export function usePartner(id: string) {
       });
     } catch (err) {
       console.error("Error updating task:", err);
+      throw err;
     }
   };
 
