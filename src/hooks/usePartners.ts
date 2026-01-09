@@ -1131,12 +1131,14 @@ export function usePartner(id: string) {
       const dbUpdates: Record<string, unknown> = {};
       if (updates.task !== undefined) dbUpdates.task = updates.task;
       if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
-      if (updates.completed !== undefined)
-        dbUpdates.completed = updates.completed;
       if (updates.status !== undefined) {
         dbUpdates.status = updates.status;
         // Sync completed flag with status
         dbUpdates.completed = updates.status === "Complete";
+      } else if (updates.completed !== undefined) {
+        // Sync status with completed flag
+        dbUpdates.completed = updates.completed;
+        dbUpdates.status = updates.completed ? "Complete" : "Not Started";
       }
       if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
 
@@ -1148,6 +1150,17 @@ export function usePartner(id: string) {
       if (updateError) throw updateError;
 
       // Update local state
+      const newCompleted = updates.status
+        ? updates.status === "Complete"
+        : (updates.completed ?? undefined);
+      const newStatus = updates.status
+        ? updates.status
+        : updates.completed !== undefined
+          ? updates.completed
+            ? "Complete"
+            : "Not Started"
+          : undefined;
+
       setPartner((prev) => {
         if (!prev) return prev;
         const updatedNotes = prev.notes.map((note) => ({
@@ -1161,10 +1174,8 @@ export function usePartner(id: string) {
                     updates.dueDate !== undefined
                       ? updates.dueDate
                       : ft.dueDate,
-                  completed: updates.status
-                    ? updates.status === "Complete"
-                    : (updates.completed ?? ft.completed),
-                  status: updates.status ?? ft.status,
+                  completed: newCompleted ?? ft.completed,
+                  status: newStatus ?? ft.status,
                   notes: updates.notes ?? ft.notes,
                 }
               : ft,
@@ -1275,12 +1286,14 @@ export function usePartner(id: string) {
       const dbUpdates: Record<string, unknown> = {};
       if (updates.task !== undefined) dbUpdates.task = updates.task;
       if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
-      if (updates.completed !== undefined)
-        dbUpdates.completed = updates.completed;
       if (updates.status !== undefined) {
         dbUpdates.status = updates.status;
         // Sync completed flag with status
         dbUpdates.completed = updates.status === "Complete";
+      } else if (updates.completed !== undefined) {
+        // Sync status with completed flag
+        dbUpdates.completed = updates.completed;
+        dbUpdates.status = updates.completed ? "Complete" : "Not Started";
       }
       if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
 
@@ -1292,6 +1305,17 @@ export function usePartner(id: string) {
       if (updateError) throw updateError;
 
       // Update local state
+      const newCompleted = updates.status
+        ? updates.status === "Complete"
+        : (updates.completed ?? undefined);
+      const newStatus = updates.status
+        ? updates.status
+        : updates.completed !== undefined
+          ? updates.completed
+            ? "Complete"
+            : "Not Started"
+          : undefined;
+
       setPartner((prev) => {
         if (!prev) return prev;
         const updatedTasks = (prev.tasks || []).map((t) =>
@@ -1301,10 +1325,8 @@ export function usePartner(id: string) {
                 task: updates.task ?? t.task,
                 dueDate:
                   updates.dueDate !== undefined ? updates.dueDate : t.dueDate,
-                completed: updates.status
-                  ? updates.status === "Complete"
-                  : (updates.completed ?? t.completed),
-                status: updates.status ?? t.status,
+                completed: newCompleted ?? t.completed,
+                status: newStatus ?? t.status,
                 notes: updates.notes ?? t.notes,
               }
             : t,

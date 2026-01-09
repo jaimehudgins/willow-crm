@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   CheckCircle2,
   Circle,
@@ -51,6 +52,7 @@ const STATUS_OPTIONS: TaskStatus[] = [
 
 export default function TasksPage() {
   const { partners, loading, error, refetch } = usePartners();
+  const pathname = usePathname();
   const [typeFilter, setTypeFilter] = useState<FilterType>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
   const [partnerFilter, setPartnerFilter] = useState<string>("all");
@@ -63,6 +65,25 @@ export default function TasksPage() {
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
   const [newTaskPartnerId, setNewTaskPartnerId] = useState("");
   const [isAddingTask, setIsAddingTask] = useState(false);
+
+  // Refetch data when page becomes visible (e.g., navigating back from partner page)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refetch();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [refetch]);
+
+  // Also refetch when navigating to this page
+  useEffect(() => {
+    refetch();
+  }, [pathname, refetch]);
 
   if (loading) {
     return (
