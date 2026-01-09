@@ -383,12 +383,16 @@ export function usePartner(id: string) {
       }
 
       const newStatus = completed ? "completed" : "pending";
+      console.log("Updating task:", task.id, "to status:", newStatus);
+
       const { data: updatedTask, error: updateError } = await supabase
         .from("onboarding_tasks")
         .update({ status: newStatus })
         .eq("id", task.id)
         .select()
         .single();
+
+      console.log("Update result:", { updatedTask, updateError });
 
       if (updateError) {
         console.error("Supabase update error:", updateError);
@@ -403,6 +407,14 @@ export function usePartner(id: string) {
           updatedTask?.status,
         );
       }
+
+      // Verify by re-fetching
+      const { data: verifyTask } = await supabase
+        .from("onboarding_tasks")
+        .select("*")
+        .eq("id", task.id)
+        .single();
+      console.log("Verification fetch after update:", verifyTask);
 
       // Update local state
       setPartner((prev) => {
