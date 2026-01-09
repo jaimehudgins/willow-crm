@@ -91,14 +91,27 @@ function transformPartner(
     })),
     summary: dbPartner.summary || "",
     painPoints: dbPartner.pain_points || [],
-    onboardingChecklist: (onboardingTasks || [])
-      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
-      .map((t) => ({
+    onboardingChecklist: (() => {
+      const sorted = (onboardingTasks || []).sort(
+        (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0),
+      );
+      console.log(
+        "Transforming onboarding tasks:",
+        sorted.map((t, i) => ({
+          index: i,
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          order_index: t.order_index,
+        })),
+      );
+      return sorted.map((t) => ({
         task: t.title || "",
         completed: t.status === "completed",
         isCustom: t.is_custom ?? false,
         dueDate: t.due_date || undefined,
-      })),
+      }));
+    })(),
     notes: (touchpoints || []).map((t) => ({
       id: t.id,
       date: t.date || "",
@@ -383,7 +396,14 @@ export function usePartner(id: string) {
       }
 
       const newStatus = completed ? "completed" : "pending";
-      console.log("Updating task:", task.id, "to status:", newStatus);
+      console.log(
+        "Updating task:",
+        task.id,
+        "title:",
+        task.title,
+        "to status:",
+        newStatus,
+      );
 
       const { data: updatedTask, error: updateError } = await supabase
         .from("onboarding_tasks")
