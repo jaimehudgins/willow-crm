@@ -43,6 +43,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  RichTextEditor,
+  RichTextContent,
+} from "@/components/ui/rich-text-editor";
+import {
   statusColors,
   priorityColors,
   leadSourceColors,
@@ -1183,11 +1187,10 @@ export default function PartnerDetailPage({ params }: PageProps) {
                       className="h-9 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
                     />
                   </div>
-                  <textarea
-                    value={newNote}
-                    onChange={(e) => setNewNote(e.target.value)}
+                  <RichTextEditor
+                    content={newNote}
+                    onChange={setNewNote}
                     placeholder="Add a note about this partner..."
-                    className="w-full min-h-[100px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm placeholder:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] resize-none"
                   />
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -1391,12 +1394,9 @@ export default function PartnerDetailPage({ params }: PageProps) {
                                 className="h-9 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm"
                               />
                             </div>
-                            <textarea
-                              value={editingNoteContent}
-                              onChange={(e) =>
-                                setEditingNoteContent(e.target.value)
-                              }
-                              className="w-full min-h-[100px] rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm resize-none"
+                            <RichTextEditor
+                              content={editingNoteContent}
+                              onChange={setEditingNoteContent}
                             />
                             <div className="flex gap-2">
                               <Button
@@ -1470,9 +1470,10 @@ export default function PartnerDetailPage({ params }: PageProps) {
                                 </button>
                               </div>
                             </div>
-                            <p className="mt-1 text-[var(--muted-foreground)]">
-                              {note.content}
-                            </p>
+                            <RichTextContent
+                              content={note.content}
+                              className="mt-1"
+                            />
                           </>
                         )}
 

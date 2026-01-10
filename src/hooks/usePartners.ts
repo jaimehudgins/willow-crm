@@ -579,9 +579,11 @@ export function usePartner(id: string) {
         return `${year}-${month}-${day}`;
       };
 
+      const noteDate = date || getLocalDate();
+
       const newTouchpoint = {
         partner_id: id,
-        date: date || getLocalDate(),
+        date: noteDate,
         author,
         title: type,
         notes: content,
@@ -596,6 +598,25 @@ export function usePartner(id: string) {
 
       if (insertError) throw insertError;
 
+      // Auto-update lastContactDate for contact-type notes (not Internal Notes)
+      // Only update if the note date is more recent than the current lastContactDate
+      const contactTypes: NoteType[] = [
+        "Call",
+        "Email",
+        "Meeting",
+        "Site Visit",
+      ];
+      if (contactTypes.includes(type)) {
+        const shouldUpdate =
+          !partner.lastContactDate || noteDate >= partner.lastContactDate;
+        if (shouldUpdate) {
+          await supabase
+            .from("partners")
+            .update({ last_contact_date: noteDate })
+            .eq("id", id);
+        }
+      }
+
       // Update local state
       setPartner((prev) => {
         if (!prev) return prev;
@@ -607,7 +628,15 @@ export function usePartner(id: string) {
           type: data.type as NoteType,
           followUpTasks: [],
         };
-        return { ...prev, notes: [newNote, ...prev.notes] };
+        // Also update lastContactDate in local state if it was updated
+        const shouldUpdateLocal =
+          contactTypes.includes(type) &&
+          (!prev.lastContactDate || noteDate >= prev.lastContactDate);
+        return {
+          ...prev,
+          notes: [newNote, ...prev.notes],
+          lastContactDate: shouldUpdateLocal ? noteDate : prev.lastContactDate,
+        };
       });
 
       return data;
