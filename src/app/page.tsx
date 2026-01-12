@@ -25,7 +25,9 @@ import { PipelineChart } from "@/components/dashboard/pipeline-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { UpcomingTasks } from "@/components/dashboard/upcoming-tasks";
 import { UpcomingMeetings } from "@/components/dashboard/upcoming-meetings";
+import { UpcomingImportantDates } from "@/components/dashboard/upcoming-important-dates";
 import { usePartners } from "@/hooks/usePartners";
+import { supabase } from "@/lib/supabase";
 
 interface NextMeeting {
   summary: string;
@@ -33,10 +35,22 @@ interface NextMeeting {
   htmlLink: string;
 }
 
+interface ImportantDateWithPartner {
+  id: string;
+  title: string;
+  date: string;
+  notes?: string;
+  partnerId: string;
+  partnerName: string;
+}
+
 export default function DashboardPage() {
   const { data: session, status: sessionStatus } = useSession();
   const { partners, loading, error } = usePartners();
   const [meetings, setMeetings] = useState<Record<string, NextMeeting>>({});
+  const [importantDates, setImportantDates] = useState<
+    ImportantDateWithPartner[]
+  >([]);
   const [showRenewals, setShowRenewals] = useState(false);
 
   // Fetch calendar meetings when authenticated and partners are loaded
@@ -82,6 +96,45 @@ export default function DashboardPage() {
 
     fetchMeetings();
   }, [sessionStatus, session?.accessToken, partners]);
+
+  // Fetch important dates for all partners
+  useEffect(() => {
+    async function fetchImportantDates() {
+      if (partners.length === 0) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("important_dates")
+          .select("*")
+          .order("date", { ascending: true });
+
+        if (error) {
+          console.warn("Failed to fetch important dates:", error);
+          return;
+        }
+
+        // Map partner IDs to names
+        const partnerMap = new Map(partners.map((p) => [p.id, p.name]));
+
+        const datesWithPartners: ImportantDateWithPartner[] = (data || [])
+          .filter((d) => partnerMap.has(d.partner_id))
+          .map((d) => ({
+            id: d.id,
+            title: d.title,
+            date: d.date,
+            notes: d.notes,
+            partnerId: d.partner_id,
+            partnerName: partnerMap.get(d.partner_id) || "Unknown",
+          }));
+
+        setImportantDates(datesWithPartners);
+      } catch (err) {
+        console.error("Failed to fetch important dates:", err);
+      }
+    }
+
+    fetchImportantDates();
+  }, [partners]);
 
   if (loading) {
     return (
@@ -325,10 +378,11 @@ export default function DashboardPage() {
 
       <div className="grid gap-8 lg:grid-cols-2">
         <UpcomingMeetings partners={partners} meetings={meetings} />
-        <UpcomingTasks partners={partners} />
+        <UpcomingImportantDates importantDates={importantDates} />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
+        <UpcomingTasks partners={partners} />
         <RecentActivity partners={partners} />
         <PipelineChart partners={partners} />
       </div>
