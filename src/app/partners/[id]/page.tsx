@@ -101,6 +101,10 @@ export default function PartnerDetailPage({ params }: PageProps) {
     updateSchool,
     addAttachment,
     deleteAttachment,
+    importantDates,
+    addImportantDate,
+    updateImportantDate,
+    deleteImportantDate,
   } = usePartner(id);
 
   const { data: session, status: sessionStatus } = useSession();
@@ -225,6 +229,19 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [newNoteTask, setNewNoteTask] = useState("");
   const [newNoteTaskDueDate, setNewNoteTaskDueDate] = useState("");
   const [showNewNoteTask, setShowNewNoteTask] = useState(false);
+  // Important dates
+  const [showAddImportantDate, setShowAddImportantDate] = useState(false);
+  const [newImportantDateTitle, setNewImportantDateTitle] = useState("");
+  const [newImportantDateDate, setNewImportantDateDate] = useState("");
+  const [newImportantDateNotes, setNewImportantDateNotes] = useState("");
+  const [editingImportantDateId, setEditingImportantDateId] = useState<
+    string | null
+  >(null);
+  const [editingImportantDate, setEditingImportantDate] = useState({
+    title: "",
+    date: "",
+    notes: "",
+  });
 
   if (loading) {
     return (
@@ -1811,6 +1828,246 @@ export default function PartnerDetailPage({ params }: PageProps) {
                 <p className="text-sm text-[var(--muted-foreground)]">
                   No upcoming meetings
                 </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Important Dates */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Important Dates
+                </CardTitle>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowAddImportantDate(!showAddImportantDate)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {showAddImportantDate && (
+                <div className="space-y-2 p-3 bg-[var(--muted)] rounded-md mb-3">
+                  <Input
+                    value={newImportantDateTitle}
+                    onChange={(e) => setNewImportantDateTitle(e.target.value)}
+                    placeholder="Event title (e.g., First Day of School)"
+                    className="text-sm"
+                  />
+                  <Input
+                    type="date"
+                    value={newImportantDateDate}
+                    onChange={(e) => setNewImportantDateDate(e.target.value)}
+                    className="text-sm"
+                  />
+                  <Input
+                    value={newImportantDateNotes}
+                    onChange={(e) => setNewImportantDateNotes(e.target.value)}
+                    placeholder="Notes (optional)"
+                    className="text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        if (
+                          newImportantDateTitle.trim() &&
+                          newImportantDateDate
+                        ) {
+                          await addImportantDate(
+                            newImportantDateTitle.trim(),
+                            newImportantDateDate,
+                            newImportantDateNotes.trim() || undefined,
+                          );
+                          setNewImportantDateTitle("");
+                          setNewImportantDateDate("");
+                          setNewImportantDateNotes("");
+                          setShowAddImportantDate(false);
+                        }
+                      }}
+                    >
+                      Add Date
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setShowAddImportantDate(false);
+                        setNewImportantDateTitle("");
+                        setNewImportantDateDate("");
+                        setNewImportantDateNotes("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {importantDates.length === 0 && !showAddImportantDate ? (
+                <p className="text-sm text-[var(--muted-foreground)]">
+                  No important dates yet
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {importantDates.map((importantDate) => {
+                    const dateObj = new Date(importantDate.date + "T00:00:00");
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const isPast = dateObj < today;
+                    const isToday = dateObj.getTime() === today.getTime();
+                    const isUpcoming =
+                      !isPast &&
+                      !isToday &&
+                      dateObj.getTime() - today.getTime() <
+                        7 * 24 * 60 * 60 * 1000;
+
+                    if (editingImportantDateId === importantDate.id) {
+                      return (
+                        <div
+                          key={importantDate.id}
+                          className="p-2 bg-[var(--muted)] rounded-md space-y-2"
+                        >
+                          <Input
+                            value={editingImportantDate.title}
+                            onChange={(e) =>
+                              setEditingImportantDate((prev) => ({
+                                ...prev,
+                                title: e.target.value,
+                              }))
+                            }
+                            className="text-sm"
+                          />
+                          <Input
+                            type="date"
+                            value={editingImportantDate.date}
+                            onChange={(e) =>
+                              setEditingImportantDate((prev) => ({
+                                ...prev,
+                                date: e.target.value,
+                              }))
+                            }
+                            className="text-sm"
+                          />
+                          <Input
+                            value={editingImportantDate.notes}
+                            onChange={(e) =>
+                              setEditingImportantDate((prev) => ({
+                                ...prev,
+                                notes: e.target.value,
+                              }))
+                            }
+                            placeholder="Notes (optional)"
+                            className="text-sm"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={async () => {
+                                await updateImportantDate(importantDate.id, {
+                                  title: editingImportantDate.title,
+                                  date: editingImportantDate.date,
+                                  notes:
+                                    editingImportantDate.notes || undefined,
+                                });
+                                setEditingImportantDateId(null);
+                              }}
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Save
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingImportantDateId(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        key={importantDate.id}
+                        className={`flex items-start justify-between p-2 rounded-md ${
+                          isPast
+                            ? "bg-gray-50 opacity-60"
+                            : isToday
+                              ? "bg-green-50 border border-green-200"
+                              : isUpcoming
+                                ? "bg-blue-50"
+                                : "bg-[var(--muted)]"
+                        }`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-medium ${isPast ? "text-gray-500" : "text-[var(--foreground)]"}`}
+                          >
+                            {importantDate.title}
+                          </p>
+                          <p
+                            className={`text-xs mt-0.5 ${
+                              isToday
+                                ? "text-green-600 font-medium"
+                                : isUpcoming
+                                  ? "text-blue-600"
+                                  : "text-[var(--muted-foreground)]"
+                            }`}
+                          >
+                            {isToday
+                              ? "Today"
+                              : dateObj.toLocaleDateString("en-US", {
+                                  weekday: "short",
+                                  month: "short",
+                                  day: "numeric",
+                                  year:
+                                    dateObj.getFullYear() !==
+                                    new Date().getFullYear()
+                                      ? "numeric"
+                                      : undefined,
+                                })}
+                          </p>
+                          {importantDate.notes && (
+                            <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                              {importantDate.notes}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 ml-2">
+                          <button
+                            onClick={() => {
+                              setEditingImportantDateId(importantDate.id);
+                              setEditingImportantDate({
+                                title: importantDate.title,
+                                date: importantDate.date,
+                                notes: importantDate.notes || "",
+                              });
+                            }}
+                            className="p-1 text-[var(--muted-foreground)] hover:text-slate-700"
+                            title="Edit"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              deleteImportantDate(importantDate.id)
+                            }
+                            className="p-1 text-[var(--muted-foreground)] hover:text-red-500"
+                            title="Delete"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </CardContent>
           </Card>

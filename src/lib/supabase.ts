@@ -108,3 +108,13 @@ export interface DbAttachment {
   created_at?: string;
   updated_at?: string;
 }
+
+export interface DbImportantDate {
+  id: string;
+  partner_id: string;
+  title: string;
+  date: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}

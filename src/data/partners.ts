@@ -126,6 +126,13 @@ export interface Attachment {
   type: "file" | "link";
 }
 
+export interface ImportantDate {
+  id: string;
+  title: string;
+  date: string;
+  notes?: string;
+}
+
 export interface Partner {
   id: string;
   name: string;

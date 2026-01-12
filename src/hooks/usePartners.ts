@@ -10,6 +10,7 @@ import {
   DbSchool,
   DbFollowUpTask,
   DbAttachment,
+  DbImportantDate,
 } from "@/lib/supabase";
 import type {
   Partner,
@@ -28,6 +29,7 @@ import type {
   School,
   TaskStatus,
   Attachment,
+  ImportantDate,
 } from "@/data/partners";
 import { CORE_ONBOARDING_TASKS } from "@/data/partners";
 
@@ -233,6 +235,7 @@ export function usePartner(id: string) {
   const [partner, setPartner] = useState<Partner | null>(null);
   const [schools, setSchools] = useState<School[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [importantDates, setImportantDates] = useState<ImportantDate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -264,6 +267,7 @@ export function usePartner(id: string) {
         schoolsResult,
         followUpTasksResult,
         attachmentsResult,
+        importantDatesResult,
       ] = await Promise.all([
         supabase.from("contacts").select("*").eq("partner_id", id),
         supabase
@@ -286,6 +290,11 @@ export function usePartner(id: string) {
           .select("*")
           .eq("partner_id", id)
           .order("created_at", { ascending: false }),
+        supabase
+          .from("important_dates")
+          .select("*")
+          .eq("partner_id", id)
+          .order("date", { ascending: true }),
       ]);
 
       if (contactsResult.error) throw contactsResult.error;
@@ -348,6 +357,17 @@ export function usePartner(id: string) {
         type: (a.type as "file" | "link") || "link",
       }));
       setAttachments(transformedAttachments);
+
+      // Transform important dates
+      const transformedImportantDates: ImportantDate[] = (
+        importantDatesResult.data || []
+      ).map((d: DbImportantDate) => ({
+        id: d.id,
+        title: d.title || "",
+        date: d.date || "",
+        notes: d.notes,
+      }));
+      setImportantDates(transformedImportantDates);
     } catch (err) {
       console.error("Error fetching partner:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch partner");
@@ -1468,10 +1488,92 @@ export function usePartner(id: string) {
     }
   };
 
+  // Add an important date
+  const addImportantDate = async (
+    title: string,
+    date: string,
+    notes?: string,
+  ) => {
+    try {
+      const { data, error: insertError } = await supabase
+        .from("important_dates")
+        .insert({
+          partner_id: id,
+          title,
+          date,
+          notes: notes || null,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Update local state
+      const newDate: ImportantDate = {
+        id: data.id,
+        title: data.title,
+        date: data.date,
+        notes: data.notes,
+      };
+      setImportantDates((prev) =>
+        [...prev, newDate].sort((a, b) => a.date.localeCompare(b.date)),
+      );
+
+      return data;
+    } catch (err) {
+      console.error("Error adding important date:", err);
+      throw err;
+    }
+  };
+
+  // Update an important date
+  const updateImportantDate = async (
+    dateId: string,
+    updates: { title?: string; date?: string; notes?: string },
+  ) => {
+    try {
+      const { error: updateError } = await supabase
+        .from("important_dates")
+        .update(updates)
+        .eq("id", dateId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setImportantDates((prev) =>
+        prev
+          .map((d) => (d.id === dateId ? { ...d, ...updates } : d))
+          .sort((a, b) => a.date.localeCompare(b.date)),
+      );
+    } catch (err) {
+      console.error("Error updating important date:", err);
+      throw err;
+    }
+  };
+
+  // Delete an important date
+  const deleteImportantDate = async (dateId: string) => {
+    try {
+      const { error: deleteError } = await supabase
+        .from("important_dates")
+        .delete()
+        .eq("id", dateId);
+
+      if (deleteError) throw deleteError;
+
+      // Update local state
+      setImportantDates((prev) => prev.filter((d) => d.id !== dateId));
+    } catch (err) {
+      console.error("Error deleting important date:", err);
+      throw err;
+    }
+  };
+
   return {
     partner,
     schools,
     attachments,
+    importantDates,
     loading,
     error,
     refetch: fetchPartner,
@@ -1500,5 +1602,8 @@ export function usePartner(id: string) {
     updateSchool,
     addAttachment,
     deleteAttachment,
+    addImportantDate,
+    updateImportantDate,
+    deleteImportantDate,
   };
 }
