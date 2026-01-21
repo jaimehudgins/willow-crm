@@ -3,7 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, School, Calendar, ListTodo } from "lucide-react";
+import {
+  LayoutDashboard,
+  School,
+  Calendar,
+  ListTodo,
+  LogOut,
+} from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -59,29 +65,37 @@ export function Navbar() {
                 </Link>
               );
             })}
-            <div className="ml-4 border-l border-[var(--border)] pl-4">
-              {status === "authenticated" ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => signOut()}
-                  className="flex items-center gap-2 text-emerald-600"
-                >
+            {status === "authenticated" && session?.user && (
+              <div className="ml-4 flex items-center gap-3 border-l border-[var(--border)] pl-4">
+                <div className="flex items-center gap-2 text-sm text-emerald-600">
                   <Calendar className="h-4 w-4" />
-                  Calendar Connected
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => signIn("google")}
-                  className="flex items-center gap-2"
-                >
-                  <Calendar className="h-4 w-4" />
-                  Connect Calendar
-                </Button>
-              )}
-            </div>
+                  <span>Calendar Connected</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {session.user.image && (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || "User"}
+                      width={28}
+                      height={28}
+                      className="rounded-full"
+                    />
+                  )}
+                  <span className="text-sm text-[var(--muted-foreground)]">
+                    {session.user.name?.split(" ")[0]}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+                    className="ml-1 h-8 w-8 p-0 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                    title="Sign out"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

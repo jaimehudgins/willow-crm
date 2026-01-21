@@ -42,6 +42,8 @@ async function refreshAccessToken(token: {
   }
 }
 
+const ALLOWED_DOMAIN = "willowed.org";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -57,7 +59,19 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
+  },
   callbacks: {
+    async signIn({ user }) {
+      // Only allow users with @willowed.org email addresses
+      const email = user.email;
+      if (!email || !email.endsWith(`@${ALLOWED_DOMAIN}`)) {
+        return `/auth/error?error=AccessDenied&message=Only @${ALLOWED_DOMAIN} accounts are allowed`;
+      }
+      return true;
+    },
     async jwt({ token, account }) {
       // Initial sign in - persist OAuth tokens
       if (account) {
