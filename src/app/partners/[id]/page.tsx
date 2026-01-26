@@ -208,6 +208,13 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [newStandaloneTask, setNewStandaloneTask] = useState("");
   const [newStandaloneTaskDueDate, setNewStandaloneTaskDueDate] = useState("");
   const [newStandaloneTaskNotes, setNewStandaloneTaskNotes] = useState("");
+  const [editingFollowUpTaskId, setEditingFollowUpTaskId] = useState<
+    string | null
+  >(null);
+  const [editingFollowUpTaskText, setEditingFollowUpTaskText] = useState("");
+  const [editingFollowUpTaskDueDate, setEditingFollowUpTaskDueDate] =
+    useState("");
+  const [editingFollowUpTaskNotes, setEditingFollowUpTaskNotes] = useState("");
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContact, setNewContact] = useState({
     name: "",
@@ -1526,52 +1533,141 @@ export default function PartnerDetailPage({ params }: PageProps) {
                                 {note.followUpTasks.map((task) => (
                                   <div
                                     key={task.id}
-                                    className="flex items-start gap-2 text-sm bg-[var(--muted)] p-2 rounded-md"
+                                    className="text-sm bg-[var(--muted)] p-2 rounded-md"
                                   >
-                                    <button
-                                      onClick={() =>
-                                        updateFollowUpTask(task.id, {
-                                          completed: !task.completed,
-                                        })
-                                      }
-                                      className="mt-0.5"
-                                    >
-                                      {task.completed ? (
-                                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                      ) : (
-                                        <Circle className="h-4 w-4 text-[var(--muted-foreground)]" />
-                                      )}
-                                    </button>
-                                    <div className="flex-1">
-                                      <p
-                                        className={
-                                          task.completed
-                                            ? "line-through text-[var(--muted-foreground)]"
-                                            : "text-[var(--foreground)]"
-                                        }
-                                      >
-                                        {task.task}
-                                      </p>
-                                      {task.dueDate && (
-                                        <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1 mt-0.5">
-                                          <Calendar className="h-3 w-3" />
-                                          Due: {formatDate(task.dueDate)}
-                                        </p>
-                                      )}
-                                      {task.notes && (
-                                        <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
-                                          {task.notes}
-                                        </p>
-                                      )}
-                                    </div>
-                                    <button
-                                      onClick={() =>
-                                        deleteFollowUpTask(task.id)
-                                      }
-                                      className="text-[var(--muted-foreground)] hover:text-red-500"
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </button>
+                                    {editingFollowUpTaskId === task.id ? (
+                                      <div className="space-y-2">
+                                        <Input
+                                          value={editingFollowUpTaskText}
+                                          onChange={(e) =>
+                                            setEditingFollowUpTaskText(
+                                              e.target.value,
+                                            )
+                                          }
+                                          placeholder="Task description..."
+                                          className="text-sm"
+                                        />
+                                        <div className="flex gap-2">
+                                          <Input
+                                            type="date"
+                                            value={editingFollowUpTaskDueDate}
+                                            onChange={(e) =>
+                                              setEditingFollowUpTaskDueDate(
+                                                e.target.value,
+                                              )
+                                            }
+                                            className="text-sm flex-1"
+                                          />
+                                        </div>
+                                        <Input
+                                          value={editingFollowUpTaskNotes}
+                                          onChange={(e) =>
+                                            setEditingFollowUpTaskNotes(
+                                              e.target.value,
+                                            )
+                                          }
+                                          placeholder="Notes (optional)..."
+                                          className="text-sm"
+                                        />
+                                        <div className="flex gap-2">
+                                          <Button
+                                            size="sm"
+                                            onClick={async () => {
+                                              await updateFollowUpTask(
+                                                task.id,
+                                                {
+                                                  task: editingFollowUpTaskText,
+                                                  dueDate:
+                                                    editingFollowUpTaskDueDate ||
+                                                    null,
+                                                  notes:
+                                                    editingFollowUpTaskNotes,
+                                                },
+                                              );
+                                              setEditingFollowUpTaskId(null);
+                                            }}
+                                            disabled={
+                                              !editingFollowUpTaskText.trim()
+                                            }
+                                          >
+                                            Save
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() =>
+                                              setEditingFollowUpTaskId(null)
+                                            }
+                                          >
+                                            Cancel
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-start gap-2">
+                                        <button
+                                          onClick={() =>
+                                            updateFollowUpTask(task.id, {
+                                              completed: !task.completed,
+                                            })
+                                          }
+                                          className="mt-0.5"
+                                        >
+                                          {task.completed ? (
+                                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                          ) : (
+                                            <Circle className="h-4 w-4 text-[var(--muted-foreground)]" />
+                                          )}
+                                        </button>
+                                        <div className="flex-1">
+                                          <p
+                                            className={
+                                              task.completed
+                                                ? "line-through text-[var(--muted-foreground)]"
+                                                : "text-[var(--foreground)]"
+                                            }
+                                          >
+                                            {task.task}
+                                          </p>
+                                          {task.dueDate && (
+                                            <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1 mt-0.5">
+                                              <Calendar className="h-3 w-3" />
+                                              Due: {formatDate(task.dueDate)}
+                                            </p>
+                                          )}
+                                          {task.notes && (
+                                            <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                                              {task.notes}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <button
+                                          onClick={() => {
+                                            setEditingFollowUpTaskId(task.id);
+                                            setEditingFollowUpTaskText(
+                                              task.task,
+                                            );
+                                            setEditingFollowUpTaskDueDate(
+                                              task.dueDate || "",
+                                            );
+                                            setEditingFollowUpTaskNotes(
+                                              task.notes || "",
+                                            );
+                                          }}
+                                          className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                                        >
+                                          <Pencil className="h-3 w-3" />
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            deleteFollowUpTask(task.id)
+                                          }
+                                          className="text-[var(--muted-foreground)] hover:text-red-500"
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>
@@ -1716,67 +1812,138 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   {allTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="flex items-start gap-2 p-3 bg-[var(--muted)] rounded-md"
+                      className="p-3 bg-[var(--muted)] rounded-md"
                     >
-                      <button
-                        onClick={() =>
-                          "noteId" in task
-                            ? updateFollowUpTask(task.id, {
-                                completed: !task.completed,
-                              })
-                            : updateTask(task.id, {
-                                completed: !task.completed,
-                              })
-                        }
-                        className="mt-0.5"
-                      >
-                        {task.completed ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-[var(--muted-foreground)]" />
-                        )}
-                      </button>
-                      <div className="flex-1">
-                        <p
-                          className={
-                            task.completed
-                              ? "line-through text-[var(--muted-foreground)]"
-                              : "text-[var(--foreground)]"
-                          }
-                        >
-                          {task.task}
-                        </p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {task.dueDate && (
-                            <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1 mt-0.5">
-                              <Calendar className="h-3 w-3" />
-                              Due: {formatDate(task.dueDate)}
-                            </p>
-                          )}
-                          {"noteId" in task && (
-                            <p className="text-xs text-blue-600 flex items-center gap-1 mt-0.5">
-                              <MessageSquare className="h-3 w-3" />
-                              From note (
-                              {formatDate(
-                                (task as unknown as { noteDate: string })
-                                  .noteDate,
-                              )}
-                              )
-                            </p>
-                          )}
+                      {editingFollowUpTaskId === task.id ? (
+                        <div className="space-y-2">
+                          <Input
+                            value={editingFollowUpTaskText}
+                            onChange={(e) =>
+                              setEditingFollowUpTaskText(e.target.value)
+                            }
+                            placeholder="Task description..."
+                            className="text-sm"
+                          />
+                          <div className="flex gap-2">
+                            <Input
+                              type="date"
+                              value={editingFollowUpTaskDueDate}
+                              onChange={(e) =>
+                                setEditingFollowUpTaskDueDate(e.target.value)
+                              }
+                              className="text-sm flex-1"
+                            />
+                          </div>
+                          <Input
+                            value={editingFollowUpTaskNotes}
+                            onChange={(e) =>
+                              setEditingFollowUpTaskNotes(e.target.value)
+                            }
+                            placeholder="Notes (optional)..."
+                            className="text-sm"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={async () => {
+                                const updateFn =
+                                  "noteId" in task
+                                    ? updateFollowUpTask
+                                    : updateTask;
+                                await updateFn(task.id, {
+                                  task: editingFollowUpTaskText,
+                                  dueDate: editingFollowUpTaskDueDate || null,
+                                  notes: editingFollowUpTaskNotes,
+                                });
+                                setEditingFollowUpTaskId(null);
+                              }}
+                              disabled={!editingFollowUpTaskText.trim()}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingFollowUpTaskId(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
-                        {task.notes && (
-                          <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
-                            {task.notes}
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => deleteFollowUpTask(task.id)}
-                        className="text-[var(--muted-foreground)] hover:text-red-500"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      ) : (
+                        <div className="flex items-start gap-2">
+                          <button
+                            onClick={() =>
+                              "noteId" in task
+                                ? updateFollowUpTask(task.id, {
+                                    completed: !task.completed,
+                                  })
+                                : updateTask(task.id, {
+                                    completed: !task.completed,
+                                  })
+                            }
+                            className="mt-0.5"
+                          >
+                            {task.completed ? (
+                              <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            ) : (
+                              <Circle className="h-5 w-5 text-[var(--muted-foreground)]" />
+                            )}
+                          </button>
+                          <div className="flex-1">
+                            <p
+                              className={
+                                task.completed
+                                  ? "line-through text-[var(--muted-foreground)]"
+                                  : "text-[var(--foreground)]"
+                              }
+                            >
+                              {task.task}
+                            </p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {task.dueDate && (
+                                <p className="text-xs text-[var(--muted-foreground)] flex items-center gap-1 mt-0.5">
+                                  <Calendar className="h-3 w-3" />
+                                  Due: {formatDate(task.dueDate)}
+                                </p>
+                              )}
+                              {"noteId" in task && (
+                                <p className="text-xs text-blue-600 flex items-center gap-1 mt-0.5">
+                                  <MessageSquare className="h-3 w-3" />
+                                  From note (
+                                  {formatDate(
+                                    (task as unknown as { noteDate: string })
+                                      .noteDate,
+                                  )}
+                                  )
+                                </p>
+                              )}
+                            </div>
+                            {task.notes && (
+                              <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
+                                {task.notes}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => {
+                              setEditingFollowUpTaskId(task.id);
+                              setEditingFollowUpTaskText(task.task);
+                              setEditingFollowUpTaskDueDate(task.dueDate || "");
+                              setEditingFollowUpTaskNotes(task.notes || "");
+                            }}
+                            className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteFollowUpTask(task.id)}
+                            className="text-[var(--muted-foreground)] hover:text-red-500"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
