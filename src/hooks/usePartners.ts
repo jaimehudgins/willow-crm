@@ -315,22 +315,6 @@ export function usePartner(id: string) {
       const touchpoints = touchpointsResult.data || [];
       const touchpointIds = touchpoints.map((t) => t.id);
       const allFollowUpTasks = followUpTasksResult.data || [];
-
-      // Debug logging
-      console.log("Partner ID from URL:", id);
-      console.log("Partner ID from DB:", partnerData.id);
-      console.log("All follow-up tasks:", allFollowUpTasks);
-      console.log(
-        "Tasks with this partner_id:",
-        allFollowUpTasks.filter((ft) => ft.partner_id === partnerData.id),
-      );
-      console.log(
-        "Standalone tasks (no touchpoint_id):",
-        allFollowUpTasks.filter(
-          (ft) => ft.partner_id === partnerData.id && !ft.touchpoint_id,
-        ),
-      );
-
       const followUpTasks = allFollowUpTasks.filter((ft) =>
         touchpointIds.includes(ft.touchpoint_id),
       );
@@ -1129,6 +1113,7 @@ export function usePartner(id: string) {
         .from("follow_up_tasks")
         .insert({
           touchpoint_id: noteId,
+          partner_id: id, // Also set partner_id for consistency and to prevent orphaned tasks
           task,
           due_date: dueDate,
           completed: false,
