@@ -315,11 +315,27 @@ export function usePartner(id: string) {
       const touchpoints = touchpointsResult.data || [];
       const touchpointIds = touchpoints.map((t) => t.id);
       const allFollowUpTasks = followUpTasksResult.data || [];
+
+      // Debug logging
+      console.log("Partner ID from URL:", id);
+      console.log("Partner ID from DB:", partnerData.id);
+      console.log("All follow-up tasks:", allFollowUpTasks);
+      console.log(
+        "Tasks with this partner_id:",
+        allFollowUpTasks.filter((ft) => ft.partner_id === partnerData.id),
+      );
+      console.log(
+        "Standalone tasks (no touchpoint_id):",
+        allFollowUpTasks.filter(
+          (ft) => ft.partner_id === partnerData.id && !ft.touchpoint_id,
+        ),
+      );
+
       const followUpTasks = allFollowUpTasks.filter((ft) =>
         touchpointIds.includes(ft.touchpoint_id),
       );
       const standaloneTasks = allFollowUpTasks.filter(
-        (ft) => ft.partner_id === id && !ft.touchpoint_id,
+        (ft) => ft.partner_id === partnerData.id && !ft.touchpoint_id,
       );
 
       const transformedPartner = transformPartner(
