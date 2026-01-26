@@ -47,10 +47,12 @@ export const noteTypeColors: Record<NoteType, string> = {
   "Internal Note": "bg-gray-100 text-gray-800",
 };
 
+export type OnboardingTaskStatus = "pending" | "completed" | "na";
+
 export interface OnboardingTask {
   id: string;
   task: string;
-  completed: boolean;
+  status: OnboardingTaskStatus;
   isCustom?: boolean;
   dueDate?: string;
 }

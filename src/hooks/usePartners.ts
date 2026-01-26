@@ -25,6 +25,7 @@ import type {
   NoteType,
   FollowUpTask,
   OnboardingTask,
+  OnboardingTaskStatus,
   Contact,
   School,
   TaskStatus,
@@ -98,7 +99,9 @@ function transformPartner(
       .map((t) => ({
         id: t.id,
         task: t.title || "",
-        completed: t.status === "completed",
+        status: (t.status === "completed" || t.status === "na"
+          ? t.status
+          : "pending") as OnboardingTaskStatus,
         isCustom: t.is_custom ?? false,
         dueDate: t.due_date || undefined,
       })),
@@ -380,16 +383,17 @@ export function usePartner(id: string) {
     fetchPartner();
   }, [fetchPartner]);
 
-  // Update onboarding task
-  const updateOnboardingTask = async (taskId: string, completed: boolean) => {
+  // Update onboarding task status
+  const updateOnboardingTask = async (
+    taskId: string,
+    status: OnboardingTaskStatus,
+  ) => {
     if (!partner) return;
 
     try {
-      const newStatus = completed ? "completed" : "pending";
-
       const { error: updateError } = await supabase
         .from("onboarding_tasks")
-        .update({ status: newStatus })
+        .update({ status })
         .eq("id", taskId);
 
       if (updateError) {
@@ -401,7 +405,7 @@ export function usePartner(id: string) {
       setPartner((prev) => {
         if (!prev) return prev;
         const newChecklist = prev.onboardingChecklist.map((task) =>
-          task.id === taskId ? { ...task, completed } : task,
+          task.id === taskId ? { ...task, status } : task,
         );
         return { ...prev, onboardingChecklist: newChecklist };
       });
@@ -568,7 +572,12 @@ export function usePartner(id: string) {
           ...prev,
           onboardingChecklist: [
             ...prev.onboardingChecklist,
-            { id: data.id, task: taskTitle, completed: false, isCustom: true },
+            {
+              id: data.id,
+              task: taskTitle,
+              status: "pending" as OnboardingTaskStatus,
+              isCustom: true,
+            },
           ],
         };
       });

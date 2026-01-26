@@ -15,6 +15,7 @@ import {
   ExternalLink,
   CheckCircle2,
   Circle,
+  MinusCircle,
   MapPin,
   GraduationCap,
   Users,
@@ -60,6 +61,7 @@ import {
   type PartnerStatus,
   type Priority,
   type NoteType,
+  type OnboardingTaskStatus,
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
 import { usePartner } from "@/hooks/usePartners";
@@ -291,8 +293,18 @@ export default function PartnerDetailPage({ params }: PageProps) {
     return a.dueDate.localeCompare(b.dueDate);
   });
 
-  const toggleTask = async (task: { id: string; completed: boolean }) => {
-    await updateOnboardingTask(task.id, !task.completed);
+  const cycleTaskStatus = async (task: {
+    id: string;
+    status: OnboardingTaskStatus;
+  }) => {
+    // Cycle through: pending → completed → na → pending
+    const nextStatus: OnboardingTaskStatus =
+      task.status === "pending"
+        ? "completed"
+        : task.status === "completed"
+          ? "na"
+          : "pending";
+    await updateOnboardingTask(task.id, nextStatus);
   };
 
   const handleAddNote = async () => {
@@ -518,11 +530,14 @@ export default function PartnerDetailPage({ params }: PageProps) {
   };
 
   const completedTasks = partner.onboardingChecklist.filter(
-    (t) => t.completed,
+    (t) => t.status === "completed",
   ).length;
-  const totalTasks = partner.onboardingChecklist.length;
+  const naTasks = partner.onboardingChecklist.filter(
+    (t) => t.status === "na",
+  ).length;
+  const applicableTasks = partner.onboardingChecklist.length - naTasks;
   const progressPercent =
-    totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    applicableTasks > 0 ? (completedTasks / applicableTasks) * 100 : 0;
 
   return (
     <div className="space-y-6">
@@ -906,7 +921,8 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   <CardTitle>Onboarding Checklist</CardTitle>
                 </button>
                 <span className="text-sm text-[var(--muted-foreground)]">
-                  {completedTasks} of {totalTasks} completed
+                  {completedTasks} of {applicableTasks} completed
+                  {naTasks > 0 && `, ${naTasks} N/A`}
                 </span>
               </div>
               <div className="mt-2">
@@ -1005,34 +1021,39 @@ export default function PartnerDetailPage({ params }: PageProps) {
                                   setEditingTaskIndex(index);
                                   setEditingTaskText(task.task);
                                 } else {
-                                  // Toggle completion
-                                  toggleTask(task);
+                                  // Cycle through status: pending → completed → na → pending
+                                  cycleTaskStatus(task);
                                 }
                               }}
                               className={`flex flex-1 items-center gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-[var(--muted)] ${
                                 task.isCustom
                                   ? "border-dashed border-[var(--border)]"
                                   : "border-[var(--border)]"
-                              }`}
+                              } ${task.status === "na" ? "opacity-50" : ""}`}
                             >
-                              {task.completed ? (
+                              {task.status === "completed" ? (
                                 <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                              ) : task.status === "na" ? (
+                                <MinusCircle className="h-5 w-5 text-[var(--muted-foreground)] shrink-0" />
                               ) : (
                                 <Circle className="h-5 w-5 text-[var(--muted-foreground)] shrink-0" />
                               )}
                               <span
                                 className={
-                                  task.completed
+                                  task.status === "completed"
                                     ? "text-[var(--muted-foreground)] line-through"
-                                    : task.isCustom && !task.task
-                                      ? "text-[var(--muted-foreground)] italic"
-                                      : "text-[var(--foreground)]"
+                                    : task.status === "na"
+                                      ? "text-[var(--muted-foreground)] line-through"
+                                      : task.isCustom && !task.task
+                                        ? "text-[var(--muted-foreground)] italic"
+                                        : "text-[var(--foreground)]"
                                 }
                               >
                                 {task.task ||
                                   (task.isCustom
                                     ? "Click to add custom task..."
                                     : "")}
+                                {task.status === "na" && " (N/A)"}
                               </span>
                             </button>
                           )}

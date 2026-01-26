@@ -58,15 +58,15 @@ export function UpcomingTasks({ partners, limit = 7 }: UpcomingTasksProps) {
       });
     });
 
-    // Onboarding tasks with due dates
+    // Onboarding tasks with due dates (excluding N/A tasks)
     partner.onboardingChecklist.forEach((task, index) => {
-      if (task.dueDate) {
+      if (task.dueDate && task.status !== "na") {
         allItems.push({
           id: `${partner.id}-onboarding-${index}`,
           type: "onboarding",
           title: task.task,
           dueDate: task.dueDate,
-          completed: task.completed,
+          completed: task.status === "completed",
           partnerId: partner.id,
           partnerName: partner.name,
         });
