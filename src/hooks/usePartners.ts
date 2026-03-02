@@ -345,7 +345,6 @@ export function usePartner(id: string) {
           studentCount: s.student_count ?? 0,
           staffCount: s.staff_count ?? 0,
           district: s.district || "",
-          address: s.address || "",
         }),
       );
       setSchools(transformedSchools);
@@ -1400,7 +1399,6 @@ export function usePartner(id: string) {
       studentCount?: number;
       staffCount?: number;
       district?: string;
-      address?: string;
     },
   ) => {
     try {
@@ -1413,7 +1411,6 @@ export function usePartner(id: string) {
       if (updates.staffCount !== undefined)
         dbUpdates.staff_count = updates.staffCount;
       if (updates.district !== undefined) dbUpdates.district = updates.district;
-      if (updates.address !== undefined) dbUpdates.address = updates.address;
 
       const { error: updateError } = await supabase
         .from("schools")
@@ -1433,7 +1430,6 @@ export function usePartner(id: string) {
                 studentCount: updates.studentCount ?? s.studentCount,
                 staffCount: updates.staffCount ?? s.staffCount,
                 district: updates.district ?? s.district,
-                address: updates.address ?? s.address,
               }
             : s,
         ),

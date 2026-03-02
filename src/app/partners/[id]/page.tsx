@@ -264,7 +264,6 @@ export default function PartnerDetailPage({ params }: PageProps) {
     studentCount: 0,
     staffCount: 0,
     district: partner?.district || "",
-    address: "",
   });
 
   if (loading) {
@@ -533,7 +532,6 @@ export default function PartnerDetailPage({ params }: PageProps) {
           student_count: newSchool.studentCount,
           staff_count: newSchool.staffCount,
           district: newSchool.district,
-          address: newSchool.address,
         })
         .select()
         .single();
@@ -547,7 +545,6 @@ export default function PartnerDetailPage({ params }: PageProps) {
         studentCount: 0,
         staffCount: 0,
         district: partner?.district || "",
-        address: "",
       });
 
       // Refetch partner data to get the updated schools list
@@ -3282,21 +3279,6 @@ export default function PartnerDetailPage({ params }: PageProps) {
                     }))
                   }
                   placeholder="Enter district name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Address
-                </label>
-                <Input
-                  value={newSchool.address}
-                  onChange={(e) =>
-                    setNewSchool((prev) => ({
-                      ...prev,
-                      address: e.target.value,
-                    }))
-                  }
-                  placeholder="Enter school address"
                 />
               </div>
             </div>

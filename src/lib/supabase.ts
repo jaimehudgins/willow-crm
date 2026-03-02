@@ -43,7 +43,6 @@ export interface DbSchool {
   student_count: number;
   staff_count: number;
   district: string;
-  address: string;
   created_at?: string;
   updated_at?: string;
 }

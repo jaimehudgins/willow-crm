@@ -118,7 +118,6 @@ export interface School {
   studentCount: number;
   staffCount: number;
   district: string;
-  address: string;
 }
 
 export interface Attachment {
