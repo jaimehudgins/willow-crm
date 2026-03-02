@@ -62,6 +62,7 @@ import {
   type Priority,
   type NoteType,
   type OnboardingTaskStatus,
+  type SchoolType,
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
 import { usePartner } from "@/hooks/usePartners";
@@ -259,7 +260,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
   const [isCreatingSchool, setIsCreatingSchool] = useState(false);
   const [newSchool, setNewSchool] = useState({
     name: "",
-    schoolType: partner?.schoolType || "Public",
+    schoolType: (partner?.schoolType || "Public") as SchoolType,
     studentCount: 0,
     staffCount: 0,
     district: partner?.district || "",
@@ -542,7 +543,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
       setShowAddSchool(false);
       setNewSchool({
         name: "",
-        schoolType: partner?.schoolType || "Public",
+        schoolType: (partner?.schoolType || "Public") as SchoolType,
         studentCount: 0,
         staffCount: 0,
         district: partner?.district || "",
@@ -3226,7 +3227,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   onChange={(e) =>
                     setNewSchool((prev) => ({
                       ...prev,
-                      schoolType: e.target.value,
+                      schoolType: e.target.value as SchoolType,
                     }))
                   }
                   className="w-full h-10 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm"
