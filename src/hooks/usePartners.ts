@@ -344,7 +344,6 @@ export function usePartner(id: string) {
           schoolType: s.school_type || "Public",
           studentCount: s.student_count ?? 0,
           staffCount: s.staff_count ?? 0,
-          district: s.district || "",
         }),
       );
       setSchools(transformedSchools);
@@ -1398,7 +1397,6 @@ export function usePartner(id: string) {
       schoolType?: string;
       studentCount?: number;
       staffCount?: number;
-      district?: string;
     },
   ) => {
     try {
@@ -1410,7 +1408,6 @@ export function usePartner(id: string) {
         dbUpdates.student_count = updates.studentCount;
       if (updates.staffCount !== undefined)
         dbUpdates.staff_count = updates.staffCount;
-      if (updates.district !== undefined) dbUpdates.district = updates.district;
 
       const { error: updateError } = await supabase
         .from("schools")
@@ -1429,7 +1426,6 @@ export function usePartner(id: string) {
                 schoolType: updates.schoolType ?? s.schoolType,
                 studentCount: updates.studentCount ?? s.studentCount,
                 staffCount: updates.staffCount ?? s.staffCount,
-                district: updates.district ?? s.district,
               }
             : s,
         ),

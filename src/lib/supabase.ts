@@ -42,7 +42,6 @@ export interface DbSchool {
   school_type: string;
   student_count: number;
   staff_count: number;
-  district: string;
   created_at?: string;
   updated_at?: string;
 }
