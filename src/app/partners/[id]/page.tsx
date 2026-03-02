@@ -65,6 +65,7 @@ import {
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
 import { usePartner } from "@/hooks/usePartners";
+import { supabase } from "@/lib/supabase";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -78,6 +79,7 @@ export default function PartnerDetailPage({ params }: PageProps) {
     attachments,
     loading,
     error,
+    refetch,
     updateOnboardingTask,
     initializeOnboardingTasks,
     updateCustomTaskText,
@@ -250,6 +252,18 @@ export default function PartnerDetailPage({ params }: PageProps) {
     title: "",
     date: "",
     notes: "",
+  });
+
+  // Schools
+  const [showAddSchool, setShowAddSchool] = useState(false);
+  const [isCreatingSchool, setIsCreatingSchool] = useState(false);
+  const [newSchool, setNewSchool] = useState({
+    name: "",
+    schoolType: partner?.schoolType || "Public",
+    studentCount: 0,
+    staffCount: 0,
+    district: partner?.district || "",
+    address: "",
   });
 
   if (loading) {
@@ -498,6 +512,50 @@ export default function PartnerDetailPage({ params }: PageProps) {
     } catch (err) {
       console.error("Failed to update priority:", err);
       alert("Failed to update priority. Check console for details.");
+    }
+  };
+
+  const handleCreateSchool = async () => {
+    if (!newSchool.name.trim()) {
+      alert("Please enter a school name");
+      return;
+    }
+
+    setIsCreatingSchool(true);
+    try {
+      const { data, error: createError } = await supabase
+        .from("schools")
+        .insert({
+          partner_id: id,
+          name: newSchool.name,
+          school_type: newSchool.schoolType,
+          student_count: newSchool.studentCount,
+          staff_count: newSchool.staffCount,
+          district: newSchool.district,
+          address: newSchool.address,
+        })
+        .select()
+        .single();
+
+      if (createError) throw createError;
+
+      setShowAddSchool(false);
+      setNewSchool({
+        name: "",
+        schoolType: partner?.schoolType || "Public",
+        studentCount: 0,
+        staffCount: 0,
+        district: partner?.district || "",
+        address: "",
+      });
+
+      // Refetch partner data to get the updated schools list
+      await refetch();
+    } catch (err) {
+      console.error("Failed to create school:", err);
+      alert("Failed to create school. Check console for details.");
+    } finally {
+      setIsCreatingSchool(false);
     }
   };
 
@@ -2856,15 +2914,24 @@ export default function PartnerDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
 
-          {/* Schools Section - show when partner has multiple schools */}
-          {((partner.schoolCount ?? 1) > 1 || schools.length > 0) && (
-            <Card>
-              <CardHeader>
+          {/* Schools Section */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Building className="h-5 w-5" />
-                  Schools ({schools.length || partner.schoolCount || 0})
+                  Schools ({schools.length})
                 </CardTitle>
-              </CardHeader>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowAddSchool(true)}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add School
+                </Button>
+              </div>
+            </CardHeader>
               <CardContent>
                 {schools.length > 0 ? (
                   <div className="space-y-3">
@@ -2988,13 +3055,11 @@ export default function PartnerDetailPage({ params }: PageProps) {
                   </div>
                 ) : (
                   <p className="text-sm text-[var(--muted-foreground)]">
-                    No schools added yet. Add schools to the schools database
-                    with this partner&apos;s ID.
+                    No schools added yet. Click &quot;Add School&quot; to add a school.
                   </p>
                 )}
               </CardContent>
             </Card>
-          )}
 
           <Card>
             <CardHeader>
@@ -3125,6 +3190,134 @@ export default function PartnerDetailPage({ params }: PageProps) {
           </Card>
         </div>
       </div>
+
+      {/* Add School Modal */}
+      {showAddSchool && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-[var(--background)] rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Add New School</h2>
+              <button
+                onClick={() => setShowAddSchool(false)}
+                className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  School Name *
+                </label>
+                <Input
+                  value={newSchool.name}
+                  onChange={(e) =>
+                    setNewSchool((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  placeholder="Enter school name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  School Type
+                </label>
+                <select
+                  value={newSchool.schoolType}
+                  onChange={(e) =>
+                    setNewSchool((prev) => ({
+                      ...prev,
+                      schoolType: e.target.value,
+                    }))
+                  }
+                  className="w-full h-10 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-sm"
+                >
+                  <option value="Public">Public</option>
+                  <option value="Charter">Charter</option>
+                  <option value="Non-Profit">Non-Profit</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Student Count
+                </label>
+                <Input
+                  type="number"
+                  value={newSchool.studentCount}
+                  onChange={(e) =>
+                    setNewSchool((prev) => ({
+                      ...prev,
+                      studentCount: parseInt(e.target.value) || 0,
+                    }))
+                  }
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Staff Count
+                </label>
+                <Input
+                  type="number"
+                  value={newSchool.staffCount}
+                  onChange={(e) =>
+                    setNewSchool((prev) => ({
+                      ...prev,
+                      staffCount: parseInt(e.target.value) || 0,
+                    }))
+                  }
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  District
+                </label>
+                <Input
+                  value={newSchool.district}
+                  onChange={(e) =>
+                    setNewSchool((prev) => ({
+                      ...prev,
+                      district: e.target.value,
+                    }))
+                  }
+                  placeholder="Enter district name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Address
+                </label>
+                <Input
+                  value={newSchool.address}
+                  onChange={(e) =>
+                    setNewSchool((prev) => ({
+                      ...prev,
+                      address: e.target.value,
+                    }))
+                  }
+                  placeholder="Enter school address"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setShowAddSchool(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateSchool}
+                disabled={isCreatingSchool || !newSchool.name.trim()}
+              >
+                {isCreatingSchool ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="mr-2 h-4 w-4" />
+                )}
+                Create School
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
