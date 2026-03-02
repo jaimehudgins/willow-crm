@@ -3043,11 +3043,6 @@ export default function PartnerDetailPage({ params }: PageProps) {
                             </select>
                           </span>
                         </div>
-                        {school.address && (
-                          <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                            {school.address}
-                          </p>
-                        )}
                       </div>
                     ))}
                   </div>
