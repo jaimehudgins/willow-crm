@@ -66,7 +66,6 @@ import {
 } from "@/data/partners";
 import { formatDate } from "@/lib/utils";
 import { usePartner } from "@/hooks/usePartners";
-import { supabase } from "@/lib/supabase";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -522,19 +521,24 @@ export default function PartnerDetailPage({ params }: PageProps) {
 
     setIsCreatingSchool(true);
     try {
-      const { data, error: createError } = await supabase
-        .from("schools")
-        .insert({
+      const response = await fetch("/api/schools", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           partner_id: id,
           name: newSchool.name,
           school_type: newSchool.schoolType,
           student_count: newSchool.studentCount,
           staff_count: newSchool.staffCount,
-        })
-        .select()
-        .single();
+        }),
+      });
 
-      if (createError) throw createError;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create school");
+      }
 
       setShowAddSchool(false);
       setNewSchool({
@@ -548,7 +552,9 @@ export default function PartnerDetailPage({ params }: PageProps) {
       await refetch();
     } catch (err) {
       console.error("Failed to create school:", err);
-      alert("Failed to create school. Check console for details.");
+      alert(
+        `Failed to create school: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     } finally {
       setIsCreatingSchool(false);
     }
